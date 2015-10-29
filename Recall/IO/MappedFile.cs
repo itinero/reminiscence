@@ -222,19 +222,12 @@ namespace Recall.IO
         /// <summary>
         /// A delegate to facilitate reading a variable-sized object.
         /// </summary>
-        /// <param name="stream">The stream to read from.</param>
-        /// <param name="position">The position to start reading at.</param>
-        /// <returns></returns>
-        public delegate T ReadFromDelegate<T>(Stream stream, long position);
+        public delegate long ReadFromDelegate<T>(Stream stream, long position, ref T structure);
 
         /// <summary>
         /// A delegate to facilitate writing a variable-sized object.
         /// </summary>
-        /// <param name="stream">The stream to write to.</param>
-        /// <param name="position">The position to start reading at.</param>
-        /// <param name="structure">The structure to write.</param>
-        /// <returns></returns>
-        public delegate long WriteToDelegate<T>(Stream stream, long position, T structure);
+        public delegate long WriteToDelegate<T>(Stream stream, long position, ref T structure);
 
         /// <summary>
         /// Creates a new empty memory mapped accessor with given size in bytes.

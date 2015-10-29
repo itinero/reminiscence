@@ -21,6 +21,7 @@
 // THE SOFTWARE.
 
 using System;
+using System.IO;
 
 namespace Recall.IO
 {
@@ -37,7 +38,8 @@ namespace Recall.IO
         /// <summary>
         /// A default delegate that can be use to read strings from a stream.
         /// </summary>
-        public static MappedFile.ReadFromDelegate<string> ReadFromString = new MappedFile.ReadFromDelegate<string>((stream, position) =>
+        public static MappedFile.ReadFromDelegate<string> ReadFromString = new MappedFile.ReadFromDelegate<string>(
+            (Stream stream, long position, ref string value) =>
         {
             var buffer = new byte[255]; // TODO: make sure this is not needed here anymore!
             stream.Seek(position, System.IO.SeekOrigin.Begin);
@@ -55,16 +57,18 @@ namespace Recall.IO
                 stream.Read(buffer, pos, size);
             }
             pos = pos + size;
-            return System.Text.Encoding.Unicode.GetString(buffer, 0, pos);
+            value = System.Text.Encoding.Unicode.GetString(buffer, 0, pos);
+            return pos;
         });
 
         /// <summary>
         /// A default delegate that can be use to write strings to a stream.
         /// </summary>
-        public static MappedFile.WriteToDelegate<string> WriteToString = new MappedFile.WriteToDelegate<string>((stream, position, obj) =>
+        public static MappedFile.WriteToDelegate<string> WriteToString = new MappedFile.WriteToDelegate<string>(
+            (Stream stream, long position, ref string value) =>
         {
             stream.Seek(position, System.IO.SeekOrigin.Begin);
-            var bytes = System.Text.Encoding.Unicode.GetBytes(obj);
+            var bytes = System.Text.Encoding.Unicode.GetBytes(value);
             var length = bytes.Length;
             for (int idx = 0; idx <= bytes.Length; idx = idx + 255)
             {
@@ -88,45 +92,47 @@ namespace Recall.IO
         /// <summary>
         /// A default delegate that can be use to read arrays of integers from a stream.
         /// </summary>
-        public static MappedFile.ReadFromDelegate<int[]> ReadFromIntArray = new MappedFile.ReadFromDelegate<int[]>((stream, position) =>
+        public static MappedFile.ReadFromDelegate<int[]> ReadFromIntArray = new MappedFile.ReadFromDelegate<int[]>(
+            (Stream stream, long position, ref int[] value) =>
         {
             var buffer = new byte[255 * 4]; // TODO: make sure this is not needed here anymore!
             stream.Seek(position, System.IO.SeekOrigin.Begin);
             var size = stream.ReadByte();
-            var result = new int[size];
+            value = new int[size];
             int pos = 0;
             stream.Read(buffer, pos, size * 4);
             int idx = 0;
             for (int offset = 0; offset < size * 4; offset = offset + 4)
             {
-                result[idx] = BitConverter.ToInt32(buffer, offset);
+                value[idx] = BitConverter.ToInt32(buffer, offset);
                 idx++;
             }
             while (size == 255)
             {
                 pos = pos + size;
                 size = stream.ReadByte();
-                Array.Resize<int>(ref result, result.Length + size);
+                Array.Resize<int>(ref value, value.Length + size);
                 stream.Read(buffer, 0, size * 4);
                 for (int offset = 0; offset < size * 4; offset = offset + 4)
                 {
-                    result[idx] = BitConverter.ToInt32(buffer, offset);
+                    value[idx] = BitConverter.ToInt32(buffer, offset);
                     idx++;
                 }
             }
-            return result;
+            return pos;
         });
 
         /// <summary>
         /// A default delegate that can be use to write arrays of integers to a stream.
         /// </summary>
-        public static MappedFile.WriteToDelegate<int[]> WriteToIntArray = new MappedFile.WriteToDelegate<int[]>((stream, position, structure) =>
+        public static MappedFile.WriteToDelegate<int[]> WriteToIntArray = new MappedFile.WriteToDelegate<int[]>(
+            (Stream stream, long position, ref int[] value) =>
         {
             stream.Seek(position, System.IO.SeekOrigin.Begin);
-            var length = structure.Length * 4;
-            for (int idx = 0; idx < structure.Length; idx = idx + 255)
+            var length = value.Length * 4;
+            for (int idx = 0; idx < value.Length; idx = idx + 255)
             {
-                var size = structure.Length - idx;
+                var size = value.Length - idx;
                 if (size > 255)
                 {
                     size = 255;
@@ -135,7 +141,7 @@ namespace Recall.IO
                 stream.WriteByte((byte)size);
                 for (int offset = 0; offset < size; offset++)
                 {
-                    var bytes = BitConverter.GetBytes(structure[idx + offset]);
+                    var bytes = BitConverter.GetBytes(value[idx + offset]);
                     if (stream.Position + bytes.Length <= stream.Length)
                     { // write is possible.
                         stream.Write(bytes, 0, 4);
@@ -153,45 +159,47 @@ namespace Recall.IO
         /// <summary>
         /// A default delegate that can be use to read arrays of unsigned integers from a stream.
         /// </summary>
-        public static MappedFile.ReadFromDelegate<uint[]> ReadFromUIntArray = new MappedFile.ReadFromDelegate<uint[]>((stream, position) =>
+        public static MappedFile.ReadFromDelegate<uint[]> ReadFromUIntArray = new MappedFile.ReadFromDelegate<uint[]>(
+            (Stream stream, long position, ref uint[] value) =>
         {
             var buffer = new byte[255 * 4]; // TODO: make sure this is not needed here anymore!
             stream.Seek(position, System.IO.SeekOrigin.Begin);
             var size = stream.ReadByte();
-            var result = new uint[size];
+            value = new uint[size];
             int pos = 0;
             stream.Read(buffer, pos, size * 4);
             int idx = 0;
             for (int offset = 0; offset < size * 4; offset = offset + 4)
             {
-                result[idx] = BitConverter.ToUInt32(buffer, offset);
+                value[idx] = BitConverter.ToUInt32(buffer, offset);
                 idx++;
             }
             while (size == 255)
             {
                 pos = pos + size;
                 size = stream.ReadByte();
-                Array.Resize<uint>(ref result, result.Length + size);
+                Array.Resize<uint>(ref value, value.Length + size);
                 stream.Read(buffer, 0, size * 4);
                 for (int offset = 0; offset < size * 4; offset = offset + 4)
                 {
-                    result[idx] = BitConverter.ToUInt32(buffer, offset);
+                    value[idx] = BitConverter.ToUInt32(buffer, offset);
                     idx++;
                 }
             }
-            return result;
+            return pos;
         });
 
         /// <summary>
         /// A default delegate that can be use to write arrays of unsigned integers to a stream.
         /// </summary>
-        public static MappedFile.WriteToDelegate<uint[]> WriteToUIntArray = new MappedFile.WriteToDelegate<uint[]>((stream, position, structure) =>
+        public static MappedFile.WriteToDelegate<uint[]> WriteToUIntArray = new MappedFile.WriteToDelegate<uint[]>(
+            (Stream stream, long position, ref uint[] value) =>
         {
             stream.Seek(position, System.IO.SeekOrigin.Begin);
-            var length = structure.Length * 4;
-            for (int idx = 0; idx < structure.Length; idx = idx + 255)
+            var length = value.Length * 4;
+            for (int idx = 0; idx < value.Length; idx = idx + 255)
             {
-                var size = structure.Length - idx;
+                var size = value.Length - idx;
                 if (size > 255)
                 {
                     size = 255;
@@ -200,53 +208,11 @@ namespace Recall.IO
                 stream.WriteByte((byte)size);
                 for (int offset = 0; offset < size; offset++)
                 {
-                    stream.Write(BitConverter.GetBytes(structure[idx + offset]), 0, 4);
+                    stream.Write(BitConverter.GetBytes(value[idx + offset]), 0, 4);
                 }
                 length++;
             }
             return length;
-        });
-
-        /// <summary>
-        /// A default delegate that can be used to read an integer from a stream.
-        /// </summary>
-        public static MappedFile.ReadFromDelegate<int> ReadFromInt32 = new MappedFile.ReadFromDelegate<int>((stream, position) =>
-        {
-            stream.Seek(position, System.IO.SeekOrigin.Begin);
-            var structBytes = new byte[4];
-            stream.Read(structBytes, 0, 4);
-            return BitConverter.ToInt32(structBytes, 0);
-        });
-
-        /// <summary>
-        /// A default delegate that can be used to write an integer to a stream.
-        /// </summary>
-        public static MappedFile.WriteToDelegate<int> WriteToInt32 = new MappedFile.WriteToDelegate<int>((stream, position, structure) =>
-        {
-            stream.Seek(position, System.IO.SeekOrigin.Begin);
-            stream.Write(BitConverter.GetBytes(structure), 0, 4);
-            return 4;
-        });
-
-        /// <summary>
-        /// A default delegate that can be used to read an unsigned integer from a stream.
-        /// </summary>
-        public static MappedFile.ReadFromDelegate<uint> ReadFromUInt32 = new MappedFile.ReadFromDelegate<uint>((stream, position) =>
-        {
-            stream.Seek(position, System.IO.SeekOrigin.Begin);
-            var structBytes = new byte[4];
-            stream.Read(structBytes, 0, 4);
-            return BitConverter.ToUInt32(structBytes, 0);
-        });
-
-        /// <summary>
-        /// A default delegate that can be used to write an unsigned integer to a stream.
-        /// </summary>
-        public static MappedFile.WriteToDelegate<uint> WriteToUInt32 = new MappedFile.WriteToDelegate<uint>((stream, position, structure) =>
-        {
-            stream.Seek(position, System.IO.SeekOrigin.Begin);
-            stream.Write(BitConverter.GetBytes(structure), 0, 4);
-            return 4;
         });
     }
 }

@@ -30,6 +30,8 @@ namespace Recall.IO.Accessors
     /// </summary>
     internal sealed class MappedAccessorInt64 : MappedAccessor<long>
     {
+        private readonly byte[] _buffer;
+
         /// <summary>
         /// Creates a new memory mapped file.
         /// </summary>
@@ -38,24 +40,28 @@ namespace Recall.IO.Accessors
         internal MappedAccessorInt64(MappedFile file, Stream stream)
             : base(file, stream, 8)
         {
-
+            _buffer = new byte[_elementSize];
         }
 
         /// <summary>
-        /// Reads from the buffer at the given position.
+        /// Reads appropriate amount of bytes from the stream at the given position and returns the structure.
         /// </summary>
-        /// <param name="position">The position to read from.</param>
-        /// <returns></returns>
-        protected sealed override long ReadFrom(int position)
+        public override long ReadFrom(Stream stream, long position, ref long structure)
         {
-            return BitConverter.ToInt64(_buffer, position);
+            stream.Seek(position, SeekOrigin.Begin);
+            if (stream.Read(_buffer, 0, _elementSize) != _elementSize)
+            {
+                structure = 0;
+                return 0;
+            }
+            structure = BitConverter.ToInt64(_buffer, 0);
+            return _elementSize;
         }
 
         /// <summary>
-        /// Writes to the stream.
+        /// Converts the structure to bytes and writes them to the stream.
         /// </summary>
-        /// <param name="structure"></param>
-        protected sealed override long WriteTo(long structure)
+        public override long WriteTo(Stream stream, long position, ref long structure)
         {
             _stream.Write(BitConverter.GetBytes(structure), 0, _elementSize);
             return _elementSize;

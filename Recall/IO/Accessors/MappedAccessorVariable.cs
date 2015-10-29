@@ -28,78 +28,36 @@ namespace Recall.IO.Accessors
     /// <summary>
     /// A memory mapped accessor that stores objects of a variable size in bytes.
     /// </summary>
-    internal sealed class MemoryMappedAccessorVariable<T> : MappedAccessor<T>
+    internal sealed class MappedAccessorVariable<T> : MappedAccessor<T>
     {
-        /// <summary>
-        /// Holds the read-from delegate.
-        /// </summary>
-        private MappedFile.ReadFromDelegate<T> _readFrom;
-
-        /// <summary>
-        /// Holds the write-to delegate.
-        /// </summary>
-        private MappedFile.WriteToDelegate<T> _writeTo;
+        private readonly MappedFile.ReadFromDelegate<T> _readFrom; // Holds the read-from delegate.
+        private readonly MappedFile.WriteToDelegate<T> _writeTo; // Holds the write-to delegate.
 
         /// <summary>
         /// Creates a new memory mapped file.
         /// </summary>
-        /// <param name="file"></param>
-        /// <param name="stream"></param>
-        /// <param name="readFrom"></param>
-        /// <param name="writeTo"></param>
-        internal MemoryMappedAccessorVariable(MappedFile file, Stream stream, 
+        internal MappedAccessorVariable(MappedFile file, Stream stream, 
             MappedFile.ReadFromDelegate<T> readFrom, MappedFile.WriteToDelegate<T> writeTo)
             : base(file, stream, -1)
         {
             _readFrom = readFrom;
             _writeTo = writeTo;
         }
-        
+
         /// <summary>
-        /// Reads the structure at the given position.
+        /// Reads appropriate amount of bytes from the stream at the given position and returns the structure.
         /// </summary>
-        /// <param name="position"></param>
-        /// <param name="structure"></param>
-        public sealed override void Read(long position, out T structure)
+        public override long ReadFrom(Stream stream, long position, ref T structure)
         {
-            structure = _readFrom.Invoke(_stream, position);
+            return _readFrom.Invoke(stream, position, ref structure);
         }
 
         /// <summary>
-        /// Reads a number of structures starting at the given position adding them to the array the the given offset.
+        /// Converts the structure to bytes and writes them to the stream.
         /// </summary>
-        /// <param name="position"></param>
-        /// <param name="array"></param>
-        /// <param name="offset"></param>
-        /// <param name="count"></param>
-        /// <returns></returns>
-        public sealed override int ReadArray(long position, T[] array, int offset, int count)
+        public override long WriteTo(Stream stream, long position, ref T structure)
         {
-            throw new NotSupportedException("Reading arrays of variable sized-structures is not suppored in a memory-mapped accessor.");
-        }
-
-        /// <summary>
-        /// Writes the structure at the given position.
-        /// </summary>
-        /// <param name="position"></param>
-        /// <param name="structure"></param>
-        /// <returns></returns>
-        public sealed override long Write(long position, ref T structure)
-        {
-            return _writeTo.Invoke(_stream, position, structure);
-        }
-
-        /// <summary>
-        /// Writes the structures from the array as the given position.
-        /// </summary>
-        /// <param name="position"></param>
-        /// <param name="array"></param>
-        /// <param name="offset"></param>
-        /// <param name="count"></param>
-        /// <returns></returns>
-        public sealed override long WriteArray(long position, T[] array, int offset, int count)
-        {
-            throw new NotSupportedException("Writing arrays of variable sized-structures is not suppored in a memory-mapped accessor.");
+            return _writeTo.Invoke(_stream, position, ref structure);
         }
     }
 }

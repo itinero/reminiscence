@@ -24,6 +24,7 @@ using NUnit.Framework;
 using Recall.Arrays;
 using Recall.IO;
 using System;
+using System.IO;
 
 namespace Recall.Tests.Arrays
 {
@@ -190,8 +191,66 @@ namespace Recall.Tests.Arrays
                     Assert.AreEqual(arrayExpected.Length, array.Length);
                     for (int i = 0; i < arrayExpected.Length; i++)
                     {
-                        Assert.AreEqual(arrayExpected[i], array[i], string.Format("Array element not equal at index: {0}. Expected {1}, found {2}",
-                            i, array[i], arrayExpected[i]));
+                        Assert.AreEqual(arrayExpected[i], array[i], 
+                            string.Format("Array element not equal at index: {0}. Expected {1}, found {2}",
+                                i, array[i], arrayExpected[i]));
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Tests write to stream.
+        /// </summary>
+        [Test]
+        public void TestWriteToAndReadFrom()
+        {
+            using (var map = new MappedStream())
+            {
+                using (var memoryStream = new MemoryStream())
+                {
+                    using (var array = new Array<int>(map.CreateInt32, 4, 10))
+                    {
+                        for (var i = 0; i < array.Length; i++)
+                        {
+                            array[i] = i + 100;
+                        }
+
+                        array.WriteTo(memoryStream);
+                        memoryStream.Seek(0, SeekOrigin.Begin);
+
+                        using (var array1 = Array<int>.ReadFrom(memoryStream, map.CreateInt32, 4))
+                        {
+                            for (var i = 0; i < array.Length; i++)
+                            {
+                                Assert.AreEqual(array[i], array1[i]);
+                            }
+                        }
+                    }
+                }
+            }
+
+            using (var map = new MappedStream())
+            {
+                using (var memoryStream = new MemoryStream())
+                {
+                    using (var array = new Array<int>(map.CreateInt32, 4, 10000, 32, 32, 2))
+                    {
+                        for (var i = 0; i < array.Length; i++)
+                        {
+                            array[i] = i + 100;
+                        }
+
+                        array.WriteTo(memoryStream);
+                        memoryStream.Seek(0, SeekOrigin.Begin);
+
+                        using (var array1 = Array<int>.ReadFrom(memoryStream, map.CreateInt32, 4))
+                        {
+                            for (var i = 0; i < array.Length; i++)
+                            {
+                                Assert.AreEqual(array[i], array1[i]);
+                            }
+                        }
                     }
                 }
             }

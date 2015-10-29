@@ -22,11 +22,10 @@
 
 using Recall.Arrays.Cache;
 using Recall.IO;
+using Recall.IO.Streams;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 
 namespace Recall.Arrays
 {
@@ -48,9 +47,6 @@ namespace Recall.Arrays
         /// <summary>
         /// Creates a memory mapped huge array.
         /// </summary>
-        /// <param name="createAccessor">The function to create a new accessor.</param>
-        /// <param name="elementSize">The element size.</param>
-        /// <param name="size">The initial size of the array.</param>
         public Array(MappedDelegates.CreateAccessorFunc<T> createAccessor, int elementSize, long size)
             : this(createAccessor, elementSize, size, 1024, 1024, 32)
         {
@@ -60,12 +56,6 @@ namespace Recall.Arrays
         /// <summary>
         /// Creates a memory mapped huge array.
         /// </summary>
-        /// <param name="createAccessor">The function to create a new accessor.</param>
-        /// <param name="elementSize">The element size.</param>
-        /// <param name="size">The initial size of the array.</param>
-        /// <param name="arraySize">The size of an indivdual array block.</param>
-        /// <param name="bufferSize">The size of an idividual buffer.</param>
-        /// <param name="cacheSize">The size of the LRU cache to keep buffers.</param>
         public Array(MappedDelegates.CreateAccessorFunc<T> createAccessor, int elementSize, long size, long arraySize, int bufferSize, int cacheSize)
         {
             if (createAccessor == null) { throw new ArgumentNullException("createAccessor"); }
@@ -117,7 +107,6 @@ namespace Recall.Arrays
             _length = size;
 
             var blockCount = (int)System.Math.Ceiling((double)size / _fileElementSize);
-            // _accessors = new List<MemoryMappedAccessor<T>>(arrayCount);
             if (blockCount < _accessors.Count)
             { // decrease files/accessors.
                 for (int i = (int)blockCount; i < _accessors.Count; i++)
@@ -189,18 +178,37 @@ namespace Recall.Arrays
         /// </summary>
         void buffer_OnRemove(Array<T>.CachedBuffer item)
         {
-            if (item.IsDirty)
+            this.FlushBuffer(item);
+        }
+
+        /// <summary>
+        /// Flushes the given buffer to disk.
+        /// </summary>
+        private void FlushBuffer(Array<T>.CachedBuffer buffer)
+        {
+            if (buffer.IsDirty)
             {
-                long arrayIdx = (long)System.Math.Floor(item.Position / _fileElementSize);
-                long localIdx = item.Position % _fileElementSize;
+                long arrayIdx = (long)System.Math.Floor(buffer.Position / _fileElementSize);
+                long localIdx = buffer.Position % _fileElementSize;
                 long localPosition = localIdx * _elementSize;
 
-                if (item.Position + _bufferSize > _length)
+                if (buffer.Position + _bufferSize > _length)
                 { // only partially write buffer, do not write past the end.
-                    _accessors[(int)arrayIdx].WriteArray(localPosition, item.Buffer, 0, (int)(_length - item.Position));
+                    _accessors[(int)arrayIdx].WriteArray(localPosition, buffer.Buffer, 0, (int)(_length - buffer.Position));
                     return;
                 }
-                _accessors[(int)arrayIdx].WriteArray(localPosition, item.Buffer, 0, _bufferSize);
+                _accessors[(int)arrayIdx].WriteArray(localPosition, buffer.Buffer, 0, _bufferSize);
+            }
+        }
+
+        /// <summary>
+        /// Flushes all buffers.
+        /// </summary>
+        private void FlushBuffers()
+        {
+            foreach(var buffer in _cachedBuffers)
+            {
+                this.FlushBuffer(buffer.Value);
             }
         }
 
@@ -273,6 +281,71 @@ namespace Recall.Arrays
             {
                 accessor.Dispose();
             }
+        }
+
+        /// <summary>
+        /// Writes this array to the given stream.
+        /// </summary>
+        public long WriteTo(Stream stream)
+        {
+            // first flush all buffers.
+            this.FlushBuffers();
+
+            // first write length.
+            stream.Write(BitConverter.GetBytes(_length), 0, 8);
+
+            // read raw data from accessor(s) and write to stream.
+            var element = 0;
+            for(var i = 0; i < _accessors.Count; i++)
+            {
+                var accessor = _accessors[i];
+                var elementsToRead = accessor.CapacityElements;
+                if(elementsToRead + element > _length)
+                {
+                    elementsToRead = _length - element;
+                }
+                if(elementsToRead <= 0)
+                {
+                    break;
+                }
+                accessor.CopyTo(stream, 0, 
+                    (int)elementsToRead * _elementSize);                
+            }
+            return (_elementSize * _length) + 8;
+        }
+
+        /// <summary>
+        /// Reads an array from the given stream.
+        /// </summary>
+        public static Array<T> ReadFrom(Stream stream, MappedDelegates.CreateAccessorFunc<T> createAccessor,
+            int elementSize)
+        {
+            var bytes = new byte[8];
+            stream.Read(bytes, 0, 8);
+
+            var size = BitConverter.ToInt64(bytes, 0);
+            var array = new Array<T>(createAccessor, elementSize, size);
+            using (var limitedStream = new LimitedStream(stream))
+            {
+                using (var map = new MappedStream(new LimitedStream(stream)))
+                {
+                    for (var i = 0; i < size; i++)
+                    {
+                        array.AddFrom(i, limitedStream, i * elementSize);
+                    }
+                }
+            }
+            return array;
+        }
+
+        /// <summary>
+        /// Adds a new element from raw bytes.
+        /// </summary>
+        private void AddFrom(int i, Stream stream, long position)
+        {
+            var structure = default(T);
+            _accessors[0].ReadFrom(stream, position, ref structure);
+            this[i] = structure;
         }
     }
 }

@@ -115,7 +115,7 @@ namespace Recall.IO
         /// <returns></returns>
         protected override MappedAccessor<T> DoCreateVariable<T>(long position, long sizeInBytes, MappedFile.ReadFromDelegate<T> readFrom, MappedFile.WriteToDelegate<T> writeTo)
         {
-            return new Accessors.MemoryMappedAccessorVariable<T>(this, new CappedStream(_stream, position, sizeInBytes), readFrom, writeTo);
+            return new Accessors.MappedAccessorVariable<T>(this, new CappedStream(_stream, position, sizeInBytes), readFrom, writeTo);
         }
     }
 }

@@ -1,2 +1,3 @@
 # recall
-A library for cross-plaform memory mapping.
+
+Recall, 'to bring back from memory; recollect; remember, to call back; summon to return'

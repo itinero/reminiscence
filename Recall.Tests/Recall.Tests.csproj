@@ -46,6 +46,7 @@
     <Compile Include="Arrays\ArrayTests.cs" />
     <Compile Include="Arrays\DefaultArrayTests.cs" />
     <Compile Include="Collections\ListTests.cs" />
+    <Compile Include="Indexes\IndexTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

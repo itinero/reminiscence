@@ -91,14 +91,30 @@ namespace Recall.IO
         }
 
         /// <summary>
-        /// Reads appropriate amount of bytes from the stream at the given position and returns the structure.
+        /// Reads appropriate amount of bytes from the given stream at the given position and returns the structure.
         /// </summary>
         public abstract long ReadFrom(Stream stream, long position, ref T structure);
 
         /// <summary>
-        /// Converts the structure to bytes and writes them to the stream.
+        /// Reads appropriate amount of bytes from the default stream at the given position and returns the structure.
+        /// </summary>
+        public virtual long ReadFrom(long position, ref T structure)
+        {
+            return this.ReadFrom(_stream, position, ref structure);
+        }
+
+        /// <summary>
+        /// Converts the structure to bytes and writes them to the given stream.
         /// </summary>
         public abstract long WriteTo(Stream stream, long position, ref T structure);
+
+        /// <summary>
+        /// Converts the structure to bytes and writes them to the stream default.
+        /// </summary>
+        public virtual long WriteTo(long position, ref T structure)
+        {
+            return this.WriteTo(_stream, position, ref structure);
+        }
 
         /// <summary>
         /// Reads elements starting at the given position.

@@ -232,10 +232,6 @@ namespace Recall.IO
         /// <summary>
         /// Creates a new empty memory mapped accessor with given size in bytes.
         /// </summary>
-        /// <param name="sizeInBytes">The size of this accessor.</param>
-        /// <param name="readFrom">The delegate to read a structure.</param>
-        /// <param name="writeTo">The delegate to write a structure.</param>
-        /// <returns></returns>
         public MappedAccessor<T> CreateVariable<T>(long sizeInBytes,
             ReadFromDelegate<T> readFrom, WriteToDelegate<T> writeTo)
         {
@@ -250,8 +246,17 @@ namespace Recall.IO
         /// <summary>
         /// Creates a new memory mapped file based on the given stream and the given size in bytes.
         /// </summary>
-        protected abstract MappedAccessor<T> DoCreateVariable<T>(long _nextPosition, long sizeInBytes, 
+        protected abstract MappedAccessor<T> DoCreateVariable<T>(long nextPosition, long sizeInBytes, 
             ReadFromDelegate<T> readFrom, WriteToDelegate<T> writeTo);
+
+        /// <summary>
+        /// Creates an accessor for strings.
+        /// </summary>
+        public MappedAccessor<string> CreateVariableString(long sizeInBytes)
+        {
+            return this.CreateVariable(sizeInBytes, IO.MappedDelegates.ReadFromString,
+                IO.MappedDelegates.WriteToString);
+        }
 
         /// <summary>
         /// Notifies this factory that the given file was already disposed. This given the opportunity to dispose of files without disposing the entire factory.

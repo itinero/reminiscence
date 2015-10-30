@@ -41,10 +41,8 @@ namespace Recall.Arrays
         public abstract void Resize(long size);
 
         /// <summary>
-        /// Returns the element at the given index.
+        /// Gets or sets the element at the given index.
         /// </summary>
-        /// <param name="idx"></param>
-        /// <returns></returns>
         public abstract T this[long idx] { get; set; }
 
         /// <summary>

@@ -46,6 +46,7 @@
     <Compile Include="Arrays\DefaultArray.cs" />
     <Compile Include="Arrays\ArrayBase.cs" />
     <Compile Include="Arrays\MappedArray.cs" />
+    <Compile Include="Arrays\VariableArray.cs" />
     <Compile Include="Collections\List.cs" />
     <Compile Include="Indexes\Index.cs" />
     <Compile Include="IO\Accessors\MappedAccessorInt32.cs" />

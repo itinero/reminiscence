@@ -30,10 +30,9 @@ using System.IO;
 namespace Recall.Arrays
 {
     /// <summary>
-    /// A memory mapped array.
+    /// A memory mapped array for elements of fixed size.
     /// </summary>
     public class Array<T> : ArrayBase<T>
-        where T : struct
     {
         private long _length;
         private readonly List<MappedAccessor<T>> _accessors;
@@ -85,7 +84,7 @@ namespace Recall.Arrays
         /// <summary>
         /// Returns the length of this array.
         /// </summary>
-        public override long Length
+        public sealed override long Length
         {
             get { return _length; }
         }
@@ -94,7 +93,7 @@ namespace Recall.Arrays
         /// Resizes this array.
         /// </summary>
         /// 
-        public override void Resize(long size)
+        public sealed override void Resize(long size)
         {
             if (size < 0) { throw new ArgumentOutOfRangeException(); }
 
@@ -129,7 +128,7 @@ namespace Recall.Arrays
         /// Returns the element at the given index.
         /// </summary>
         /// <returns></returns>
-        public override T this[long idx]
+        public sealed override T this[long idx]
         {
             get
             {
@@ -271,7 +270,7 @@ namespace Recall.Arrays
         /// <summary>
         /// Diposes of all native resource associated with this array.
         /// </summary>
-        public override void Dispose()
+        public sealed override void Dispose()
         {
             // clear cache.
             _cachedBuffers.Clear();

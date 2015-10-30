@@ -21,13 +21,14 @@
 // THE SOFTWARE.
 
 using Recall.IO;
+using System;
 
 namespace Recall.Indexes
 {
     /// <summary>
     /// An index mapping variable-sized elements to id's.
     /// </summary>
-    public class Index<T>
+    public class Index<T> : IDisposable
     {
         private readonly MappedDelegates.CreateAccessorFunc<T> _createAccessor;
         private readonly System.Collections.Generic.List<MappedAccessor<T>> _accessors;
@@ -99,6 +100,18 @@ namespace Recall.Indexes
                 throw new System.Exception("Failed to read element, perhaps an invalid id was given.");
             }
             return result;
+        }
+
+        /// <summary>
+        /// Disposes all native resources associated with this index.
+        /// </summary>
+        public void Dispose()
+        {
+            // dispose only the accessors, the file may still be in use.
+            foreach (var accessor in _accessors)
+            {
+                accessor.Dispose();
+            }
         }
     }
 }

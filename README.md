@@ -1,5 +1,5 @@
-# Recall
+# Reminiscence
 
-*to bring back from memory; recollect; remember, to call back; summon to return*
+*the act or process of recalling past experiences, events, etc.*
 
-Recall is a lightweight crossplatform memorymapping library to bring some form of memorymapping to .NET/Mono on any platform.
+Reminiscence is a lightweight crossplatform memorymapping library to bring some form of memorymapping to .NET/Mono on any platform.

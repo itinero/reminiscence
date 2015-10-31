@@ -39,9 +39,18 @@ namespace Reminiscence.Arrays
         private readonly MappedFile.CreateAccessorFunc<T> _createAccessor;
         private readonly MappedFile _map;
 
-        public static long DefaultAccessorSize = 1024; // The default element size of one accessor.
-        public static int DefaultBufferSize = 128; // The default buffer size.
-        public static int DefaultCacheSize = 64 * 8; // The default cache size.
+        /// <summary>
+        /// The default element size of one accessor.
+        /// </summary>
+        public static long DefaultAccessorSize = 1024;
+        /// <summary>
+        /// The default buffer size.
+        /// </summary>
+        public static int DefaultBufferSize = 128;
+        /// <summary>
+        /// The default cache size.
+        /// </summary>
+        public static int DefaultCacheSize = 64 * 8;
 
         /// <summary>
         /// Creates a memory mapped array based on existing data.

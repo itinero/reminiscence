@@ -302,6 +302,7 @@ namespace Reminiscence.IO
         /// <summary>
         /// A delegate to create an accessor.
         /// </summary>
+        /// <param name="map">The memory map.</param>
         /// <param name="sizeInBytesOrElements">The size in elements for fixed-size accessors and in bytes for variable-sized accessors.</param>
         public delegate MappedAccessor<T> CreateAccessorFunc<T>(MappedFile map, long sizeInBytesOrElements);
 

@@ -353,6 +353,9 @@ namespace Reminiscence.Collections
             return false;
         }
 
+        /// <summary>
+        /// Gets the enumerator.
+        /// </summary>
         public System.Collections.Generic.IEnumerator<System.Collections.Generic.KeyValuePair<TKey, TValue>> GetEnumerator()
         {
             return new Enumerator(this);

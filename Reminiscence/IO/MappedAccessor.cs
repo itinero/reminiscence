@@ -132,13 +132,23 @@ namespace Reminiscence.IO
         /// </summary>
         public virtual int ReadArray(long position, T[] array, int offset, int count)
         {
+            if(_stream.Length <= position)
+            { // cannot seek to this location, past the end of the stream.
+                return -1;
+            }
+
+            // seek until the correct position.
+            _stream.Seek(position, SeekOrigin.Begin);
+
+            // try and read everything.
+            var elementsRead = System.Math.Min((int)((_stream.Length - position) / _elementSize), count);
             var structure = default(T);
-            for (int i = 0; i < count; i++)
+            for (int i = 0; i < elementsRead; i++)
             {
                 this.ReadFrom(_stream, i * _elementSize, ref structure);
                 array[i + offset] = structure;
             }
-            return count;
+            return elementsRead;
         }
 
         /// <summary>

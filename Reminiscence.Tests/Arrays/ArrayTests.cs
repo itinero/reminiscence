@@ -257,5 +257,31 @@ namespace Reminiscence.Tests.Arrays
                 }
             }
         }
+
+        /// <summary>
+        /// Tests reading/writing an array that has a lenght smaller than the default buffer size.
+        /// </summary>
+        [Test]
+        public void TestArraySmallerThanBuffer()
+        {
+            var data = new byte[16]; // room for 4 int's
+            using(var map = new MemoryMapStream(new MemoryStream(data)))
+            {
+                // create a fixed-length array with one accessor.
+                var array = new Array<int>(map.CreateInt32(4));
+
+                Assert.AreEqual(4, array.Length);
+
+                array[0] = 0;
+                array[1] = 1;
+                array[2] = 2;
+                array[3] = 3;
+
+                Assert.AreEqual(0, array[0]);
+                Assert.AreEqual(1, array[1]);
+                Assert.AreEqual(2, array[2]);
+                Assert.AreEqual(3, array[3]);
+            }
+        }
     }
 }

@@ -21,12 +21,12 @@
 // THE SOFTWARE.
 
 using System.Reflection;
+using System.Resources;
 
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Reminiscence")]
-[assembly: AssemblyCopyright("Copyright © Ben Abelshausen 2015")]
-[assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]
-
-[assembly: AssemblyVersion("0.0.0.9999")] // semantic versioning Major.Minor.Patch.Build (9999 will be updated by CI server)
-[assembly: AssemblyInformationalVersion("Local Build Version")] // do not change this; build server replace this automatically.
+// General Information about an assembly is controlled through the following 
+// set of attributes. Change these attribute values to modify the information
+// associated with an assembly.
+[assembly: AssemblyTitle("Reminiscence")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: NeutralResourcesLanguage("en")]

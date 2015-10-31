@@ -20,13 +20,35 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System.Reflection;
+using Reminiscence.IO;
+using System.Collections.Generic;
+using System.IO;
 
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Reminiscence")]
-[assembly: AssemblyCopyright("Copyright © Ben Abelshausen 2015")]
-[assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]
-
-[assembly: AssemblyVersion("0.0.0.9999")] // semantic versioning Major.Minor.Patch.Build (9999 will be updated by CI server)
-[assembly: AssemblyInformationalVersion("Local Build Version")] // do not change this; build server replace this automatically.
+namespace Reminiscence
+{
+    /// <summary>
+    /// Contains extensions methods for native .NET objects.
+    /// </summary>
+    public static class Extensions
+    {
+        /// <summary>
+        /// Copies a sorted list of elements to a stream.
+        /// </summary>
+        public static long CopyTo<T>(this IList<T> list, Stream stream)
+        {
+            var position = stream.Position;
+            var i = 0;
+            using (var accessor = MappedFile.GetCreateAccessorFuncFor<T>()(new MappedStream(), 0))
+            {
+                var element = default(T);
+                while (i < list.Count)
+                {
+                    element = list[i];
+                    accessor.WriteTo(stream, stream.Position, ref element);
+                    i++;
+                }
+            }
+            return stream.Position - position;
+        }
+    }
+}

@@ -45,11 +45,9 @@ namespace Recall.IO
         /// <summary>
         /// Creates a new memory mapped accessor for a given part of this file with given size in bytes and the start position.
         /// </summary>
-        /// <param name="position">The position to start this accessor at.</param>
-        /// <param name="sizeInBytes">The size of this accessor.</param>
-        /// <returns></returns>
-        public MappedAccessor<uint> CreateUInt32(long position, long sizeInBytes)
+        public MappedAccessor<uint> CreateUInt32(long position, long sizeInElements)
         {
+            var sizeInBytes = sizeInElements * 4;
             var accessor = this.DoCreateNewUInt32(position, sizeInBytes);
             _accessors.Add(accessor);
 
@@ -65,10 +63,9 @@ namespace Recall.IO
         /// <summary>
         /// Creates a new empty memory mapped accessor with given size in bytes.
         /// </summary>
-        /// <param name="sizeInBytes">The size of this accessor.</param>
-        /// <returns></returns>
-        public MappedAccessor<uint> CreateUInt32(long sizeInBytes)
+        public MappedAccessor<uint> CreateUInt32(long sizeInElements)
         {
+            var sizeInBytes = sizeInElements * 4;
             var accessor = this.DoCreateNewUInt32(_nextPosition, sizeInBytes);
             _accessors.Add(accessor);
 
@@ -82,18 +79,14 @@ namespace Recall.IO
         /// <summary>
         /// Creates a new memory mapped file based on the given stream and the given size in bytes.
         /// </summary>
-        /// <param name="position">The position to start at.</param>
-        /// <param name="sizeInByte">The size.</param>
-        /// <returns></returns>
         protected abstract MappedAccessor<int> DoCreateNewInt32(long position, long sizeInByte);
 
         /// <summary>
         /// Creates a new empty memory mapped accessor with given size in bytes.
         /// </summary>
-        /// <param name="sizeInBytes">The size of this accessor.</param>
-        /// <returns></returns>
-        public MappedAccessor<int> CreateInt32(long sizeInBytes)
+        public MappedAccessor<int> CreateInt32(long sizeInElements)
         {
+            var sizeInBytes = sizeInElements * 4;
             var accessor = this.DoCreateNewInt32(_nextPosition, sizeInBytes);
             _accessors.Add(accessor);
 
@@ -105,19 +98,14 @@ namespace Recall.IO
         /// <summary>
         /// Creates a new memory mapped file based on the given stream and the given size in bytes.
         /// </summary>
-        /// <param name="position">The position to start at.</param>
-        /// <param name="sizeInByte">The size.</param>
-        /// <returns></returns>
         protected abstract MappedAccessor<uint> DoCreateNewUInt32(long position, long sizeInByte);
 
         /// <summary>
         /// Creates a new memory mapped accessor for a given part of this file with given size in bytes and the start position.
         /// </summary>
-        /// <param name="position">The position to start this accessor at.</param>
-        /// <param name="sizeInBytes">The size of this accessor.</param>
-        /// <returns></returns>
-        public MappedAccessor<float> CreateSingle(long position, long sizeInBytes)
+        public MappedAccessor<float> CreateSingle(long position, long sizeInElements)
         {
+            var sizeInBytes = sizeInElements * 4;
             var accessor = this.DoCreateNewSingle(position, sizeInBytes);
             _accessors.Add(accessor);
 
@@ -133,10 +121,9 @@ namespace Recall.IO
         /// <summary>
         /// Creates a new empty memory mapped accessor with given size in bytes.
         /// </summary>
-        /// <param name="sizeInBytes">The size of this accessor.</param>
-        /// <returns></returns>
-        public MappedAccessor<float> CreateSingle(long sizeInBytes)
+        public MappedAccessor<float> CreateSingle(long sizeInElements)
         {
+            var sizeInBytes = sizeInElements * 4;
             var accessor = this.DoCreateNewSingle(_nextPosition, sizeInBytes);
             _accessors.Add(accessor);
 
@@ -148,19 +135,14 @@ namespace Recall.IO
         /// <summary>
         /// Creates a new memory mapped file based on the given stream and the given size in bytes.
         /// </summary>
-        /// <param name="position">The position to start at.</param>
-        /// <param name="sizeInByte">The size.</param>
-        /// <returns></returns>
         protected abstract MappedAccessor<float> DoCreateNewSingle(long position, long sizeInByte);
 
         /// <summary>
         /// Creates a new memory mapped accessor for a given part of this file with given size in bytes and the start position.
         /// </summary>
-        /// <param name="position">The position to start this accessor at.</param>
-        /// <param name="sizeInBytes">The size of this accessor.</param>
-        /// <returns></returns>
-        public MappedAccessor<ulong> CreateUInt64(long position, long sizeInBytes)
+        public MappedAccessor<ulong> CreateUInt64(long position, long sizeInElements)
         {
+            var sizeInBytes = sizeInElements * 8;
             var accessor = this.DoCreateNewUInt64(position, sizeInBytes);
             _accessors.Add(accessor);
 
@@ -176,10 +158,9 @@ namespace Recall.IO
         /// <summary>
         /// Creates a new empty memory mapped accessor with given size in bytes.
         /// </summary>
-        /// <param name="sizeInBytes">The size of this accessor.</param>
-        /// <returns></returns>
-        public MappedAccessor<ulong> CreateUInt64(long sizeInBytes)
+        public MappedAccessor<ulong> CreateUInt64(long sizeInElements)
         {
+            var sizeInBytes = sizeInElements * 8;
             var accessor = this.DoCreateNewUInt64(_nextPosition, sizeInBytes);
             _accessors.Add(accessor);
 
@@ -191,18 +172,14 @@ namespace Recall.IO
         /// <summary>
         /// Creates a new memory mapped file based on the given stream and the given size in bytes.
         /// </summary>
-        /// <param name="position">The position to start at.</param>
-        /// <param name="sizeInByte">The size.</param>
-        /// <returns></returns>
         protected abstract MappedAccessor<ulong> DoCreateNewUInt64(long position, long sizeInByte);
 
         /// <summary>
         /// Creates a new empty memory mapped accessor with given size in bytes.
         /// </summary>
-        /// <param name="sizeInBytes">The size of this accessor.</param>
-        /// <returns></returns>
-        public MappedAccessor<long> CreateInt64(long sizeInBytes)
+        public MappedAccessor<long> CreateInt64(long sizeInElements)
         {
+            var sizeInBytes = sizeInElements * 8;
             var accessor = this.DoCreateNewInt64(_nextPosition, sizeInBytes);
             _accessors.Add(accessor);
 
@@ -259,6 +236,15 @@ namespace Recall.IO
         }
 
         /// <summary>
+        /// Creates an accessor for strings.
+        /// </summary>
+        public MappedAccessor<int[]> CreateInt32Array(long sizeInBytes)
+        {
+            return this.CreateVariable(sizeInBytes, IO.MappedDelegates.ReadFromIntArray,
+                IO.MappedDelegates.WriteToIntArray);
+        }
+
+        /// <summary>
         /// Notifies this factory that the given file was already disposed. This given the opportunity to dispose of files without disposing the entire factory.
         /// </summary>
         internal void Disposed<T>(MappedAccessor<T> fileToDispose)
@@ -276,6 +262,66 @@ namespace Recall.IO
                 _accessors[0].Dispose();
             }
             _accessors.Clear();
+        }
+
+        /// <summary>
+        /// Holds accessor creating functions.
+        /// </summary>
+        private static System.Collections.Generic.Dictionary<Type, object> _accessorDelegates;
+
+        /// <summary>
+        /// Registers default accessors.
+        /// </summary>
+        public static void RegisterCreateAccessorFuncs()
+        {
+            _accessorDelegates = new Dictionary<Type, object>();
+            _accessorDelegates.Add(typeof(int), new CreateAccessorFunc<int>(
+                (map, size) => map.CreateInt32(size)));
+            _accessorDelegates.Add(typeof(uint), new CreateAccessorFunc<uint>(
+                (map, size) => map.CreateUInt32(size)));
+            _accessorDelegates.Add(typeof(long), new CreateAccessorFunc<long>(
+                (map, size) => map.CreateInt64(size)));
+            _accessorDelegates.Add(typeof(ulong), new CreateAccessorFunc<ulong>(
+                (map, size) => map.CreateUInt64(size)));
+            _accessorDelegates.Add(typeof(float), new CreateAccessorFunc<float>(
+                (map, size) => map.CreateSingle(size)));
+            //_accessorDelegates.Add(typeof(double), new CreateAccessorFunc<double>(
+            //    (map, size) => map.(size)));
+            _accessorDelegates.Add(typeof(string), new CreateAccessorFunc<string>(
+                (map, size) => map.CreateVariableString(size)));
+        }
+
+        /// <summary>
+        /// Registers a new create accessor function.
+        /// </summary>
+        public static void RegisterCreateAccessorFunc<T>(CreateAccessorFunc<T> func)
+        {
+            _accessorDelegates[typeof(T)] = func;
+        }
+
+        /// <summary>
+        /// A delegate to create an accessor.
+        /// </summary>
+        /// <param name="sizeInBytesOrElements">The size in elements for fixed-size accessors and in bytes for variable-sized accessors.</param>
+        public delegate MappedAccessor<T> CreateAccessorFunc<T>(MappedFile map, long sizeInBytesOrElements);
+
+        /// <summary>
+        /// Gets the create accessor function for the given type.
+        /// </summary>
+        public static CreateAccessorFunc<T> GetCreateAccessorFuncFor<T>()
+        {
+            var type = typeof(T);
+            if (_accessorDelegates == null ||
+               _accessorDelegates.Count == 0)
+            { // register accessors.
+                MappedFile.RegisterCreateAccessorFuncs();
+            }
+            object value;
+            if(!_accessorDelegates.TryGetValue(type, out value))
+            {
+                throw new NotSupportedException(string.Format("Type {0} not supported, try explicity register an accessor creating function."));
+            }
+            return (CreateAccessorFunc<T>)value;
         }
     }
 }

@@ -21,6 +21,7 @@
 // THE SOFTWARE.
 
 using Recall.Indexes;
+using Recall.IO;
 
 namespace Recall.Arrays
 {
@@ -31,15 +32,22 @@ namespace Recall.Arrays
     {
         private readonly Array<long> _index;
         private readonly Index<T> _data;
+        /// <summary>
+        /// Creates a new array.
+        /// </summary>
+        public VariableArray(MappedFile map, long size)
+            : this(map, 1024, size)
+        {
+
+        }
 
         /// <summary>
         /// Creates a new array.
         /// </summary>
-        public VariableArray(IO.MappedDelegates.CreateAccessorFunc<long> createInt64Accessor,
-            IO.MappedDelegates.CreateAccessorFunc<T> createAccessor, int accessorSize, long size)
+        public VariableArray(MappedFile map, int accessorSize, long size)
         {
-            _index = new Array<long>(createInt64Accessor, 8, size);
-            _data = new Index<T>(createAccessor, accessorSize);
+            _index = new Array<long>(map, size);
+            _data = new Index<T>(map);
         }
 
         /// <summary>
@@ -61,6 +69,14 @@ namespace Recall.Arrays
                 var id = _data.Add(value);
                 _index[idx] = id + 1;
             }
+        }
+
+        /// <summary>
+        /// Returns true if this array can resize.
+        /// </summary>
+        public override bool CanResize
+        {
+            get { return true; }
         }
 
         /// <summary>

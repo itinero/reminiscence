@@ -27,7 +27,7 @@ namespace Recall.Arrays
     /// <summary>
     /// An in-memory array working around the pre .NET 4.5 memory limitations for one object.
     /// </summary>
-    public class DefaultArray<T> : ArrayBase<T>
+    public class MemoryArray<T> : ArrayBase<T>
     {
         private T[][] blocks;
         private readonly int _blockSize = (int)System.Math.Pow(2, 20); // Holds the maximum array size, always needs to be a power of 2.
@@ -37,7 +37,7 @@ namespace Recall.Arrays
         /// <summary>
         /// Creates a new array.
         /// </summary>
-        public DefaultArray(long size)
+        public MemoryArray(long size)
             : this(size, (int)System.Math.Pow(2, 20))
         {
 
@@ -46,7 +46,7 @@ namespace Recall.Arrays
         /// <summary>
         /// Creates a new array.
         /// </summary>
-        public DefaultArray(long size, int blockSize)
+        public MemoryArray(long size, int blockSize)
         {
             if (size < 0) { throw new ArgumentOutOfRangeException("Size needs to be bigger than or equal to zero."); }
             if (blockSize < 0) { throw new ArgumentOutOfRangeException("Blocksize needs to be bigger than or equal to zero."); }
@@ -86,6 +86,14 @@ namespace Recall.Arrays
                 long localIdx = idx % _blockSize;
                 blocks[block][localIdx] = value;
             }
+        }
+
+        /// <summary>
+        /// Returns true if this array can be resized.
+        /// </summary>
+        public override bool CanResize
+        {
+            get { return true; }
         }
 
         /// <summary>

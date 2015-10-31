@@ -20,7 +20,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+using Recall.IO;
 using System;
+using System.Collections.Generic;
+using System.IO;
 
 namespace Recall.Arrays
 {
@@ -33,6 +36,11 @@ namespace Recall.Arrays
         /// Returns the length of this array.
         /// </summary>
         public abstract long Length { get; }
+
+        /// <summary>
+        /// Returns true if this array can be resized.
+        /// </summary>
+        public abstract bool CanResize { get; }
         
         /// <summary>
         /// Resizes this array.
@@ -82,6 +90,61 @@ namespace Recall.Arrays
             {
                 this[index + idx] = array[start + idx];
             }
+        }
+
+        /// <summary>
+        /// Copies an array to the given stream.
+        /// </summary>
+        public void CopyFrom(Stream stream)
+        {
+            var position = stream.Position;
+            var i = 0;
+            using (var accessor = MappedFile.GetCreateAccessorFuncFor<T>()(new MappedStream(), 0))
+            {
+                var element = default(T);
+                while (i < this.Length)
+                {
+                    accessor.ReadFrom(stream, stream.Position, ref element);
+                    this[i] = element;
+                    i++;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Copies an array to the given stream.
+        /// </summary>
+        public long CopyTo(Stream stream)
+        {
+            var position = stream.Position;
+            var i = 0;
+            using (var accessor = MappedFile.GetCreateAccessorFuncFor<T>()(new MappedStream(), 0))
+            {
+                var element = default(T);
+                while (i < this.Length)
+                {
+                    element = this[i];
+                    accessor.WriteTo(stream, stream.Position, ref element);
+                    i++;
+                }
+            }
+            return stream.Position - position;
+        }
+
+        /// <summary>
+        /// Creates a mapped array with the given size.
+        /// </summary>
+        public static ArrayBase<T> CreateFor(MappedFile map, long size)
+        {
+            var func = MappedFile.GetCreateAccessorFuncFor<T>();
+            using(var accessor = func(map, 0))
+            {
+                if(accessor.ElementSizeFixed)
+                { // fixed element size.
+                    return new Array<T>(map, size);
+                }
+            }
+            return new VariableArray<T>(map, size);
         }
     }
 }

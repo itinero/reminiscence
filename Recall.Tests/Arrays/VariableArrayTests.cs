@@ -42,7 +42,7 @@ namespace Recall.Tests.Arrays
         {
             using (var map = new MappedStream())
             {
-                using (var array = new VariableArray<string>(map.CreateInt64, map.CreateVariableString, 1024, 10))
+                using (var array = new VariableArray<string>(map, 1024, 10))
                 {
                     Assert.AreEqual(10, array.Length);
                     Assert.Catch<ArgumentOutOfRangeException>(() =>
@@ -75,11 +75,11 @@ namespace Recall.Tests.Arrays
         {
             using (var map = new MappedStream())
             {
-                using (var array = new VariableArray<string>(map.CreateInt64, map.CreateVariableString, 1024, 0))
+                using (var array = new VariableArray<string>(map, 1024, 0))
                 {
                     Assert.AreEqual(0, array.Length);
                 }
-                using (var array = new VariableArray<string>(map.CreateInt64, map.CreateVariableString, 1024, 100))
+                using (var array = new VariableArray<string>(map, 1024, 100))
                 {
                     array.Resize(0);
                     Assert.AreEqual(0, array.Length);
@@ -97,7 +97,7 @@ namespace Recall.Tests.Arrays
 
             using (var map = new MappedStream())
             {
-                using (var array = new VariableArray<string>(map.CreateInt64, map.CreateVariableString, 1024, 1000))
+                using (var array = new VariableArray<string>(map, 1024, 1000))
                 {
                     var arrayExpected = new string[1000];
 
@@ -134,7 +134,7 @@ namespace Recall.Tests.Arrays
 
             using (var map = new MappedStream())
             {
-                using (var array = new VariableArray<string>(map.CreateInt64, map.CreateVariableString, 1024, 1000))
+                using (var array = new VariableArray<string>(map, 1024, 1000))
                 {
                     var arrayExepected = new string[1000];
 
@@ -164,7 +164,7 @@ namespace Recall.Tests.Arrays
                     }
                 }
 
-                using (var array = new VariableArray<string>(map.CreateInt64, map.CreateVariableString, 1024, 1000))
+                using (var array = new VariableArray<string>(map, 1024, 1000))
                 {
                     var arrayExpected = new string[1000];
 

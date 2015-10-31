@@ -61,7 +61,7 @@ namespace Recall.IO.Accessors
         /// </summary>
         public override long WriteTo(Stream stream, long position, ref uint structure)
         {
-            _stream.Write(BitConverter.GetBytes(structure), 0, _elementSize);
+            stream.Write(BitConverter.GetBytes(structure), 0, _elementSize);
             return _elementSize;
         }
     }

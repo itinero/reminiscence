@@ -32,24 +32,32 @@ namespace Recall.Collections
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public class List<T> : IDisposable, IList<T>
-        where T : struct
     {
         private readonly ArrayBase<T> _data;
 
         /// <summary>
         /// Creates a new list.
         /// </summary>
-        public List(MappedDelegates.CreateAccessorFunc<T> createAccessor, int elementSize)
+        public List()
         {
-            _data = new Array<T>(createAccessor, elementSize, 1024);
+            _data = new MemoryArray<T>(1024);
         }
 
         /// <summary>
         /// Creates a new list.
         /// </summary>
-        public List(MappedDelegates.CreateAccessorFunc<T> createAccessor, int elementSize, long capacity)
+        public List(MappedFile map)
+            : this(map, 1024)
         {
-            _data = new Array<T>(createAccessor, elementSize, capacity);
+
+        }
+
+        /// <summary>
+        /// Creates a new list.
+        /// </summary>
+        public List(MappedFile map, long capacity)
+        {
+            _data = ArrayBase<T>.CreateFor(map, capacity);
         }
 
         private int _count = 0; // hold the current number of elements.

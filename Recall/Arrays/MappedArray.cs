@@ -71,6 +71,14 @@ namespace Recall.Arrays
         }
 
         /// <summary>
+        /// Returns true if this array can resize.
+        /// </summary>
+        public override bool CanResize
+        {
+            get { return _baseArray.CanResize; }
+        }
+
+        /// <summary>
         /// Resizes this array.
         /// </summary>
         public override void Resize(long size)

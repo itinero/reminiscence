@@ -34,52 +34,84 @@ namespace Recall.Arrays
     /// </summary>
     public class Array<T> : ArrayBase<T>
     {
-        private long _length;
         private readonly List<MappedAccessor<T>> _accessors;
-        private readonly int _elementSize;
-        private readonly long _fileSizeBytes;
-        private readonly long _fileElementSize = DefaultFileElementSize;
-        private readonly MappedDelegates.CreateAccessorFunc<T> _createAccessor;
-        public static long DefaultFileElementSize = (long)1024; // The default element file size.
+        private readonly long _accessorSize = DefaultAccessorSize;
+        private readonly MappedFile.CreateAccessorFunc<T> _createAccessor;
+        private readonly MappedFile _map;
+
+        public static long DefaultAccessorSize = 1024; // The default element size of one accessor.
         public static int DefaultBufferSize = 128; // The default buffer size.
         public static int DefaultCacheSize = 64 * 8; // The default cache size.
+
         /// <summary>
-        /// Creates a memory mapped huge array.
+        /// Creates a memory mapped array based on existing data.
         /// </summary>
-        public Array(MappedDelegates.CreateAccessorFunc<T> createAccessor, int elementSize, long size)
-            : this(createAccessor, elementSize, size, 1024, 1024, 32)
+        public Array(MappedAccessor<T> accessor)
+            : this(accessor, DefaultBufferSize, DefaultCacheSize)
         {
 
         }
 
         /// <summary>
-        /// Creates a memory mapped huge array.
+        /// Creates a memory mapped array based on existing data.
         /// </summary>
-        public Array(MappedDelegates.CreateAccessorFunc<T> createAccessor, int elementSize, long size, long arraySize, int bufferSize, int cacheSize)
+        public Array(MappedAccessor<T> accessor, int bufferSize, int cacheSize)
         {
-            if (createAccessor == null) { throw new ArgumentNullException("createAccessor"); }
-            if (elementSize < 0) { throw new ArgumentOutOfRangeException("elementSize"); }
-            if (arraySize < 0) { throw new ArgumentOutOfRangeException("arraySize"); }
-            if (size < 0) { throw new ArgumentOutOfRangeException("size"); }
+            _accessors = new List<MappedAccessor<T>>();
+            _accessors.Add(accessor);
+            _accessorSize = accessor.CapacityElements;
+            _createAccessor = null;
 
-            _createAccessor = createAccessor;
-            _length = size;
-            _fileElementSize = arraySize;
-            _elementSize = elementSize;
-            _fileSizeBytes = arraySize * _elementSize;
+            // create first accessor.
+            _length = accessor.CapacityElements;
+
+            _bufferSize = bufferSize;
+            _cachedBuffer = null;
+            _cachedBuffers = new LRUCache<long, CachedBuffer>(cacheSize);
+            _cachedBuffers.OnRemove += new LRUCache<long, CachedBuffer>.OnRemoveDelegate(buffer_OnRemove);
+        }
+
+        /// <summary>
+        /// Creates a memory mapped array.
+        /// </summary>
+        public Array(MappedFile map, long length)
+            : this(map, length, 1024, 1024, 32)
+        {
+
+        }
+
+        /// <summary>
+        /// Creates a memory mapped array.
+        /// </summary>
+        public Array(MappedFile map, long length, 
+            long accessorSize, int bufferSize, int cacheSize)
+        {
+            if (accessorSize < 0) { throw new ArgumentOutOfRangeException("accessorSize"); }
+            if (length < 0) { throw new ArgumentOutOfRangeException("length"); }
+
+            _map = map;
+            _accessors = new List<MappedAccessor<T>>();
+            _accessorSize = accessorSize;
+            _createAccessor = MappedFile.GetCreateAccessorFuncFor<T>();
+
+            // create first accessor.
+            var accessor = _createAccessor(_map, _accessorSize);
+            _accessors.Add(accessor);
+            _length = length;
 
             _bufferSize = bufferSize;
             _cachedBuffer = null;
             _cachedBuffers = new LRUCache<long, CachedBuffer>(cacheSize);
             _cachedBuffers.OnRemove += new LRUCache<long, CachedBuffer>.OnRemoveDelegate(buffer_OnRemove);
 
-            var blockCount = (int)System.Math.Ceiling((double)size / _fileElementSize);
-            _accessors = new List<MappedAccessor<T>>(blockCount);
-            for (int i = 0; i < blockCount; i++)
+            var blockCount = (int)System.Math.Max(System.Math.Ceiling((double)length / _accessorSize), 1);
+            for (int i = 1; i < blockCount; i++)
             {
-                _accessors.Add(_createAccessor(_fileSizeBytes));
+                _accessors.Add(_createAccessor(_map, _accessorSize));
             }
         }
+
+        private long _length;
 
         /// <summary>
         /// Returns the length of this array.
@@ -90,12 +122,28 @@ namespace Recall.Arrays
         }
 
         /// <summary>
+        /// Returns the size of one element in bytes.
+        /// </summary>
+        public int ElementSizeInBytes
+        {
+            get { return _accessors[0].ElementSize; }
+        }
+
+        /// <summary>
+        /// Returns true if this array can be resized.
+        /// </summary>
+        public override bool CanResize
+        {
+            get { return _createAccessor != null; }
+        }
+
+        /// <summary>
         /// Resizes this array.
         /// </summary>
-        /// 
         public sealed override void Resize(long size)
         {
             if (size < 0) { throw new ArgumentOutOfRangeException(); }
+            if (!this.CanResize) { throw new InvalidOperationException("Array cannot be resized."); }
 
             // clear cache (and save dirty blocks).
             _cachedBuffers.Clear();
@@ -105,7 +153,7 @@ namespace Recall.Arrays
             var oldSize = _length;
             _length = size;
 
-            var blockCount = (int)System.Math.Ceiling((double)size / _fileElementSize);
+            var blockCount = (int)System.Math.Ceiling((double)size / _accessorSize);
             if (blockCount < _accessors.Count)
             { // decrease files/accessors.
                 for (int i = (int)blockCount; i < _accessors.Count; i++)
@@ -119,7 +167,7 @@ namespace Recall.Arrays
             { // increase files/accessors.
                 for (int i = _accessors.Count; i < blockCount; i++)
                 {
-                    _accessors.Add(_createAccessor(_fileSizeBytes));
+                    _accessors.Add(_createAccessor(_map, _accessorSize));
                 }
             }
         }
@@ -187,13 +235,14 @@ namespace Recall.Arrays
         {
             if (buffer.IsDirty)
             {
-                long arrayIdx = (long)System.Math.Floor(buffer.Position / _fileElementSize);
-                long localIdx = buffer.Position % _fileElementSize;
-                long localPosition = localIdx * _elementSize;
+                var arrayIdx = (long)System.Math.Floor(buffer.Position / _accessorSize);
+                var localIdx = buffer.Position % _accessorSize;
+                var localPosition = localIdx * _accessors[(int)arrayIdx].ElementSize;
 
                 if (buffer.Position + _bufferSize > _length)
                 { // only partially write buffer, do not write past the end.
-                    _accessors[(int)arrayIdx].WriteArray(localPosition, buffer.Buffer, 0, (int)(_length - buffer.Position));
+                    _accessors[(int)arrayIdx].WriteArray(localPosition, buffer.Buffer, 0, 
+                        (int)(_length - buffer.Position));
                     return;
                 }
                 _accessors[(int)arrayIdx].WriteArray(localPosition, buffer.Buffer, 0, _bufferSize);
@@ -227,9 +276,9 @@ namespace Recall.Arrays
                 {
                     var newBuffer = new T[_bufferSize];
 
-                    var arrayIdx = (long)System.Math.Floor(bufferPosition / _fileElementSize);
-                    var localIdx = bufferPosition % _fileElementSize;
-                    var localPosition = localIdx * _elementSize;
+                    var arrayIdx = (long)System.Math.Floor(bufferPosition / _accessorSize);
+                    var localIdx = bufferPosition % _accessorSize;
+                    var localPosition = localIdx * _accessors[(int)arrayIdx].ElementSize;
 
                     _accessors[(int)arrayIdx].ReadArray(localPosition, newBuffer, 0, _bufferSize);
                     _cachedBuffer = new CachedBuffer()
@@ -280,61 +329,6 @@ namespace Recall.Arrays
             {
                 accessor.Dispose();
             }
-        }
-
-        /// <summary>
-        /// Writes this array to the given stream.
-        /// </summary>
-        public long WriteTo(Stream stream)
-        {
-            // first flush all buffers.
-            this.FlushBuffers();
-
-            // first write length.
-            stream.Write(BitConverter.GetBytes(_length), 0, 8);
-
-            // read raw data from accessor(s) and write to stream.
-            var element = 0;
-            for(var i = 0; i < _accessors.Count; i++)
-            {
-                var accessor = _accessors[i];
-                var elementsToRead = accessor.CapacityElements;
-                if(elementsToRead + element > _length)
-                {
-                    elementsToRead = _length - element;
-                }
-                if(elementsToRead <= 0)
-                {
-                    break;
-                }
-                accessor.CopyTo(stream, 0, 
-                    (int)elementsToRead * _elementSize);                
-            }
-            return (_elementSize * _length) + 8;
-        }
-
-        /// <summary>
-        /// Reads an array from the given stream.
-        /// </summary>
-        public static Array<T> ReadFrom(Stream stream, MappedDelegates.CreateAccessorFunc<T> createAccessor,
-            int elementSize)
-        {
-            var bytes = new byte[8];
-            stream.Read(bytes, 0, 8);
-
-            var size = BitConverter.ToInt64(bytes, 0);
-            var array = new Array<T>(createAccessor, elementSize, size);
-            using (var limitedStream = new LimitedStream(stream))
-            {
-                using (var map = new MappedStream(new LimitedStream(stream)))
-                {
-                    for (var i = 0; i < size; i++)
-                    {
-                        array.AddFrom(i, limitedStream, i * elementSize);
-                    }
-                }
-            }
-            return array;
         }
 
         /// <summary>

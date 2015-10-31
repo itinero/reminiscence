@@ -43,11 +43,11 @@ namespace Recall.Tests.Collections
         {
             using(var map = new MappedStream())
             {
-                var list = new List<int>(map.CreateInt32, 4);
+                var list = new List<int>(map);
                 Assert.AreEqual(0, list.Count);
                 Assert.AreEqual(1024, list.Capacity);
 
-                list = new List<int>(map.CreateInt32, 4, 10);
+                list = new List<int>(map, 10);
                 Assert.AreEqual(0, list.Count);
                 Assert.AreEqual(10, list.Capacity);
             }
@@ -61,7 +61,7 @@ namespace Recall.Tests.Collections
         {
             using (var map = new MappedStream())
             {
-                var list = new List<int>(map.CreateInt32, 4);
+                var list = new List<int>(map);
                 list.Add(100);
 
                 Assert.AreEqual(1, list.Count);
@@ -93,7 +93,7 @@ namespace Recall.Tests.Collections
         {
             using (var map = new MappedStream())
             {
-                var list = new List<int>(map.CreateInt32, 4);
+                var list = new List<int>(map);
                 list.Add(100);
                 list.Clear();
 
@@ -124,7 +124,7 @@ namespace Recall.Tests.Collections
         {
             using (var map = new MappedStream())
             {
-                var list = new List<int>(map.CreateInt32, 4);
+                var list = new List<int>(map);
                 for (var i = 0; i < 1024; i++)
                 {
                     list.Add(i);
@@ -146,7 +146,7 @@ namespace Recall.Tests.Collections
         {
             using (var map = new MappedStream())
             {
-                var list = new List<int>(map.CreateInt32, 4);
+                var list = new List<int>(map);
                 for (var i = 0; i < 1024; i++)
                 {
                     list.Add(i);
@@ -168,7 +168,7 @@ namespace Recall.Tests.Collections
         {
             using (var map = new MappedStream())
             {
-                var list = new List<int>(map.CreateInt32, 4);
+                var list = new List<int>(map);
                 for (var i = 0; i < 10; i++)
                 {
                     list.Add(i);
@@ -199,7 +199,7 @@ namespace Recall.Tests.Collections
         {
             using (var map = new MappedStream())
             {
-                var list = new List<int>(map.CreateInt32, 4);
+                var list = new List<int>(map);
                 for (var i = 1; i < 10; i++)
                 {
                     list.Add(i);
@@ -221,7 +221,7 @@ namespace Recall.Tests.Collections
         {
             using (var map = new MappedStream())
             {
-                var list = new List<int>(map.CreateInt32, 4);
+                var list = new List<int>(map);
                 for (var i = 0; i < 10; i++)
                 {
                     list.Add(i + 100);
@@ -261,7 +261,7 @@ namespace Recall.Tests.Collections
         {
             using (var map = new MappedStream())
             {
-                var list = new List<int>(map.CreateInt32, 4);
+                var list = new List<int>(map);
                 Assert.IsFalse(list.IsReadOnly);
             }
         }
@@ -274,7 +274,7 @@ namespace Recall.Tests.Collections
         {
             using (var map = new MappedStream())
             {
-                var list = new List<int>(map.CreateInt32, 4);
+                var list = new List<int>(map);
                 for (var i = 0; i < 10; i++)
                 {
                     list.Add(i);
@@ -309,7 +309,7 @@ namespace Recall.Tests.Collections
         {
             using (var map = new MappedStream())
             {
-                var list = new List<int>(map.CreateInt32, 4);
+                var list = new List<int>(map);
                 for (var i = 0; i < 10; i++)
                 {
                     list.Add(i);
@@ -339,7 +339,7 @@ namespace Recall.Tests.Collections
         {
             using (var map = new MappedStream())
             {
-                var list = new List<int>(map.CreateInt32, 4);
+                var list = new List<int>(map);
                 for (var i = 0; i < 10; i++)
                 {
                     list.Add(i);

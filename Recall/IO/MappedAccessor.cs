@@ -91,6 +91,17 @@ namespace Recall.IO
         }
 
         /// <summary>
+        /// Returns true if this accessor is for elements of a fixed size.
+        /// </summary>
+        public virtual bool ElementSizeFixed
+        {
+            get
+            {
+                return _elementSize != -1;
+            }
+        }
+
+        /// <summary>
         /// Reads appropriate amount of bytes from the given stream at the given position and returns the structure.
         /// </summary>
         public abstract long ReadFrom(Stream stream, long position, ref T structure);

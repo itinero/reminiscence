@@ -20,49 +20,35 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
+using Recall.IO;
+using System.Collections.Generic;
 using System.IO;
 
-namespace Recall.IO.Accessors
+namespace Recall
 {
     /// <summary>
-    /// A memory mapped accessor that stores uints.
+    /// Contains extensions methods for native .NET objects.
     /// </summary>
-    internal sealed class MappedAccessorInt32 : MappedAccessor<int>
+    public static class Extensions
     {
-        private readonly byte[] _buffer;
-
         /// <summary>
-        /// Creates a new memory mapped file.
+        /// Copies a sorted list of elements to a stream.
         /// </summary>
-        internal MappedAccessorInt32(MappedFile file, Stream stream)
-            : base(file, stream, 4)
+        public static long CopyTo<T>(this IList<T> list, Stream stream)
         {
-            _buffer = new byte[_elementSize];
-        }
-
-        /// <summary>
-        /// Reads appropriate amount of bytes from the stream at the given position and returns the structure.
-        /// </summary>
-        public override long ReadFrom(Stream stream, long position, ref int structure)
-        {
-            stream.Seek(position, SeekOrigin.Begin);
-            if (stream.Read(_buffer, 0, _elementSize) != _elementSize)
+            var position = stream.Position;
+            var i = 0;
+            using (var accessor = MappedFile.GetCreateAccessorFuncFor<T>()(new MappedStream(), 0))
             {
-                structure = 0;
-                return 0;
+                var element = default(T);
+                while (i < list.Count)
+                {
+                    element = list[i];
+                    accessor.WriteTo(stream, stream.Position, ref element);
+                    i++;
+                }
             }
-            structure = BitConverter.ToInt32(_buffer, 0);
-            return _elementSize;
-        }
-
-        /// <summary>
-        /// Converts the structure to bytes and writes them to the stream.
-        /// </summary>
-        public override long WriteTo(Stream stream, long position, ref int structure)
-        {
-            stream.Write(BitConverter.GetBytes(structure), 0, _elementSize);
-            return _elementSize;
+            return stream.Position - position;
         }
     }
 }

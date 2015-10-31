@@ -45,7 +45,7 @@
   <ItemGroup>
     <Compile Include="Arrays\VariableArrayTests.cs" />
     <Compile Include="Arrays\ArrayTests.cs" />
-    <Compile Include="Arrays\DefaultArrayTests.cs" />
+    <Compile Include="Arrays\MemoryArrayTests.cs" />
     <Compile Include="Collections\DictionaryTests.cs" />
     <Compile Include="Collections\ListTests.cs" />
     <Compile Include="Indexes\IndexTests.cs" />

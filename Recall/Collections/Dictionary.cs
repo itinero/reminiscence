@@ -21,6 +21,7 @@
 // THE SOFTWARE.
 
 using Recall.Arrays;
+using Recall.IO;
 using System;
 using System.Linq;
 
@@ -39,14 +40,12 @@ namespace Recall.Collections
         /// <summary>
         /// Creates a new dictionary.
         /// </summary>
-        public Dictionary(IO.MappedDelegates.CreateAccessorFunc<uint> createUInt32Accessor,
-            IO.MappedDelegates.CreateAccessorFunc<TKey> createKeyAccessor, 
-            IO.MappedDelegates.CreateAccessorFunc<TValue> createValueAccessor)
+        public Dictionary(MappedFile map)
         {
-            _hashedPointers = new Array<uint>(createUInt32Accessor, 4, 1024);
-            _linkedKeyValueList = new List<uint>(createUInt32Accessor, 4);
-            _keys = new Indexes.Index<TKey>(createKeyAccessor);
-            _values = new Indexes.Index<TValue>(createValueAccessor);
+            _hashedPointers = new Array<uint>(map, 1024);
+            _linkedKeyValueList = new List<uint>(map, 4);
+            _keys = new Indexes.Index<TKey>(map);
+            _values = new Indexes.Index<TValue>(map);
         }
 
         private int _count = 0;

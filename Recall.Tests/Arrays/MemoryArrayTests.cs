@@ -30,7 +30,7 @@ namespace Recall.Tests.Arrays
     /// Contains new memory array tests.
     /// </summary>
     [TestFixture]
-    public class DefaultArrayTests
+    public class MemoryArrayTests
     {
         /// <summary>
         /// Tests the argument verifications on the constructors.
@@ -40,19 +40,19 @@ namespace Recall.Tests.Arrays
         {
             Assert.Catch<ArgumentOutOfRangeException>(() =>
             {
-                new DefaultArray<int>(-1);
+                new MemoryArray<int>(-1);
             });
             Assert.Catch<ArgumentOutOfRangeException>(() =>
             {
-                new DefaultArray<int>(-1, 2);
+                new MemoryArray<int>(-1, 2);
             });
             Assert.Catch<ArgumentOutOfRangeException>(() =>
             {
-                new DefaultArray<int>(10, -1);
+                new MemoryArray<int>(10, -1);
             });
             Assert.Catch<ArgumentOutOfRangeException>(() =>
             {
-                new DefaultArray<int>(10, 3);
+                new MemoryArray<int>(10, 3);
             });
         }
 
@@ -63,7 +63,7 @@ namespace Recall.Tests.Arrays
         public void CompareToArrayTest()
         {
             var stringArrayRef = new string[1000];
-            var stringArray = new DefaultArray<string>(1000);
+            var stringArray = new MemoryArray<string>(1000);
 
             var randomGenerator = new System.Random(66707770); // make this deterministic 
             for (var idx = 0; idx < 1000; idx++)
@@ -93,7 +93,7 @@ namespace Recall.Tests.Arrays
         public void ResizeTest()
         {
             var stringArrayRef = new string[1000];
-            var stringArray = new DefaultArray<string>(1000);
+            var stringArray = new MemoryArray<string>(1000);
 
             var randomGenerator = new System.Random(66707770); // make this deterministic 
             for (int idx = 0; idx < 1000; idx++)
@@ -120,7 +120,7 @@ namespace Recall.Tests.Arrays
             }
 
             stringArrayRef = new string[1000];
-            stringArray = new DefaultArray<string>(1000);
+            stringArray = new MemoryArray<string>(1000);
 
             for (int idx = 0; idx < 1000; idx++)
             {

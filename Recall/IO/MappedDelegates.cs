@@ -33,7 +33,8 @@ namespace Recall.IO
         /// <summary>
         /// A delegate to create an accessor.
         /// </summary>
-        public delegate MappedAccessor<T> CreateAccessorFunc<T>(long sizeInBytes);
+        /// <param name="sizeInBytesOrElements">The size in elements for fixed-size accessors and in bytes for variable-sized accessors.</param>
+        public delegate MappedAccessor<T> CreateAccessorFunc<T>(long sizeInBytesOrElements);
 
         /// <summary>
         /// A default delegate that can be use to read strings from a stream.

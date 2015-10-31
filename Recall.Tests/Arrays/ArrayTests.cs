@@ -42,7 +42,7 @@ namespace Recall.Tests.Arrays
         {
             using (var map = new MappedStream())
             {
-                using (var array = new Array<uint>(map.CreateUInt32, 4, 1000))
+                using (var array = new Array<uint>(map, 1000))
                 {
                     Assert.AreEqual(1000, array.Length);
                     Assert.Catch<ArgumentOutOfRangeException>(() =>
@@ -75,11 +75,11 @@ namespace Recall.Tests.Arrays
         {
             using (var map = new MappedStream())
             {
-                using (var array = new Array<uint>(map.CreateUInt32, 4, 0))
+                using (var array = new Array<uint>(map, 0))
                 {
                     Assert.AreEqual(0, array.Length);
                 }
-                using (var array = new Array<uint>(map.CreateUInt32, 4, 100))
+                using (var array = new Array<uint>(map, 100))
                 {
                     array.Resize(0);
                     Assert.AreEqual(0, array.Length);
@@ -97,7 +97,7 @@ namespace Recall.Tests.Arrays
 
             using (var map = new MappedStream())
             {
-                using (var array = new Array<uint>(map.CreateUInt32, 4, 1000))
+                using (var array = new Array<uint>(map, 1000))
                 {
                     var arrayExpected = new uint[1000];
 
@@ -134,7 +134,7 @@ namespace Recall.Tests.Arrays
 
             using (var map = new MappedStream())
             {
-                using (var array = new Array<uint>(map.CreateUInt32, 4, 1000, 256, 256, 32))
+                using (var array = new Array<uint>(map, 1000, 256, 256, 32))
                 {
                     var arrayExepected = new uint[1000];
 
@@ -164,7 +164,7 @@ namespace Recall.Tests.Arrays
                     }
                 }
 
-                using (var array = new Array<uint>(map.CreateUInt32, 4, 1000, 256, 256, 32))
+                using (var array = new Array<uint>(map, 1000, 256, 256, 32))
                 {
                     var arrayExpected = new uint[1000];
 
@@ -209,18 +209,19 @@ namespace Recall.Tests.Arrays
             {
                 using (var memoryStream = new MemoryStream())
                 {
-                    using (var array = new Array<int>(map.CreateInt32, 4, 10))
+                    using (var array = new Array<int>(map, 10))
                     {
                         for (var i = 0; i < array.Length; i++)
                         {
                             array[i] = i + 100;
                         }
 
-                        array.WriteTo(memoryStream);
+                        array.CopyTo(memoryStream);
                         memoryStream.Seek(0, SeekOrigin.Begin);
 
-                        using (var array1 = Array<int>.ReadFrom(memoryStream, map.CreateInt32, 4))
+                        using (var array1 = new Array<int>(map, array.Length))
                         {
+                            array1.CopyFrom(memoryStream);
                             for (var i = 0; i < array.Length; i++)
                             {
                                 Assert.AreEqual(array[i], array1[i]);
@@ -234,18 +235,19 @@ namespace Recall.Tests.Arrays
             {
                 using (var memoryStream = new MemoryStream())
                 {
-                    using (var array = new Array<int>(map.CreateInt32, 4, 10000, 32, 32, 2))
+                    using (var array = new Array<int>(map, 10000, 32, 32, 2))
                     {
                         for (var i = 0; i < array.Length; i++)
                         {
                             array[i] = i + 100;
                         }
 
-                        array.WriteTo(memoryStream);
+                        array.CopyFrom(memoryStream);
                         memoryStream.Seek(0, SeekOrigin.Begin);
 
-                        using (var array1 = Array<int>.ReadFrom(memoryStream, map.CreateInt32, 4))
+                        using (var array1 = new Array<int>(map, array.Length))
                         {
+                            array.CopyFrom(memoryStream);
                             for (var i = 0; i < array.Length; i++)
                             {
                                 Assert.AreEqual(array[i], array1[i]);

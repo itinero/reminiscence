@@ -42,8 +42,7 @@ namespace Recall.Tests.Collections
         {
             using(var map = new MappedStream())
             {
-                var dictionary = new Dictionary<string, string>(map.CreateUInt32, 
-                    map.CreateVariableString, map.CreateVariableString);
+                var dictionary = new Dictionary<string, string>(map);
 
                 Assert.AreEqual(0, dictionary.Count);
             }
@@ -57,8 +56,7 @@ namespace Recall.Tests.Collections
         {
             using (var map = new MappedStream())
             {
-                var dictionary = new Dictionary<string, string>(map.CreateUInt32,
-                    map.CreateVariableString, map.CreateVariableString);
+                var dictionary = new Dictionary<string, string>(map);
 
                 dictionary.Add("Ben", "Abelshausen");
                 Assert.AreEqual("Abelshausen", dictionary["Ben"]);
@@ -66,10 +64,10 @@ namespace Recall.Tests.Collections
                 Assert.Catch<ArgumentException>(() => dictionary.Add("Ben", "Not Abelshausen"));
             }
 
+            MockObject.RegisterAccessorCreateFunc();
             using (var map = new MappedStream())
             {
-                var dictionary = new Dictionary<MockObject, string>(map.CreateUInt32,
-                    (size) => MockObject.CreateAccessor(map, size), map.CreateVariableString);
+                var dictionary = new Dictionary<MockObject, string>(map);
 
                 dictionary.Add(new MockObject("Ben"), "Abelshausen");
                 Assert.AreEqual("Abelshausen", dictionary[new MockObject("Ben")]);
@@ -97,18 +95,17 @@ namespace Recall.Tests.Collections
         {
             using (var map = new MappedStream())
             {
-                var dictionary = new Dictionary<string, string>(map.CreateUInt32,
-                    map.CreateVariableString, map.CreateVariableString);
+                var dictionary = new Dictionary<string, string>(map);
 
                 dictionary.Add("Ben", "Abelshausen");
 
                 Assert.IsTrue(dictionary.ContainsKey("Ben"));
             }
 
+            MockObject.RegisterAccessorCreateFunc();
             using (var map = new MappedStream())
             {
-                var dictionary = new Dictionary<MockObject, string>(map.CreateUInt32,
-                    (size) => MockObject.CreateAccessor(map, size), map.CreateVariableString);
+                var dictionary = new Dictionary<MockObject, string>(map);
 
                 Assert.IsFalse(dictionary.ContainsKey(new MockObject("Ben")));
                 Assert.IsFalse(dictionary.ContainsKey(new MockObject("Ben1")));
@@ -137,8 +134,7 @@ namespace Recall.Tests.Collections
         {
             using (var map = new MappedStream())
             {
-                var dictionary = new Dictionary<string, string>(map.CreateUInt32,
-                    map.CreateVariableString, map.CreateVariableString);
+                var dictionary = new Dictionary<string, string>(map);
 
                 dictionary.Add("Ben", "Abelshausen");
 
@@ -147,10 +143,10 @@ namespace Recall.Tests.Collections
                 Assert.AreEqual("Abelshausen", value);
             }
 
+            MockObject.RegisterAccessorCreateFunc();
             using (var map = new MappedStream())
             {
-                var dictionary = new Dictionary<MockObject, string>(map.CreateUInt32,
-                    (size) => MockObject.CreateAccessor(map, size), map.CreateVariableString);
+                var dictionary = new Dictionary<MockObject, string>(map);
 
                 string value;
                 Assert.IsFalse(dictionary.TryGetValue(new MockObject("Ben"), out value));
@@ -180,8 +176,7 @@ namespace Recall.Tests.Collections
         {
             using (var map = new MappedStream())
             {
-                var dictionary = new Dictionary<string, string>(map.CreateUInt32,
-                    map.CreateVariableString, map.CreateVariableString);
+                var dictionary = new Dictionary<string, string>(map);
 
                 dictionary.Add("Ben", "Abelshausen");
 
@@ -192,10 +187,10 @@ namespace Recall.Tests.Collections
                 Assert.AreEqual(0, dictionary.Count);
             }
 
+            MockObject.RegisterAccessorCreateFunc();
             using (var map = new MappedStream())
             {
-                var dictionary = new Dictionary<MockObject, string>(map.CreateUInt32,
-                    (size) => MockObject.CreateAccessor(map, size), map.CreateVariableString);
+                var dictionary = new Dictionary<MockObject, string>(map);
 
                 dictionary.Add(new MockObject("Ben"), "Abelshausen");
                 dictionary.Add(new MockObject("Ben1"), "Abelshausen1");
@@ -226,10 +221,11 @@ namespace Recall.Tests.Collections
         [Test]
         public void TestItemGetOrSet()
         {
+            MockObject.RegisterAccessorCreateFunc();
+
             using (var map = new MappedStream())
             {
-                var dictionary = new Dictionary<string, string>(map.CreateUInt32,
-                    map.CreateVariableString, map.CreateVariableString);
+                var dictionary = new Dictionary<string, string>(map);
 
                 dictionary["Ben"] = "Abelshausen";
 
@@ -242,8 +238,7 @@ namespace Recall.Tests.Collections
 
             using (var map = new MappedStream())
             {
-                var dictionary = new Dictionary<MockObject, string>(map.CreateUInt32,
-                    (size) => MockObject.CreateAccessor(map, size), map.CreateVariableString);
+                var dictionary = new Dictionary<MockObject, string>(map);
 
                 dictionary[new MockObject("Ben")] = "Abelshausen";
                 dictionary[new MockObject("Ben1")] = "Abelshausen1";
@@ -283,10 +278,11 @@ namespace Recall.Tests.Collections
         [Test]
         public void TestEnumerators()
         {
+            MockObject.RegisterAccessorCreateFunc();
+
             using (var map = new MappedStream())
             {
-                var dictionary = new Dictionary<string, string>(map.CreateUInt32,
-                    map.CreateVariableString, map.CreateVariableString);
+                var dictionary = new Dictionary<string, string>(map);
                 dictionary["Ben"] = "Abelshausen";
 
                 // use the enumerator to create a new dictionary.
@@ -299,8 +295,7 @@ namespace Recall.Tests.Collections
 
             using (var map = new MappedStream())
             {
-                var dictionary = new Dictionary<string, string>(map.CreateUInt32,
-                    map.CreateVariableString, map.CreateVariableString);
+                var dictionary = new Dictionary<string, string>(map);
                 dictionary["Ben1"] = "Abelshausen1";
                 dictionary["Ben2"] = "Abelshausen2";
                 dictionary["Ben3"] = "Abelshausen3";
@@ -359,6 +354,12 @@ namespace Recall.Tests.Collections
                             var payload = value.Payload;
                             return MappedDelegates.WriteToString(stream, position, ref payload);
                         }));
+            }
+
+            internal static void RegisterAccessorCreateFunc()
+            {
+                MappedFile.RegisterCreateAccessorFunc<MockObject>(
+                    MockObject.CreateAccessor);
             }
         }
     }

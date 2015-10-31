@@ -28,7 +28,7 @@ namespace Reminiscence.IO
     /// <summary>
     /// Contains default read/write delegates for elements of several memory mapped data structures.
     /// </summary>
-    public static class MappedDelegates
+    public static class MemoryMapDelegates
     {
         /// <summary>
         /// A delegate to create an accessor.
@@ -39,7 +39,7 @@ namespace Reminiscence.IO
         /// <summary>
         /// A default delegate that can be use to read strings from a stream.
         /// </summary>
-        public static MappedFile.ReadFromDelegate<string> ReadFromString = new MappedFile.ReadFromDelegate<string>(
+        public static MemoryMap.ReadFromDelegate<string> ReadFromString = new MemoryMap.ReadFromDelegate<string>(
             (Stream stream, long position, ref string value) =>
         {
             var buffer = new byte[255]; // TODO: make sure this is not needed here anymore!
@@ -65,7 +65,7 @@ namespace Reminiscence.IO
         /// <summary>
         /// A default delegate that can be use to write strings to a stream.
         /// </summary>
-        public static MappedFile.WriteToDelegate<string> WriteToString = new MappedFile.WriteToDelegate<string>(
+        public static MemoryMap.WriteToDelegate<string> WriteToString = new MemoryMap.WriteToDelegate<string>(
             (Stream stream, long position, ref string value) =>
         {
             stream.Seek(position, System.IO.SeekOrigin.Begin);
@@ -93,7 +93,7 @@ namespace Reminiscence.IO
         /// <summary>
         /// A default delegate that can be use to read arrays of integers from a stream.
         /// </summary>
-        public static MappedFile.ReadFromDelegate<int[]> ReadFromIntArray = new MappedFile.ReadFromDelegate<int[]>(
+        public static MemoryMap.ReadFromDelegate<int[]> ReadFromIntArray = new MemoryMap.ReadFromDelegate<int[]>(
             (Stream stream, long position, ref int[] value) =>
         {
             var buffer = new byte[255 * 4]; // TODO: make sure this is not needed here anymore!
@@ -126,7 +126,7 @@ namespace Reminiscence.IO
         /// <summary>
         /// A default delegate that can be use to write arrays of integers to a stream.
         /// </summary>
-        public static MappedFile.WriteToDelegate<int[]> WriteToIntArray = new MappedFile.WriteToDelegate<int[]>(
+        public static MemoryMap.WriteToDelegate<int[]> WriteToIntArray = new MemoryMap.WriteToDelegate<int[]>(
             (Stream stream, long position, ref int[] value) =>
         {
             stream.Seek(position, System.IO.SeekOrigin.Begin);
@@ -160,7 +160,7 @@ namespace Reminiscence.IO
         /// <summary>
         /// A default delegate that can be use to read arrays of unsigned integers from a stream.
         /// </summary>
-        public static MappedFile.ReadFromDelegate<uint[]> ReadFromUIntArray = new MappedFile.ReadFromDelegate<uint[]>(
+        public static MemoryMap.ReadFromDelegate<uint[]> ReadFromUIntArray = new MemoryMap.ReadFromDelegate<uint[]>(
             (Stream stream, long position, ref uint[] value) =>
         {
             var buffer = new byte[255 * 4]; // TODO: make sure this is not needed here anymore!
@@ -193,7 +193,7 @@ namespace Reminiscence.IO
         /// <summary>
         /// A default delegate that can be use to write arrays of unsigned integers to a stream.
         /// </summary>
-        public static MappedFile.WriteToDelegate<uint[]> WriteToUIntArray = new MappedFile.WriteToDelegate<uint[]>(
+        public static MemoryMap.WriteToDelegate<uint[]> WriteToUIntArray = new MemoryMap.WriteToDelegate<uint[]>(
             (Stream stream, long position, ref uint[] value) =>
         {
             stream.Seek(position, System.IO.SeekOrigin.Begin);

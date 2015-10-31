@@ -36,8 +36,8 @@ namespace Reminiscence.Arrays
     {
         private readonly List<MappedAccessor<T>> _accessors;
         private readonly long _accessorSize = DefaultAccessorSize;
-        private readonly MappedFile.CreateAccessorFunc<T> _createAccessor;
-        private readonly MappedFile _map;
+        private readonly MemoryMap.CreateAccessorFunc<T> _createAccessor;
+        private readonly MemoryMap _map;
 
         /// <summary>
         /// The default element size of one accessor.
@@ -83,7 +83,7 @@ namespace Reminiscence.Arrays
         /// <summary>
         /// Creates a memory mapped array.
         /// </summary>
-        public Array(MappedFile map, long length)
+        public Array(MemoryMap map, long length)
             : this(map, length, 1024, 1024, 32)
         {
 
@@ -92,7 +92,7 @@ namespace Reminiscence.Arrays
         /// <summary>
         /// Creates a memory mapped array.
         /// </summary>
-        public Array(MappedFile map, long length, 
+        public Array(MemoryMap map, long length, 
             long accessorSize, int bufferSize, int cacheSize)
         {
             if (accessorSize < 0) { throw new ArgumentOutOfRangeException("accessorSize"); }
@@ -101,7 +101,7 @@ namespace Reminiscence.Arrays
             _map = map;
             _accessors = new List<MappedAccessor<T>>();
             _accessorSize = accessorSize;
-            _createAccessor = MappedFile.GetCreateAccessorFuncFor<T>();
+            _createAccessor = MemoryMap.GetCreateAccessorFuncFor<T>();
 
             // create first accessor.
             var accessor = _createAccessor(_map, _accessorSize);

@@ -41,7 +41,7 @@ namespace Reminiscence.Tests.Collections
         [Test]
         public void TestCreateNew()
         {
-            using(var map = new MappedStream())
+            using(var map = new MemoryMapStream())
             {
                 var list = new List<int>(map);
                 Assert.AreEqual(0, list.Count);
@@ -59,7 +59,7 @@ namespace Reminiscence.Tests.Collections
         [Test]
         public void TestAdd()
         {
-            using (var map = new MappedStream())
+            using (var map = new MemoryMapStream())
             {
                 var list = new List<int>(map);
                 list.Add(100);
@@ -91,7 +91,7 @@ namespace Reminiscence.Tests.Collections
         [Test]
         public void TestClear()
         {
-            using (var map = new MappedStream())
+            using (var map = new MemoryMapStream())
             {
                 var list = new List<int>(map);
                 list.Add(100);
@@ -122,7 +122,7 @@ namespace Reminiscence.Tests.Collections
         [Test]
         public void TestIndexOf()
         {
-            using (var map = new MappedStream())
+            using (var map = new MemoryMapStream())
             {
                 var list = new List<int>(map);
                 for (var i = 0; i < 1024; i++)
@@ -144,7 +144,7 @@ namespace Reminiscence.Tests.Collections
         [Test]
         public void TestContains()
         {
-            using (var map = new MappedStream())
+            using (var map = new MemoryMapStream())
             {
                 var list = new List<int>(map);
                 for (var i = 0; i < 1024; i++)
@@ -166,7 +166,7 @@ namespace Reminiscence.Tests.Collections
         [Test]
         public void TestCopyTo()
         {
-            using (var map = new MappedStream())
+            using (var map = new MemoryMapStream())
             {
                 var list = new List<int>(map);
                 for (var i = 0; i < 10; i++)
@@ -197,7 +197,7 @@ namespace Reminiscence.Tests.Collections
         [Test]
         public void TestInsert()
         {
-            using (var map = new MappedStream())
+            using (var map = new MemoryMapStream())
             {
                 var list = new List<int>(map);
                 for (var i = 1; i < 10; i++)
@@ -219,7 +219,7 @@ namespace Reminiscence.Tests.Collections
         [Test]
         public void TestSetItem()
         {
-            using (var map = new MappedStream())
+            using (var map = new MemoryMapStream())
             {
                 var list = new List<int>(map);
                 for (var i = 0; i < 10; i++)
@@ -259,7 +259,7 @@ namespace Reminiscence.Tests.Collections
         [Test]
         public void TestIsReadonly()
         {
-            using (var map = new MappedStream())
+            using (var map = new MemoryMapStream())
             {
                 var list = new List<int>(map);
                 Assert.IsFalse(list.IsReadOnly);
@@ -272,7 +272,7 @@ namespace Reminiscence.Tests.Collections
         [Test]
         public void TestRemove()
         {
-            using (var map = new MappedStream())
+            using (var map = new MemoryMapStream())
             {
                 var list = new List<int>(map);
                 for (var i = 0; i < 10; i++)
@@ -307,7 +307,7 @@ namespace Reminiscence.Tests.Collections
         [Test]
         public void TestRemoveAt()
         {
-            using (var map = new MappedStream())
+            using (var map = new MemoryMapStream())
             {
                 var list = new List<int>(map);
                 for (var i = 0; i < 10; i++)
@@ -337,7 +337,7 @@ namespace Reminiscence.Tests.Collections
         [Test]
         public void TestEnumerator()
         {
-            using (var map = new MappedStream())
+            using (var map = new MemoryMapStream())
             {
                 var list = new List<int>(map);
                 for (var i = 0; i < 10; i++)

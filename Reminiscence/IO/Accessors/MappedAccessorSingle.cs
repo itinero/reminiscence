@@ -35,7 +35,7 @@ namespace Reminiscence.IO.Accessors
         /// <summary>
         /// Creates a new memory mapped acessor.
         /// </summary>
-        internal MappedAccessorSingle(MappedFile file, Stream stream)
+        internal MappedAccessorSingle(MemoryMap file, Stream stream)
             : base(file, stream, 4)
         {
             _buffer = new byte[_elementSize];

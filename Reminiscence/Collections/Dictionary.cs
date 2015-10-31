@@ -40,7 +40,7 @@ namespace Reminiscence.Collections
         /// <summary>
         /// Creates a new dictionary.
         /// </summary>
-        public Dictionary(MappedFile map)
+        public Dictionary(MemoryMap map)
         {
             _hashedPointers = new Array<uint>(map, 1024);
             _linkedKeyValueList = new List<uint>(map, 4);

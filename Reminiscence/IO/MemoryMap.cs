@@ -29,14 +29,14 @@ namespace Reminiscence.IO
     /// <summary>
     /// Represents a memory mapped file.
     /// </summary>
-    public abstract class MappedFile : IDisposable
+    public abstract class MemoryMap : IDisposable
     {
         private readonly List<IDisposable> _accessors; // Holds all acessors generated for this file.
 
         /// <summary>
         /// Creates a new memory mapped file.
         /// </summary>
-        public MappedFile()
+        public MemoryMap()
         {
             _accessors = new List<IDisposable>();
             _nextPosition = 0;
@@ -231,8 +231,8 @@ namespace Reminiscence.IO
         /// </summary>
         public MappedAccessor<string> CreateVariableString(long sizeInBytes)
         {
-            return this.CreateVariable(sizeInBytes, IO.MappedDelegates.ReadFromString,
-                IO.MappedDelegates.WriteToString);
+            return this.CreateVariable(sizeInBytes, IO.MemoryMapDelegates.ReadFromString,
+                IO.MemoryMapDelegates.WriteToString);
         }
 
         /// <summary>
@@ -240,8 +240,8 @@ namespace Reminiscence.IO
         /// </summary>
         public MappedAccessor<int[]> CreateInt32Array(long sizeInBytes)
         {
-            return this.CreateVariable(sizeInBytes, IO.MappedDelegates.ReadFromIntArray,
-                IO.MappedDelegates.WriteToIntArray);
+            return this.CreateVariable(sizeInBytes, IO.MemoryMapDelegates.ReadFromIntArray,
+                IO.MemoryMapDelegates.WriteToIntArray);
         }
 
         /// <summary>
@@ -304,7 +304,7 @@ namespace Reminiscence.IO
         /// </summary>
         /// <param name="map">The memory map.</param>
         /// <param name="sizeInBytesOrElements">The size in elements for fixed-size accessors and in bytes for variable-sized accessors.</param>
-        public delegate MappedAccessor<T> CreateAccessorFunc<T>(MappedFile map, long sizeInBytesOrElements);
+        public delegate MappedAccessor<T> CreateAccessorFunc<T>(MemoryMap map, long sizeInBytesOrElements);
 
         /// <summary>
         /// Gets the create accessor function for the given type.
@@ -315,7 +315,7 @@ namespace Reminiscence.IO
             if (_accessorDelegates == null ||
                _accessorDelegates.Count == 0)
             { // register accessors.
-                MappedFile.RegisterCreateAccessorFuncs();
+                MemoryMap.RegisterCreateAccessorFuncs();
             }
             object value;
             if(!_accessorDelegates.TryGetValue(type, out value))

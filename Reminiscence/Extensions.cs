@@ -38,7 +38,7 @@ namespace Reminiscence
         {
             var position = stream.Position;
             var i = 0;
-            using (var accessor = MappedFile.GetCreateAccessorFuncFor<T>()(new MappedStream(), 0))
+            using (var accessor = MemoryMap.GetCreateAccessorFuncFor<T>()(new MemoryMapStream(), 0))
             {
                 var element = default(T);
                 while (i < list.Count)

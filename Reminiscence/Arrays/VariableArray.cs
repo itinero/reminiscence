@@ -35,7 +35,7 @@ namespace Reminiscence.Arrays
         /// <summary>
         /// Creates a new array.
         /// </summary>
-        public VariableArray(MappedFile map, long size)
+        public VariableArray(MemoryMap map, long size)
             : this(map, 1024, size)
         {
 
@@ -44,7 +44,7 @@ namespace Reminiscence.Arrays
         /// <summary>
         /// Creates a new array.
         /// </summary>
-        public VariableArray(MappedFile map, int accessorSize, long size)
+        public VariableArray(MemoryMap map, int accessorSize, long size)
         {
             _index = new Array<long>(map, size);
             _data = new Index<T>(map);

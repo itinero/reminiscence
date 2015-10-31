@@ -28,14 +28,14 @@ namespace Reminiscence.IO
     /// <summary>
     /// A mapped file that is using a single stream.
     /// </summary>
-    public class MappedStream : MappedFile
+    public class MemoryMapStream : MemoryMap
     {
         private Stream _stream; // Holds the stream.
 
         /// <summary>
         /// Creates a new mapped stream using a memory stream.
         /// </summary>
-        public MappedStream()
+        public MemoryMapStream()
             : this(new MemoryStream())
         {
 
@@ -45,7 +45,7 @@ namespace Reminiscence.IO
         /// Creates a new mapped stream.
         /// </summary>
         /// <param name="stream">The stream to read/write.</param>
-        public MappedStream(Stream stream)
+        public MemoryMapStream(Stream stream)
         {
             _stream = stream;
         }
@@ -113,7 +113,7 @@ namespace Reminiscence.IO
         /// <param name="readFrom"></param>
         /// <param name="writeTo"></param>
         /// <returns></returns>
-        protected override MappedAccessor<T> DoCreateVariable<T>(long position, long sizeInBytes, MappedFile.ReadFromDelegate<T> readFrom, MappedFile.WriteToDelegate<T> writeTo)
+        protected override MappedAccessor<T> DoCreateVariable<T>(long position, long sizeInBytes, MemoryMap.ReadFromDelegate<T> readFrom, MemoryMap.WriteToDelegate<T> writeTo)
         {
             return new Accessors.MappedAccessorVariable<T>(this, new CappedStream(_stream, position, sizeInBytes), readFrom, writeTo);
         }

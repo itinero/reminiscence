@@ -40,7 +40,7 @@ namespace Reminiscence.Tests.Collections
         [Test]
         public void TestCreate()
         {
-            using(var map = new MappedStream())
+            using(var map = new MemoryMapStream())
             {
                 var dictionary = new Dictionary<string, string>(map);
 
@@ -54,7 +54,7 @@ namespace Reminiscence.Tests.Collections
         [Test]
         public void TestAdd()
         {
-            using (var map = new MappedStream())
+            using (var map = new MemoryMapStream())
             {
                 var dictionary = new Dictionary<string, string>(map);
 
@@ -65,7 +65,7 @@ namespace Reminiscence.Tests.Collections
             }
 
             MockObject.RegisterAccessorCreateFunc();
-            using (var map = new MappedStream())
+            using (var map = new MemoryMapStream())
             {
                 var dictionary = new Dictionary<MockObject, string>(map);
 
@@ -93,7 +93,7 @@ namespace Reminiscence.Tests.Collections
         [Test]
         public void TestContainsKey()
         {
-            using (var map = new MappedStream())
+            using (var map = new MemoryMapStream())
             {
                 var dictionary = new Dictionary<string, string>(map);
 
@@ -103,7 +103,7 @@ namespace Reminiscence.Tests.Collections
             }
 
             MockObject.RegisterAccessorCreateFunc();
-            using (var map = new MappedStream())
+            using (var map = new MemoryMapStream())
             {
                 var dictionary = new Dictionary<MockObject, string>(map);
 
@@ -132,7 +132,7 @@ namespace Reminiscence.Tests.Collections
         [Test]
         public void TestTryGetValue()
         {
-            using (var map = new MappedStream())
+            using (var map = new MemoryMapStream())
             {
                 var dictionary = new Dictionary<string, string>(map);
 
@@ -144,7 +144,7 @@ namespace Reminiscence.Tests.Collections
             }
 
             MockObject.RegisterAccessorCreateFunc();
-            using (var map = new MappedStream())
+            using (var map = new MemoryMapStream())
             {
                 var dictionary = new Dictionary<MockObject, string>(map);
 
@@ -174,7 +174,7 @@ namespace Reminiscence.Tests.Collections
         [Test]
         public void TestRemoveKey()
         {
-            using (var map = new MappedStream())
+            using (var map = new MemoryMapStream())
             {
                 var dictionary = new Dictionary<string, string>(map);
 
@@ -188,7 +188,7 @@ namespace Reminiscence.Tests.Collections
             }
 
             MockObject.RegisterAccessorCreateFunc();
-            using (var map = new MappedStream())
+            using (var map = new MemoryMapStream())
             {
                 var dictionary = new Dictionary<MockObject, string>(map);
 
@@ -223,7 +223,7 @@ namespace Reminiscence.Tests.Collections
         {
             MockObject.RegisterAccessorCreateFunc();
 
-            using (var map = new MappedStream())
+            using (var map = new MemoryMapStream())
             {
                 var dictionary = new Dictionary<string, string>(map);
 
@@ -236,7 +236,7 @@ namespace Reminiscence.Tests.Collections
                 Assert.AreEqual("Abelshausen", dictionary["Ben"]);
             }
 
-            using (var map = new MappedStream())
+            using (var map = new MemoryMapStream())
             {
                 var dictionary = new Dictionary<MockObject, string>(map);
 
@@ -280,7 +280,7 @@ namespace Reminiscence.Tests.Collections
         {
             MockObject.RegisterAccessorCreateFunc();
 
-            using (var map = new MappedStream())
+            using (var map = new MemoryMapStream())
             {
                 var dictionary = new Dictionary<string, string>(map);
                 dictionary["Ben"] = "Abelshausen";
@@ -293,7 +293,7 @@ namespace Reminiscence.Tests.Collections
                 Assert.AreEqual("Abelshausen", dictionary["Ben"]);
             }
 
-            using (var map = new MappedStream())
+            using (var map = new MemoryMapStream())
             {
                 var dictionary = new Dictionary<string, string>(map);
                 dictionary["Ben1"] = "Abelshausen1";
@@ -338,27 +338,27 @@ namespace Reminiscence.Tests.Collections
                 return false;
             }
 
-            public static MappedAccessor<MockObject> CreateAccessor(MappedFile map, long sizeInBytes)
+            public static MappedAccessor<MockObject> CreateAccessor(MemoryMap map, long sizeInBytes)
             {
-                return map.CreateVariable<MockObject>(sizeInBytes, new MappedFile.ReadFromDelegate<MockObject>(
+                return map.CreateVariable<MockObject>(sizeInBytes, new MemoryMap.ReadFromDelegate<MockObject>(
                     (Stream stream, long position, ref MockObject value) =>
                     {
                         var payload = string.Empty;
-                        var size = MappedDelegates.ReadFromString(stream, position, ref payload);
+                        var size = MemoryMapDelegates.ReadFromString(stream, position, ref payload);
                         value = new MockObject(payload);
                         return size;
                     }),
-                    new MappedFile.WriteToDelegate<MockObject>(
+                    new MemoryMap.WriteToDelegate<MockObject>(
                         (Stream stream, long position, ref MockObject value) =>
                         {
                             var payload = value.Payload;
-                            return MappedDelegates.WriteToString(stream, position, ref payload);
+                            return MemoryMapDelegates.WriteToString(stream, position, ref payload);
                         }));
             }
 
             internal static void RegisterAccessorCreateFunc()
             {
-                MappedFile.RegisterCreateAccessorFunc<MockObject>(
+                MemoryMap.RegisterCreateAccessorFunc<MockObject>(
                     MockObject.CreateAccessor);
             }
         }

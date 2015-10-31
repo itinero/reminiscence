@@ -32,11 +32,11 @@ namespace Reminiscence.Indexes
     /// </summary>
     public class Index<T> : IDisposable
     {
-        private readonly MappedFile.CreateAccessorFunc<T> _createAccessor;
+        private readonly MemoryMap.CreateAccessorFunc<T> _createAccessor;
         private readonly System.Collections.Generic.List<MappedAccessor<T>> _accessors;
         private readonly System.Collections.Generic.List<long> _accessorBytesLost;
         private readonly long _accessorSize;
-        private readonly MappedFile _map;
+        private readonly MemoryMap _map;
 
         /// <summary>
         /// Creates a new index based on one fixed-size accessor.
@@ -54,7 +54,7 @@ namespace Reminiscence.Indexes
         /// Creates a new index.
         /// </summary>
         public Index()
-            : this(new MappedStream())
+            : this(new MemoryMapStream())
         {
 
         }
@@ -62,7 +62,7 @@ namespace Reminiscence.Indexes
         /// <summary>
         /// Creates a new index.
         /// </summary>
-        public Index(MappedFile map)
+        public Index(MemoryMap map)
             : this(map, 1024)
         {
 
@@ -71,10 +71,10 @@ namespace Reminiscence.Indexes
         /// <summary>
         /// Creates a new index.
         /// </summary>
-        public Index(MappedFile map, int accessorSize)
+        public Index(MemoryMap map, int accessorSize)
         {
             _map = map;
-            _createAccessor = MappedFile.GetCreateAccessorFuncFor<T>();
+            _createAccessor = MemoryMap.GetCreateAccessorFuncFor<T>();
             _accessorSize = accessorSize;
             _accessors = new System.Collections.Generic.List<MappedAccessor<T>>();
             _accessors.Add(_createAccessor(_map, _accessorSize));
@@ -244,8 +244,8 @@ namespace Reminiscence.Indexes
         {
             if (useAsMap)
             { // use the existing stream as map.
-                var map = new MappedStream(new CappedStream(stream, stream.Position, size));
-                var accessor = MappedFile.GetCreateAccessorFuncFor<T>()(map, size);
+                var map = new MemoryMapStream(new CappedStream(stream, stream.Position, size));
+                var accessor = MemoryMap.GetCreateAccessorFuncFor<T>()(map, size);
                 return new Index<T>(accessor);
             }
             else
@@ -253,8 +253,8 @@ namespace Reminiscence.Indexes
                 var data = new byte[size];
                 var position = stream.Position;
                 stream.Read(data, 0, (int)size);
-                var map = new MappedStream(new CappedStream(new MemoryStream(data), 0, size));
-                var accessor = MappedFile.GetCreateAccessorFuncFor<T>()(map, size);
+                var map = new MemoryMapStream(new CappedStream(new MemoryStream(data), 0, size));
+                var accessor = MemoryMap.GetCreateAccessorFuncFor<T>()(map, size);
                 return new Index<T>(accessor);
             }
         }

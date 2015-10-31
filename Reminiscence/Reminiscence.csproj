@@ -60,9 +60,9 @@
     <Compile Include="IO\Accessors\MappedAccessorUInt64.cs" />
     <Compile Include="IO\Accessors\MappedAccessorVariable.cs" />
     <Compile Include="IO\MappedAccessor.cs" />
-    <Compile Include="IO\MappedDelegates.cs" />
-    <Compile Include="IO\MappedFile.cs" />
-    <Compile Include="IO\MappedStream.cs" />
+    <Compile Include="IO\MemoryMapDelegates.cs" />
+    <Compile Include="IO\MemoryMap.cs" />
+    <Compile Include="IO\MemoryMapStream.cs" />
     <Compile Include="IO\Streams\CappedStream.cs" />
     <Compile Include="IO\Streams\LimitedStream.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

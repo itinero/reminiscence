@@ -40,7 +40,7 @@ namespace Reminiscence.Tests.Arrays
         [Test]
         public void ArgumentTest()
         {
-            using (var map = new MappedStream())
+            using (var map = new MemoryMapStream())
             {
                 using (var array = new VariableArray<string>(map, 1024, 10))
                 {
@@ -73,7 +73,7 @@ namespace Reminiscence.Tests.Arrays
         [Test]
         public void ZeroSizeTest()
         {
-            using (var map = new MappedStream())
+            using (var map = new MemoryMapStream())
             {
                 using (var array = new VariableArray<string>(map, 1024, 0))
                 {
@@ -95,7 +95,7 @@ namespace Reminiscence.Tests.Arrays
         {
             var randomGenerator = new System.Random(66707770); // make this deterministic 
 
-            using (var map = new MappedStream())
+            using (var map = new MemoryMapStream())
             {
                 using (var array = new VariableArray<string>(map, 1024, 1000))
                 {
@@ -132,7 +132,7 @@ namespace Reminiscence.Tests.Arrays
         {
             var randomGenerator = new System.Random(66707770); // make this deterministic 
 
-            using (var map = new MappedStream())
+            using (var map = new MemoryMapStream())
             {
                 using (var array = new VariableArray<string>(map, 1024, 1000))
                 {

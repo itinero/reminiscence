@@ -99,7 +99,7 @@ namespace Reminiscence.Arrays
         {
             var position = stream.Position;
             var i = 0;
-            using (var accessor = MappedFile.GetCreateAccessorFuncFor<T>()(new MappedStream(), 0))
+            using (var accessor = MemoryMap.GetCreateAccessorFuncFor<T>()(new MemoryMapStream(), 0))
             {
                 var element = default(T);
                 while (i < this.Length)
@@ -118,7 +118,7 @@ namespace Reminiscence.Arrays
         {
             var position = stream.Position;
             var i = 0;
-            using (var accessor = MappedFile.GetCreateAccessorFuncFor<T>()(new MappedStream(), 0))
+            using (var accessor = MemoryMap.GetCreateAccessorFuncFor<T>()(new MemoryMapStream(), 0))
             {
                 var element = default(T);
                 while (i < this.Length)
@@ -134,9 +134,9 @@ namespace Reminiscence.Arrays
         /// <summary>
         /// Creates a mapped array with the given size.
         /// </summary>
-        public static ArrayBase<T> CreateFor(MappedFile map, long size)
+        public static ArrayBase<T> CreateFor(MemoryMap map, long size)
         {
-            var func = MappedFile.GetCreateAccessorFuncFor<T>();
+            var func = MemoryMap.GetCreateAccessorFuncFor<T>();
             using(var accessor = func(map, 0))
             {
                 if(accessor.ElementSizeFixed)

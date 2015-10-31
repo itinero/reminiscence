@@ -30,14 +30,14 @@ namespace Reminiscence.IO.Accessors
     /// </summary>
     internal sealed class MappedAccessorVariable<T> : MappedAccessor<T>
     {
-        private readonly MappedFile.ReadFromDelegate<T> _readFrom; // Holds the read-from delegate.
-        private readonly MappedFile.WriteToDelegate<T> _writeTo; // Holds the write-to delegate.
+        private readonly MemoryMap.ReadFromDelegate<T> _readFrom; // Holds the read-from delegate.
+        private readonly MemoryMap.WriteToDelegate<T> _writeTo; // Holds the write-to delegate.
 
         /// <summary>
         /// Creates a new memory mapped file.
         /// </summary>
-        internal MappedAccessorVariable(MappedFile file, Stream stream, 
-            MappedFile.ReadFromDelegate<T> readFrom, MappedFile.WriteToDelegate<T> writeTo)
+        internal MappedAccessorVariable(MemoryMap file, Stream stream, 
+            MemoryMap.ReadFromDelegate<T> readFrom, MemoryMap.WriteToDelegate<T> writeTo)
             : base(file, stream, -1)
         {
             _readFrom = readFrom;

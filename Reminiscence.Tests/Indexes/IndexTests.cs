@@ -39,7 +39,7 @@ namespace Reminiscence.Tests.Indexes
         [Test]
         public void TestOneElement()
         {
-            using(var map = new MappedStream())
+            using(var map = new MemoryMapStream())
             {
                 var index = new Index<string>(map);
                 var id = index.Add("Ben");
@@ -53,7 +53,7 @@ namespace Reminiscence.Tests.Indexes
         [Test]
         public void TestTinyAccessors()
         {
-            using (var map = new MappedStream())
+            using (var map = new MemoryMapStream())
             {
                 using (var tempStream = new MemoryStream(new byte[1024]))
                 {
@@ -62,57 +62,57 @@ namespace Reminiscence.Tests.Indexes
                     var element = "Ben";
                     var id1 = index.Add(element);
                     Assert.AreEqual(0, id1);
-                    var id2Ref = MappedDelegates.WriteToString(tempStream, id1, ref element);
+                    var id2Ref = MemoryMapDelegates.WriteToString(tempStream, id1, ref element);
 
                     element = "Abelshausen";
                     var id2 = index.Add(element);
                     Assert.AreEqual(id2Ref, id2);
-                    var id3Ref = MappedDelegates.WriteToString(tempStream, id2, ref element) + id2;
+                    var id3Ref = MemoryMapDelegates.WriteToString(tempStream, id2, ref element) + id2;
 
                     element = "is";
                     var id3 = index.Add(element);
                     Assert.AreEqual(id3Ref, id3);
-                    var id4Ref = MappedDelegates.WriteToString(tempStream, id3, ref element) + id3;
+                    var id4Ref = MemoryMapDelegates.WriteToString(tempStream, id3, ref element) + id3;
 
                     element = "the";
                     var id4 = index.Add(element);
                     Assert.AreEqual(id4Ref, id4);
-                    var id5Ref = MappedDelegates.WriteToString(tempStream, id4, ref element) + id4;
+                    var id5Ref = MemoryMapDelegates.WriteToString(tempStream, id4, ref element) + id4;
 
                     element = "author";
                     var id5 = index.Add(element);
                     Assert.AreEqual(id5Ref, id5);
-                    var id6Ref = MappedDelegates.WriteToString(tempStream, id5, ref element) + id5;
+                    var id6Ref = MemoryMapDelegates.WriteToString(tempStream, id5, ref element) + id5;
 
                     element = "of";
                     var id6 = index.Add(element);
                     Assert.AreEqual(id6Ref, id6);
-                    var id7Ref = MappedDelegates.WriteToString(tempStream, id6, ref element) + id6;
+                    var id7Ref = MemoryMapDelegates.WriteToString(tempStream, id6, ref element) + id6;
 
                     element = "this";
                     var id7 = index.Add(element);
                     Assert.AreEqual(id7Ref, id7);
-                    var id8Ref = MappedDelegates.WriteToString(tempStream, id7, ref element) + id7;
+                    var id8Ref = MemoryMapDelegates.WriteToString(tempStream, id7, ref element) + id7;
 
                     element = "library";
                     var id8 = index.Add(element);
                     Assert.AreEqual(id8Ref, id8);
-                    var id9Ref = MappedDelegates.WriteToString(tempStream, id8, ref element) + id8;
+                    var id9Ref = MemoryMapDelegates.WriteToString(tempStream, id8, ref element) + id8;
 
                     element = "and";
                     var id9 = index.Add(element);
                     Assert.AreEqual(id9Ref, id9);
-                    var id10Ref = MappedDelegates.WriteToString(tempStream, id9, ref element) + id9;
+                    var id10Ref = MemoryMapDelegates.WriteToString(tempStream, id9, ref element) + id9;
 
                     element = "this";
                     var id10 = index.Add(element);
                     Assert.AreEqual(id10Ref, id10);
-                    var id11Ref = MappedDelegates.WriteToString(tempStream, id10, ref element) + id10;
+                    var id11Ref = MemoryMapDelegates.WriteToString(tempStream, id10, ref element) + id10;
 
                     element = "test!";
                     var id11 = index.Add("test!");
                     Assert.AreEqual(id11Ref, id11);
-                    var id12Ref = MappedDelegates.WriteToString(tempStream, id11, ref element) + id11;
+                    var id12Ref = MemoryMapDelegates.WriteToString(tempStream, id11, ref element) + id11;
 
                     Assert.AreEqual(id12Ref, index.SizeInBytes);
 
@@ -136,7 +136,7 @@ namespace Reminiscence.Tests.Indexes
         /// </summary>
         public void TestCopyTo()
         {
-            using (var map = new MappedStream())
+            using (var map = new MemoryMapStream())
             {
                 using (var refStream = new MemoryStream(new byte[1024]))
                 {
@@ -145,47 +145,47 @@ namespace Reminiscence.Tests.Indexes
 
                     var element = "Ben";
                     var id = index.Add(element);
-                    MappedDelegates.WriteToString(refStream, id, ref element);
+                    MemoryMapDelegates.WriteToString(refStream, id, ref element);
 
                     element = "Abelshausen";
                     id = index.Add(element);
-                    MappedDelegates.WriteToString(refStream, id, ref element);
+                    MemoryMapDelegates.WriteToString(refStream, id, ref element);
 
                     element = "is";
                     id = index.Add(element);
-                    MappedDelegates.WriteToString(refStream, id, ref element);
+                    MemoryMapDelegates.WriteToString(refStream, id, ref element);
 
                     element = "the";
                     id = index.Add(element);
-                    MappedDelegates.WriteToString(refStream, id, ref element);
+                    MemoryMapDelegates.WriteToString(refStream, id, ref element);
 
                     element = "author";
                     id = index.Add(element);
-                    MappedDelegates.WriteToString(refStream, id, ref element);
+                    MemoryMapDelegates.WriteToString(refStream, id, ref element);
 
                     element = "of";
                     id = index.Add(element);
-                    MappedDelegates.WriteToString(refStream, id, ref element);
+                    MemoryMapDelegates.WriteToString(refStream, id, ref element);
 
                     element = "this";
                     id = index.Add(element);
-                    MappedDelegates.WriteToString(refStream, id, ref element);
+                    MemoryMapDelegates.WriteToString(refStream, id, ref element);
 
                     element = "library";
                     id = index.Add(element);
-                    MappedDelegates.WriteToString(refStream, id, ref element);
+                    MemoryMapDelegates.WriteToString(refStream, id, ref element);
 
                     element = "and";
                     id = index.Add(element);
-                    MappedDelegates.WriteToString(refStream, id, ref element);
+                    MemoryMapDelegates.WriteToString(refStream, id, ref element);
 
                     element = "this";
                     id = index.Add(element);
-                    MappedDelegates.WriteToString(refStream, id, ref element);
+                    MemoryMapDelegates.WriteToString(refStream, id, ref element);
 
                     element = "test!";
                     id = index.Add("test!");
-                    MappedDelegates.WriteToString(refStream, id, ref element);
+                    MemoryMapDelegates.WriteToString(refStream, id, ref element);
 
                     refStream.SetLength(refStream.Position);
 
@@ -234,7 +234,7 @@ namespace Reminiscence.Tests.Indexes
 
             using (var indexStream = new MemoryStream())
             {
-                using (var map = new MappedStream())
+                using (var map = new MemoryMapStream())
                 {
                     // write to index and to a stream.
                     var index = new Index<string>(map, 32);

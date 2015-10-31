@@ -37,7 +37,7 @@ namespace Reminiscence.IO.Accessors
         /// </summary>
         /// <param name="file"></param>
         /// <param name="stream"></param>
-        internal MappedAccessorInt64(MappedFile file, Stream stream)
+        internal MappedAccessorInt64(MemoryMap file, Stream stream)
             : base(file, stream, 8)
         {
             _buffer = new byte[_elementSize];

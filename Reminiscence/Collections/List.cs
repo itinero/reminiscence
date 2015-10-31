@@ -46,7 +46,7 @@ namespace Reminiscence.Collections
         /// <summary>
         /// Creates a new list.
         /// </summary>
-        public List(MappedFile map)
+        public List(MemoryMap map)
             : this(map, 1024)
         {
 
@@ -55,7 +55,7 @@ namespace Reminiscence.Collections
         /// <summary>
         /// Creates a new list.
         /// </summary>
-        public List(MappedFile map, long capacity)
+        public List(MemoryMap map, long capacity)
         {
             _data = ArrayBase<T>.CreateFor(map, capacity);
         }

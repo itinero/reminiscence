@@ -137,15 +137,12 @@ namespace Reminiscence.IO
                 return -1;
             }
 
-            // seek until the correct position.
-            _stream.Seek(position, SeekOrigin.Begin);
-
             // try and read everything.
             var elementsRead = System.Math.Min((int)((_stream.Length - position) / _elementSize), count);
             var structure = default(T);
             for (int i = 0; i < elementsRead; i++)
             {
-                this.ReadFrom(_stream, i * _elementSize, ref structure);
+                this.ReadFrom(_stream, position + i * _elementSize, ref structure);
                 array[i + offset] = structure;
             }
             return elementsRead;

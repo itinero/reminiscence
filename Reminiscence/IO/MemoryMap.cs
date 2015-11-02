@@ -340,8 +340,8 @@ namespace Reminiscence.IO
                 (map, size) => map.CreateUInt64(size)));
             _accessorDelegates.Add(typeof(float), new CreateAccessorFunc<float>(
                 (map, size) => map.CreateSingle(size)));
-            //_accessorDelegates.Add(typeof(double), new CreateAccessorFunc<double>(
-            //    (map, size) => map.(size)));
+            _accessorDelegates.Add(typeof(double), new CreateAccessorFunc<double>(
+                (map, size) => map.CreateDouble(size)));
             _accessorDelegates.Add(typeof(string), new CreateAccessorFunc<string>(
                 (map, size) => map.CreateVariableString(size)));
             _accessorDelegates.Add(typeof(uint[]), new CreateAccessorFunc<uint[]>(

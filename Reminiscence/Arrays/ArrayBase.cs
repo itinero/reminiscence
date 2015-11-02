@@ -95,7 +95,7 @@ namespace Reminiscence.Arrays
         /// <summary>
         /// Copies an array to the given stream.
         /// </summary>
-        public void CopyFrom(Stream stream)
+        public virtual void CopyFrom(Stream stream)
         {
             var position = stream.Position;
             var i = 0;
@@ -114,7 +114,7 @@ namespace Reminiscence.Arrays
         /// <summary>
         /// Copies an array to the given stream.
         /// </summary>
-        public long CopyTo(Stream stream)
+        public virtual long CopyTo(Stream stream)
         {
             var position = stream.Position;
             var i = 0;

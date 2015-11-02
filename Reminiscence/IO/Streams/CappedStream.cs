@@ -66,7 +66,7 @@ namespace Reminiscence.IO.Streams
         /// </summary>
         public override bool CanWrite
         {
-            get { return false; }
+            get { return _stream.CanWrite; }
         }
 
         /// <summary>

@@ -111,6 +111,10 @@ namespace Reminiscence.IO
         /// </summary>
         public virtual long ReadFrom(long position, ref T structure)
         {
+            if (position < 0 || position > _stream.Length)
+            {
+                return -1;
+            }
             return this.ReadFrom(_stream, position, ref structure);
         }
 
@@ -124,6 +128,10 @@ namespace Reminiscence.IO
         /// </summary>
         public virtual long WriteTo(long position, ref T structure)
         {
+            if (position < 0 || position > _stream.Length)
+            {
+                return -1;
+            }
             return this.WriteTo(_stream, position, ref structure);
         }
 

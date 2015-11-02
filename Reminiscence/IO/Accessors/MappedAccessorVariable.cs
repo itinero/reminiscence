@@ -49,6 +49,10 @@ namespace Reminiscence.IO.Accessors
         /// </summary>
         public override long ReadFrom(Stream stream, long position, ref T structure)
         {
+            if (position < 0 || position >= _stream.Length)
+            {
+                return -1;
+            }
             return _readFrom.Invoke(stream, position, ref structure);
         }
 
@@ -57,6 +61,10 @@ namespace Reminiscence.IO.Accessors
         /// </summary>
         public override long WriteTo(Stream stream, long position, ref T structure)
         {
+            if (position < 0 || position >= _stream.Length)
+            {
+                return -1;
+            }
             return _writeTo.Invoke(_stream, position, ref structure);
         }
     }

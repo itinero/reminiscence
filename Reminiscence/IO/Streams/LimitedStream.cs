@@ -33,12 +33,21 @@ namespace Reminiscence.IO.Streams
         private readonly Stream _stream;
 
         /// <summary>
-        /// Creates a new routing serializer stream.
+        /// Creates a new limited stream.
         /// </summary>
         public LimitedStream(Stream stream)
         {
             _stream = stream;
             _offset = _stream.Position;
+        }
+
+        /// <summary>
+        /// Creates a new limited stream.
+        /// </summary>
+        public LimitedStream(Stream stream, long offset)
+        {
+            _stream = stream;
+            _offset = offset;
         }
 
         /// <summary>

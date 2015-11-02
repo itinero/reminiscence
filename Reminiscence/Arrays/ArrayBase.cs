@@ -30,7 +30,7 @@ namespace Reminiscence.Arrays
     /// <summary>
     /// Abstract representation of an array.
     /// </summary>
-    public abstract class ArrayBase<T> : IDisposable
+    public abstract class ArrayBase<T> : IDisposable, ISerializableToStream
     {
         /// <summary>
         /// Returns the length of this array.

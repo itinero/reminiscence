@@ -30,7 +30,7 @@ namespace Reminiscence.Indexes
     /// <summary>
     /// An index mapping variable-sized elements to id's. The id's represent the position as if a continuous byte stream.
     /// </summary>
-    public class Index<T> : IDisposable
+    public class Index<T> : IDisposable, ISerializableToStream
     {
         private readonly MemoryMap.CreateAccessorFunc<T> _createAccessor;
         private readonly System.Collections.Generic.List<MappedAccessor<T>> _accessors;

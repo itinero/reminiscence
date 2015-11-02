@@ -21,6 +21,7 @@
 // THE SOFTWARE.
 
 using Reminiscence.IO;
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -49,6 +50,26 @@ namespace Reminiscence
                 }
             }
             return stream.Position - position;
+        }
+
+        /// <summary>
+        /// Copies all data to the given stream starting at it's current position prefixed with 8 bytes containing the size.
+        /// </summary>
+        public static long CopyToWithSize(this ISerializableToStream serializable, Stream stream)
+        {
+            var position = stream.Position;
+            stream.Seek(position + 8, SeekOrigin.Begin);
+
+            // copy the actual data.
+            var size = serializable.CopyTo(stream);
+
+            // write the size.
+            stream.Seek(position, SeekOrigin.Begin);
+            stream.Write(BitConverter.GetBytes(size), 0, 8);
+
+            // reposition stream.
+            stream.Seek(position + 8 + size, SeekOrigin.Begin);
+            return size + 8;
         }
     }
 }

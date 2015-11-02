@@ -32,6 +32,7 @@ namespace Reminiscence.Arrays
     {
         private readonly Array<long> _index;
         private readonly Index<T> _data;
+
         /// <summary>
         /// Creates a new array.
         /// </summary>

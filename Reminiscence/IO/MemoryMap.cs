@@ -140,6 +140,43 @@ namespace Reminiscence.IO
         /// <summary>
         /// Creates a new memory mapped accessor for a given part of this file with given size in bytes and the start position.
         /// </summary>
+        public MappedAccessor<double> CreateDouble(long position, long sizeInElements)
+        {
+            var sizeInBytes = sizeInElements * 8;
+            var accessor = this.DoCreateNewDouble(position, sizeInBytes);
+            _accessors.Add(accessor);
+
+            var nextPosition = position + sizeInBytes;
+            if (nextPosition > _nextPosition)
+            {
+                _nextPosition = nextPosition;
+            }
+
+            return accessor;
+        }
+
+        /// <summary>
+        /// Creates a new empty memory mapped accessor with given size in bytes.
+        /// </summary>
+        public MappedAccessor<double> CreateDouble(long sizeInElements)
+        {
+            var sizeInBytes = sizeInElements * 8;
+            var accessor = this.DoCreateNewDouble(_nextPosition, sizeInBytes);
+            _accessors.Add(accessor);
+
+            _nextPosition = _nextPosition + sizeInBytes;
+
+            return accessor;
+        }
+
+        /// <summary>
+        /// Creates a new memory mapped file based on the given stream and the given size in bytes.
+        /// </summary>
+        protected abstract MappedAccessor<double> DoCreateNewDouble(long position, long sizeInByte);
+
+        /// <summary>
+        /// Creates a new memory mapped accessor for a given part of this file with given size in bytes and the start position.
+        /// </summary>
         public MappedAccessor<ulong> CreateUInt64(long position, long sizeInElements)
         {
             var sizeInBytes = sizeInElements * 8;
@@ -236,6 +273,24 @@ namespace Reminiscence.IO
         }
 
         /// <summary>
+        /// Creates an accessor for and array of uint's.
+        /// </summary>
+        public MappedAccessor<uint[]> CreateVariableUInt32Array(long sizeInBytes)
+        {
+            return this.CreateVariable(sizeInBytes, IO.MemoryMapDelegates.ReadFromUIntArray, 
+                IO.MemoryMapDelegates.WriteToUIntArray);
+        }
+
+        /// <summary>
+        /// Creates an accessor for and array of int's.
+        /// </summary>
+        public MappedAccessor<int[]> CreateVariableInt32Array(long sizeInBytes)
+        {
+            return this.CreateVariable(sizeInBytes, IO.MemoryMapDelegates.ReadFromIntArray,
+                IO.MemoryMapDelegates.WriteToIntArray);
+        }
+
+        /// <summary>
         /// Creates an accessor for strings.
         /// </summary>
         public MappedAccessor<int[]> CreateInt32Array(long sizeInBytes)
@@ -289,6 +344,10 @@ namespace Reminiscence.IO
             //    (map, size) => map.(size)));
             _accessorDelegates.Add(typeof(string), new CreateAccessorFunc<string>(
                 (map, size) => map.CreateVariableString(size)));
+            _accessorDelegates.Add(typeof(uint[]), new CreateAccessorFunc<uint[]>(
+                (map, size) => map.CreateVariableUInt32Array(size)));
+            _accessorDelegates.Add(typeof(int[]), new CreateAccessorFunc<int[]>(
+                (map, size) => map.CreateVariableInt32Array(size)));
         }
 
         /// <summary>
@@ -320,7 +379,8 @@ namespace Reminiscence.IO
             object value;
             if(!_accessorDelegates.TryGetValue(type, out value))
             {
-                throw new NotSupportedException(string.Format("Type {0} not supported, try explicity register an accessor creating function."));
+                throw new NotSupportedException(string.Format("Type {0} not supported, try explicity registering an accessor creating function.",
+                    type));
             }
             return (CreateAccessorFunc<T>)value;
         }

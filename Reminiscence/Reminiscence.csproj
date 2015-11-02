@@ -55,6 +55,7 @@
     <Compile Include="Indexes\Index.cs" />
     <Compile Include="IO\Accessors\MappedAccessorInt32.cs" />
     <Compile Include="IO\Accessors\MappedAccessorInt64.cs" />
+    <Compile Include="IO\Accessors\MappedAccessorDouble.cs" />
     <Compile Include="IO\Accessors\MappedAccessorSingle.cs" />
     <Compile Include="IO\Accessors\MappedAccessorUInt32.cs" />
     <Compile Include="IO\Accessors\MappedAccessorUInt64.cs" />

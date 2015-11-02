@@ -89,6 +89,17 @@ namespace Reminiscence.IO
         /// <param name="position">The position to start at.</param>
         /// <param name="sizeInBytes">The size.</param>
         /// <returns></returns>
+        protected override MappedAccessor<double> DoCreateNewDouble(long position, long sizeInBytes)
+        {
+            return new Accessors.MappedAccessorDouble(this, new CappedStream(_stream, position, sizeInBytes));
+        }
+
+        /// <summary>
+        /// Creates a new memory mapped file based on the given stream and the given size in bytes.
+        /// </summary>
+        /// <param name="position">The position to start at.</param>
+        /// <param name="sizeInBytes">The size.</param>
+        /// <returns></returns>
         protected override MappedAccessor<ulong> DoCreateNewUInt64(long position, long sizeInBytes)
         {
             return new Accessors.MappedAccessorUInt64(this, new CappedStream(_stream, position, sizeInBytes));

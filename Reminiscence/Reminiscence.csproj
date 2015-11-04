@@ -43,6 +43,7 @@
       <Link>Properties\SharedAssemblyVersion.cs</Link>
     </Compile>
     <Compile Include="Arrays\Array.cs" />
+    <Compile Include="Arrays\ArrayProfile.cs" />
     <Compile Include="Arrays\Cache\BinaryHeapULong.cs" />
     <Compile Include="Arrays\Cache\LRUCache.cs" />
     <Compile Include="Arrays\MemoryArray.cs" />

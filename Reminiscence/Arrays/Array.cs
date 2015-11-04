@@ -64,6 +64,15 @@ namespace Reminiscence.Arrays
         /// <summary>
         /// Creates a memory mapped array based on existing data.
         /// </summary>
+        public Array(MappedAccessor<T> accessor, ArrayProfile profile)
+            : this(accessor, profile.BufferSize, profile.CacheSize)
+        {
+
+        }
+
+        /// <summary>
+        /// Creates a memory mapped array based on existing data.
+        /// </summary>
         public Array(MappedAccessor<T> accessor, int bufferSize, int cacheSize)
         {
             _accessors = new List<MappedAccessor<T>>();
@@ -85,6 +94,16 @@ namespace Reminiscence.Arrays
         /// </summary>
         public Array(MemoryMap map, long length)
             : this(map, length, 1024, 1024, 32)
+        {
+
+        }
+
+        /// <summary>
+        /// Creates a memory mapped array.
+        /// </summary>
+        public Array(MemoryMap map, long length, 
+            ArrayProfile profile)
+            : this(map, length, 1024, profile.BufferSize, profile.CacheSize)
         {
 
         }

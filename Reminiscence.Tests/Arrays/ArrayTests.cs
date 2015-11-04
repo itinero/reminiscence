@@ -88,7 +88,7 @@ namespace Reminiscence.Tests.Arrays
         }
 
         /// <summary>
-        /// A test for the huge array.
+        /// A test for the array comparing it to a regular array.
         /// </summary>
         [Test]
         public void CompareToArrayTest()
@@ -98,6 +98,43 @@ namespace Reminiscence.Tests.Arrays
             using (var map = new MemoryMapStream())
             {
                 using (var array = new Array<uint>(map, 1000))
+                {
+                    var arrayExpected = new uint[1000];
+
+                    for (uint i = 0; i < 1000; i++)
+                    {
+                        if (randomGenerator.Next(4) >= 2)
+                        { // add data.
+                            arrayExpected[i] = i;
+                            array[i] = i;
+                        }
+                        else
+                        {
+                            arrayExpected[i] = int.MaxValue;
+                            array[i] = int.MaxValue;
+                        }
+                        Assert.AreEqual(arrayExpected[i], array[i]);
+                    }
+
+                    for (var i = 0; i < 1000; i++)
+                    {
+                        Assert.AreEqual(arrayExpected[i], array[i]);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// A test for the array comparing it to a regular array without any caching.
+        /// </summary>
+        [Test]
+        public void CompareToArrayWithNoCacheTest()
+        {
+            var randomGenerator = new System.Random(66707770); // make this deterministic 
+
+            using (var map = new MemoryMapStream())
+            {
+                using (var array = new Array<uint>(map, 1000, ArrayProfile.NoCache))
                 {
                     var arrayExpected = new uint[1000];
 

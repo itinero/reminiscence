@@ -23,7 +23,7 @@
 namespace Reminiscence.Arrays
 {
     /// <summary>
-    /// A profile to with settings for a mapped array.
+    /// A profile with settings for a mapped array.
     /// </summary>
     public class ArrayProfile
     {

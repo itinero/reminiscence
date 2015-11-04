@@ -140,6 +140,7 @@ namespace Reminiscence.Arrays
         }
 
         private long _length;
+        private T _temp = default(T);
 
         /// <summary>
         /// Returns the length of this array.
@@ -213,9 +214,21 @@ namespace Reminiscence.Arrays
                     throw new ArgumentOutOfRangeException();
                 }
 
-                // sync buffer.
-                var relativePosition = this.SyncBuffer(idx);
-                return _cachedBuffer.Buffer[relativePosition];
+                if (_bufferSize == 0)
+                { // don't use buffer(s).
+                    var arrayIdx = (long)System.Math.Floor(idx / _accessorSize);
+                    var localIdx = idx % _accessorSize;
+                    var localPosition = localIdx * _accessors[(int)arrayIdx].ElementSize;
+
+                    _accessors[(int)arrayIdx].ReadFrom(localPosition, ref _temp);
+                    return _temp;
+                }
+                else
+                { // use buffer(s).
+                    // sync buffer.
+                    var relativePosition = this.SyncBuffer(idx);
+                    return _cachedBuffer.Buffer[relativePosition];
+                }
             }
             set
             {
@@ -224,10 +237,20 @@ namespace Reminiscence.Arrays
                     throw new ArgumentOutOfRangeException();
                 }
 
-                // sync buffer.
-                var relativePosition = this.SyncBuffer(idx);
-                _cachedBuffer.Buffer[relativePosition] = value;
-                _cachedBuffer.IsDirty = true;
+                if (_bufferSize == 0)
+                { // don't use buffer(s).
+                    var arrayIdx = (long)System.Math.Floor(idx / _accessorSize);
+                    var localIdx = idx % _accessorSize;
+                    var localPosition = localIdx * _accessors[(int)arrayIdx].ElementSize;
+                    
+                    _accessors[(int)arrayIdx].WriteTo(localPosition, ref value);
+                }
+                else
+                { // use buffer(s).
+                    var relativePosition = this.SyncBuffer(idx);
+                    _cachedBuffer.Buffer[relativePosition] = value;
+                    _cachedBuffer.IsDirty = true;
+                }
             }
         }
 

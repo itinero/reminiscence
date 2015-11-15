@@ -168,6 +168,10 @@ namespace Reminiscence.Indexes
         {
             get
             {
+                if(_createAccessor == null)
+                { // only one accessor here, no next position or lost bytes.
+                    return _accessors[0].Capacity;
+                }
                 return _nextPositionInBytes - _bytesLost;
             }
         }
@@ -201,16 +205,23 @@ namespace Reminiscence.Indexes
         /// </summary>
         public long CopyTo(Stream stream)
         {
-            for (var i = 0; i < _accessors.Count; i++)
-            {
-                var bytesAtStart = i * _accessorSize;
-                if (_nextPositionInBytes > bytesAtStart + _accessorSize)
-                { // copy the full accessor.
-                    _accessors[i].CopyTo(stream, 0, (int)(_accessorSize - _accessorBytesLost[i]));
-                }
-                else
-                { // copy part of the accessor.
-                    _accessors[i].CopyTo(stream, 0, (int)(_nextPositionInBytes - bytesAtStart));
+            if (_createAccessor == null)
+            { // just one fixed-size accessor here.
+                _accessors[0].CopyTo(stream);
+            }
+            else
+            { // write and remove the gaps.
+                for (var i = 0; i < _accessors.Count; i++)
+                {
+                    var bytesAtStart = i * _accessorSize;
+                    if (_nextPositionInBytes > bytesAtStart + _accessorSize)
+                    { // copy the full accessor.
+                        _accessors[i].CopyTo(stream, 0, (int)(_accessorSize - _accessorBytesLost[i]));
+                    }
+                    else
+                    { // copy part of the accessor.
+                        _accessors[i].CopyTo(stream, 0, (int)(_nextPositionInBytes - bytesAtStart));
+                    }
                 }
             }
             return this.SizeInBytes;

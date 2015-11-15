@@ -300,5 +300,77 @@ namespace Reminiscence.Tests.Indexes
                 }
             }
         }
+
+        /// <summary>
+        /// Tests create from and copy to in a row.
+        /// </summary>
+        public void TestCreateFromAndCopyTo()
+        {
+            byte[] data = null;
+            var indexDictionary = new System.Collections.Generic.Dictionary<long, string>();
+
+            using (var indexStream = new MemoryStream())
+            {
+                using (var map = new MemoryMapStream())
+                {
+                    // write to index and to a stream.
+                    var index = new Index<string>(map, 32);
+
+                    var element = "Ben";
+                    var id = index.Add(element);
+                    indexDictionary[id] = element;
+                    element = "Abelshausen";
+                    id = index.Add(element);
+                    indexDictionary[id] = element;
+                    element = "is";
+                    id = index.Add(element);
+                    indexDictionary[id] = element;
+                    element = "the";
+                    id = index.Add(element);
+                    indexDictionary[id] = element;
+                    element = "author";
+                    id = index.Add(element);
+                    indexDictionary[id] = element;
+                    element = "of";
+                    id = index.Add(element);
+                    indexDictionary[id] = element;
+                    element = "this";
+                    id = index.Add(element);
+                    indexDictionary[id] = element;
+                    element = "library";
+                    id = index.Add(element);
+                    indexDictionary[id] = element;
+                    element = "and";
+                    id = index.Add(element);
+                    indexDictionary[id] = element;
+                    element = "this";
+                    id = index.Add(element);
+                    indexDictionary[id] = element;
+                    element = "test!";
+                    id = index.Add("test!");
+                    indexDictionary[id] = element;
+
+                    index.CopyToWithSize(indexStream);
+                    data = indexStream.ToArray();
+                }
+            }
+
+            using (var indexStream = new MemoryStream(data))
+            {
+                var index = Index<string>.CreateFromWithSize(indexStream);
+
+                foreach (var refIndexElement in indexDictionary)
+                {
+                    var value = index.Get(refIndexElement.Key);
+                    Assert.AreEqual(refIndexElement.Value, value);
+                }
+
+                using(var outputData = new MemoryStream())
+                {
+                    var size = index.CopyToWithSize(outputData);
+                    Assert.AreEqual(data.Length, size);
+                }
+            }
+        }
     }
 }

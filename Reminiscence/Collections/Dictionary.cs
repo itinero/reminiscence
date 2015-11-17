@@ -23,6 +23,7 @@
 using Reminiscence.Arrays;
 using Reminiscence.IO;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Reminiscence.Collections
@@ -36,16 +37,63 @@ namespace Reminiscence.Collections
         private readonly List<uint> _linkedKeyValueList; // a linked list of (keyId, pairId, nextId).
         private readonly Indexes.Index<TKey> _keys; // an index of all keys.
         private readonly Indexes.Index<TValue> _values; // an index of all values.
+        private readonly Func<TKey, int> _keyGetHashCode; // a function to calculate hashcodes for keys.
+        private readonly Func<TKey, TKey, bool> _keysEqual; // a function to compare keys when hashcodes collide.
 
         /// <summary>
         /// Creates a new dictionary.
         /// </summary>
         public Dictionary(MemoryMap map)
+            : this(map, 1024)
         {
-            _hashedPointers = new Array<uint>(map, 1024);
+
+        }
+
+        /// <summary>
+        /// Creates a new dictionary.
+        /// </summary>
+        public Dictionary(MemoryMap map, int hashes)
+            : this(map, hashes, 
+                (key) => key.GetHashCode(), 
+                (key1, key2) => key1.Equals(key2))
+        {
+
+        }
+
+        /// <summary>
+        /// Creates a new dictionary.
+        /// </summary>
+        public Dictionary(MemoryMap map, IEqualityComparer<TKey> equalityComparer)
+            : this(map, 1024,
+                (key) => equalityComparer.GetHashCode(key),
+                (key1, key2) => equalityComparer.Equals(key1, key2))
+        {
+
+        }
+
+        /// <summary>
+        /// Creates a new dictionary.
+        /// </summary>
+        public Dictionary(MemoryMap map, int hashes, IEqualityComparer<TKey> equalityComparer)
+            : this(map, hashes, 
+                (key) => equalityComparer.GetHashCode(key),
+                (key1, key2) => equalityComparer.Equals(key1, key2))
+        {
+
+        }
+
+        /// <summary>
+        /// Creates a new dictionary.
+        /// </summary>
+        public Dictionary(MemoryMap map, int hashes, Func<TKey, int> keyGetHashCode, Func<TKey, TKey, bool> keyEquals)
+        {
+            _hashedPointers = new Array<uint>(map, hashes);
             _linkedKeyValueList = new List<uint>(map, 4);
             _keys = new Indexes.Index<TKey>(map);
             _values = new Indexes.Index<TValue>(map);
+
+            _keyGetHashCode = keyGetHashCode;
+            _keysEqual = keyEquals;
         }
 
         private int _count = 0;
@@ -66,7 +114,7 @@ namespace Reminiscence.Collections
                 while(true)
                 {
                     var existingKey = _keys.Get(_linkedKeyValueList[(int)pointer - 1]);
-                    if(existingKey.Equals(key))
+                    if(_keysEqual(existingKey, key))
                     {
                         throw new ArgumentException("Key already exists.");
                     }
@@ -103,7 +151,7 @@ namespace Reminiscence.Collections
                 while (true)
                 {
                     var existingKey = _keys.Get(_linkedKeyValueList[(int)pointer - 1]);
-                    if (existingKey.Equals(key))
+                    if (_keysEqual(existingKey, key))
                     {
                         return true;
                     }
@@ -146,7 +194,7 @@ namespace Reminiscence.Collections
                 if (_linkedKeyValueList[(int)pointer + 2 - 1] == 0)
                 { // only one element, check the key.
                     existingKey = _keys.Get(_linkedKeyValueList[(int)pointer - 1]);
-                    if (existingKey.Equals(key))
+                    if (_keysEqual(existingKey, key))
                     { // ok, the one key that was found matches.
                         _hashedPointers[hash] = 0;
                         _count--;
@@ -157,7 +205,7 @@ namespace Reminiscence.Collections
 
                 // check the first element.
                 existingKey = _keys.Get(_linkedKeyValueList[(int)pointer - 1]);
-                if (existingKey.Equals(key))
+                if (_keysEqual(existingKey, key))
                 { // ok, the one key that was found matches.
                     _hashedPointers[hash] = _linkedKeyValueList[(int)pointer + 2 - 1];
                     _count--;
@@ -170,7 +218,7 @@ namespace Reminiscence.Collections
                 while (true)
                 {
                     existingKey = _keys.Get(_linkedKeyValueList[(int)pointer - 1]);
-                    if (existingKey.Equals(key))
+                    if (_keysEqual(existingKey, key))
                     { // remove this entry, point previous entry to the next one.
                         _linkedKeyValueList[(int)previous + 2 - 1] =
                             _linkedKeyValueList[(int)pointer + 2 - 1];
@@ -204,7 +252,7 @@ namespace Reminiscence.Collections
                 while(true) 
                 {
                     var existingKey = _keys.Get(_linkedKeyValueList[(int)pointer - 1]);
-                    if (existingKey.Equals(key))
+                    if (_keysEqual(existingKey, key))
                     {
                         value = _values.Get(_linkedKeyValueList[(int)pointer + 1 - 1]);
                         return true;
@@ -256,7 +304,7 @@ namespace Reminiscence.Collections
                     while (true)
                     {
                         var existingKey = _keys.Get(_linkedKeyValueList[(int)pointer - 1]);
-                        if (existingKey.Equals(key))
+                        if (_keysEqual(existingKey, key))
                         { // replace existing value.
                             _linkedKeyValueList[(int)pointer + 1 - 1] = (uint)_values.Add(value);
                             return;
@@ -465,9 +513,9 @@ namespace Reminiscence.Collections
         /// <summary>
         /// Calculates a hashcode with a fixed size.
         /// </summary>
-        private static int CalculateHash(object obj, int size)
+        private int CalculateHash(TKey obj, int size)
         {
-            var hash = (obj.GetHashCode() % size);
+            var hash = (_keyGetHashCode(obj) % size);
             if(hash > 0)
             {
                 return hash;

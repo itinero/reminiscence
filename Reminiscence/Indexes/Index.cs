@@ -36,6 +36,7 @@ namespace Reminiscence.Indexes
         private readonly System.Collections.Generic.List<MappedAccessor<T>> _accessors;
         private readonly System.Collections.Generic.List<long> _accessorBytesLost;
         private readonly long _accessorSize;
+        private readonly long _accessorSizeElements;
         private readonly MemoryMap _map;
 
         /// <summary>
@@ -48,6 +49,14 @@ namespace Reminiscence.Indexes
             _accessorBytesLost = new System.Collections.Generic.List<long>();
             _accessorBytesLost.Add(0);
             _accessorSize = accessor.Capacity;
+            if(!accessor.ElementSizeFixed)
+            { // use the size in bytes.
+                _accessorSizeElements = _accessorSize;
+            }
+            else
+            { // use the size in elements.
+                _accessorSizeElements = accessor.CapacityElements;
+            }
         }
 
         /// <summary>
@@ -78,6 +87,15 @@ namespace Reminiscence.Indexes
             _accessorSize = accessorSize;
             _accessors = new System.Collections.Generic.List<MappedAccessor<T>>();
             _accessors.Add(_createAccessor(_map, _accessorSize));
+            _accessorSize = _accessors[0].Capacity; // make sure to get the size in bytes, not elements for fixed-size structures.
+            if (!_accessors[0].ElementSizeFixed)
+            { // use the size in bytes.
+                _accessorSizeElements = _accessorSize;
+            }
+            else
+            { // use the size in elements.
+                _accessorSizeElements = _accessors[0].CapacityElements;
+            }
             _accessorBytesLost = new System.Collections.Generic.List<long>();
             _accessorBytesLost.Add(0);
         }
@@ -113,7 +131,7 @@ namespace Reminiscence.Indexes
                 _bytesLost += lastAccessorBytesLost;
 
                 // add/get new accessor.
-                _accessors.Add(_createAccessor(_map, _accessorSize));
+                _accessors.Add(_createAccessor(_map, _accessorSizeElements));
                 _accessorBytesLost.Add(0);
                 accessor = _accessors[_accessors.Count - 1];
 

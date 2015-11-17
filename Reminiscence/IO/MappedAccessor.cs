@@ -128,7 +128,7 @@ namespace Reminiscence.IO
         /// </summary>
         public virtual long WriteTo(long position, ref T structure)
         {
-            if (position < 0 || position > _stream.Length)
+            if (position < 0 || position >= _stream.Length)
             {
                 return -1;
             }

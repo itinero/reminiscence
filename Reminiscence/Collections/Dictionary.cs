@@ -87,7 +87,7 @@ namespace Reminiscence.Collections
         /// </summary>
         public Dictionary(MemoryMap map, int hashes, Func<TKey, int> keyGetHashCode, Func<TKey, TKey, bool> keyEquals)
         {
-            _hashedPointers = new Array<uint>(map, hashes);
+            _hashedPointers = new Array<uint>(map, hashes, ArrayProfile.NoCache);
             _linkedKeyValueList = new List<uint>(map, 4);
             _keys = new Indexes.Index<TKey>(map);
             _values = new Indexes.Index<TValue>(map);

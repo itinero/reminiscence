@@ -57,7 +57,15 @@ namespace Reminiscence.Collections
         /// </summary>
         public List(MemoryMap map, long capacity)
         {
-            _data = ArrayBase<T>.CreateFor(map, capacity);
+            _data = ArrayBase<T>.CreateFor(map, capacity, ArrayProfile.NoCache);
+        }
+
+        /// <summary>
+        /// Creates a new list.
+        /// </summary>
+        public List(MemoryMap map, long capacity, ArrayProfile arrayProfile)
+        {
+            _data = ArrayBase<T>.CreateFor(map, capacity, arrayProfile);
         }
 
         private int _count = 0; // hold the current number of elements.

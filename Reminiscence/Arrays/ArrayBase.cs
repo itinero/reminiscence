@@ -146,5 +146,21 @@ namespace Reminiscence.Arrays
             }
             return new VariableArray<T>(map, size);
         }
+
+        /// <summary>
+        /// Creates a mapped array with the given size.
+        /// </summary>
+        public static ArrayBase<T> CreateFor(MemoryMap map, long size, ArrayProfile profile)
+        {
+            var func = MemoryMap.GetCreateAccessorFuncFor<T>();
+            using (var accessor = func(map, 0))
+            {
+                if (accessor.ElementSizeFixed)
+                { // fixed element size.
+                    return new Array<T>(map, size, profile);
+                }
+            }
+            return new VariableArray<T>(map, size);
+        }
     }
 }

@@ -20,6 +20,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+using System;
+
 namespace Reminiscense.Stresstests
 {
     class Program
@@ -31,6 +33,9 @@ namespace Reminiscense.Stresstests
 
             // test arrays first.
             Arrays.ArrayTests.Test();
+
+            Console.WriteLine("Done!");
+            Console.ReadLine();
         }
     }
 }

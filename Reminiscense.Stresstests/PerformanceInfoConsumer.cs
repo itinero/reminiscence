@@ -99,6 +99,8 @@ namespace Reminiscense.Stresstests
             Process p = Process.GetCurrentProcess();
             _memory = p.PrivateMemorySize64;
             _ticks = DateTime.Now.Ticks;
+            Console.WriteLine(string.Format("Started {0}.",
+                    _name));
         }
 
         /// <summary>
@@ -124,10 +126,10 @@ namespace Reminiscense.Stresstests
         /// </summary>
         public void Report(string message, long i, long max)
         {
-            var currentPercentage = (int)System.Math.Round((i / (double)max) * 100, 0);
+            var currentPercentage = (int)System.Math.Round((i / (double)max) * 10, 0);
             if(previousPercentage != currentPercentage)
             {
-                Console.WriteLine(message, currentPercentage);
+                Console.WriteLine(message, currentPercentage * 10);
                 previousPercentage = currentPercentage;
             }
         }

@@ -30,7 +30,7 @@ namespace Reminiscence.IO.Accessors
     /// </summary>
     internal sealed class MappedAccessorInt32 : MappedAccessor<int>
     {
-        private readonly byte[] _buffer;
+        private byte[] _buffer;
 
         /// <summary>
         /// Creates a new memory mapped file.
@@ -60,6 +60,38 @@ namespace Reminiscence.IO.Accessors
         }
 
         /// <summary>
+        /// Reads elements starting at the given position.
+        /// </summary>
+        public override int ReadArray(long position, int[] array, int offset, int count)
+        {
+            if (_stream.Length <= position)
+            { // cannot seek to this location, past the end of the stream.
+                return -1;
+            }
+
+            // try and read everything.
+            var elementsRead = System.Math.Min((int)((_stream.Length - position) / _elementSize), count);
+            if (elementsRead > 0)
+            { // ok, read.
+                var bufferSize = array.Length * _elementSize;
+                if (_buffer.Length < bufferSize)
+                {
+                    Array.Resize(ref _buffer, bufferSize);
+                }
+                if (_stream.Position != position)
+                {
+                    _stream.Seek(position, SeekOrigin.Begin);
+                }
+                _stream.Read(_buffer, 0, _buffer.Length);
+                for (int i = 0; i < elementsRead; i++)
+                {
+                    array[i + offset] = BitConverter.ToInt32(_buffer, i * _elementSize);
+                }
+            }
+            return elementsRead;
+        }
+
+        /// <summary>
         /// Converts the structure to bytes and writes them to the stream.
         /// </summary>
         public override long WriteTo(Stream stream, long position, ref int structure)
@@ -70,6 +102,23 @@ namespace Reminiscence.IO.Accessors
             }
             stream.Write(BitConverter.GetBytes(structure), 0, _elementSize);
             return _elementSize;
+        }
+
+        /// <summary>
+        /// Writes an array of elements at the given position.
+        /// </summary>
+        public override long WriteArray(long position, int[] array, int offset, int count)
+        {
+            long size = 0;
+            _stream.Seek(position, SeekOrigin.Begin);
+            using (var binaryWriter = new BinaryWriter(_stream))
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    binaryWriter.Write(array[i]);
+                }
+            }
+            return size;
         }
     }
 }

@@ -22,6 +22,7 @@
 
 using Reminiscence.Arrays;
 using Reminiscence.IO;
+using System;
 using System.IO;
 
 namespace Reminiscense.Stresstests.Arrays
@@ -36,15 +37,27 @@ namespace Reminiscense.Stresstests.Arrays
         /// </summary>
         public static void Test()
         {
+            ArrayTests.TestWrite(ArrayProfile.NoCache);
+            ArrayTests.TestRead(ArrayProfile.NoCache);
+            ArrayTests.TestReadRandom(ArrayProfile.NoCache);
+        }
+
+        /// <summary>
+        /// Tests writing to an array.
+        /// </summary>
+        public static void TestWrite(ArrayProfile profile)
+        {
             using (var mapStream = new FileInfo(Global.FileName).Open(
                 FileMode.Create, FileAccess.ReadWrite))
             {
                 using (var map = new MemoryMapStream(mapStream))
                 {
-                    var array = new Array<int>(map, Global.ArrayTestLength, 
-                        ArrayProfile.NoCache);
+                    var array = new Array<int>(map, Global.ArrayTestLength,
+                        profile);
 
-                    var perf = new PerformanceInfoConsumer("Write Array", 1000);
+                    var perf = new PerformanceInfoConsumer(
+                        string.Format("Write Array: {0}", profile.ToString()), 
+                            1000);
                     perf.Start();
                     for (var i = 0; i < array.Length; i++)
                     {
@@ -53,6 +66,99 @@ namespace Reminiscense.Stresstests.Arrays
                         if (Global.Verbose && i % (array.Length / 100) == 0)
                         {
                             perf.Report("Writing... {0}%", i, array.Length - 1);
+                        }
+                    }
+                    perf.Stop();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Tests read from an array.
+        /// </summary>
+        public static void TestRead(ArrayProfile profile)
+        {
+            using (var mapStream = new FileInfo(Global.FileName).Open(
+                FileMode.Open, FileAccess.ReadWrite))
+            {
+                using (var map = new MemoryMapStream(mapStream))
+                {
+                    var array = new Array<int>(map.CreateInt32(mapStream.Length / 4), profile);
+
+                    var perf = new PerformanceInfoConsumer(
+                        string.Format("Read Array: {0}", profile.ToString()),
+                            1000);
+                    perf.Start();
+                    for (var i = 0; i < array.Length; i++)
+                    {
+                        var val = array[i];
+                        if (val != i * 2)
+                        { // oeps, something went wrong here!
+                            throw new System.Exception();
+                        }
+
+                        if (Global.Verbose && i % (array.Length / 100) == 0)
+                        {
+                            perf.Report("Reading... {0}%", i, array.Length - 1);
+                        }
+                    }
+                    perf.Stop();
+
+                    //var size = 1000000;
+                    //perf = new PerformanceInfoConsumer(
+                    //    string.Format("Read Random Array: {0} {1}", size, profile.ToString()),
+                    //        1000);
+                    //perf.Start();
+                    //var rand = new Random();
+                    //for (var i = 0; i < size; i++)
+                    //{
+                    //    var ran = (long)rand.Next((int)array.Length);
+                    //    var val = array[ran];
+                    //    if (val != ran * 2)
+                    //    { // oeps, something went wrong here!
+                    //        throw new System.Exception();
+                    //    }
+
+                    //    if (Global.Verbose && i % (size / 100) == 0)
+                    //    {
+                    //        perf.Report("Reading... {0}%", i, size);
+                    //    }
+                    //}
+                    //perf.Stop();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Tests read from an array.
+        /// </summary>
+        public static void TestReadRandom(ArrayProfile profile)
+        {
+            using (var mapStream = new FileInfo(Global.FileName).Open(
+                FileMode.Open, FileAccess.ReadWrite))
+            {
+                using (var map = new MemoryMapStream(mapStream))
+                {
+                    var array = new Array<int>(map.CreateInt32(mapStream.Length / 4), profile);
+
+                    var size = 1000000;
+                    var perf = new PerformanceInfoConsumer(
+                        string.Format("Read Random Array: {0} {1}", size, profile.ToString()),
+                            1000);
+                    perf.Start();
+                    var rand = new Random();
+                    for (var i = 0; i < size; i++)
+                    {
+                        var ran = (long)rand.Next((int)array.Length);
+                        var val = array[ran];
+                        if (val != ran * 2)
+                        { // oeps, something went wrong here!
+                            throw new System.Exception();
+                        }
+
+                        if (Global.Verbose && i % (size / 100) == 0)
+                        {
+                            perf.Report("Reading... {0}%", i, size);
                         }
                     }
                     perf.Stop();

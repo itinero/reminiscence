@@ -35,7 +35,7 @@ namespace Reminiscense.Stresstests
         /// <summary>
         /// Holds the verbose flag.
         /// </summary>
-        public static bool Verbose = false;
+        public static bool Verbose = true;
 
         /// <summary>
         /// Holds the default array test length.

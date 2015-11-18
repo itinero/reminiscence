@@ -81,5 +81,15 @@ namespace Reminiscence.Arrays
             BufferSize = 1024,
             CacheSize = 64
         };
+
+        /// <summary>
+        /// Returns a string that represents the current object.
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            return string.Format("Array Profile: B={0} C={1}",
+                this.BufferSize, this.CacheSize);
+        }
     }
 }

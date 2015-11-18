@@ -30,7 +30,7 @@ namespace Reminiscence.IO.Accessors
     /// </summary>
     internal sealed class MappedAccessorUInt32 : MappedAccessor<uint>
     {
-        private readonly byte[] _buffer;
+        private byte[] _buffer;
 
         /// <summary>
         /// Creates a new memory mapped file.
@@ -61,6 +61,10 @@ namespace Reminiscence.IO.Accessors
         /// </summary>
         public override long WriteTo(Stream stream, long position, ref uint structure)
         {
+            if (stream.Position != position)
+            {
+                stream.Seek(position, SeekOrigin.Begin);
+            }
             stream.Seek(position, SeekOrigin.Begin);
             stream.Write(BitConverter.GetBytes(structure), 0, _elementSize);
             return _elementSize;

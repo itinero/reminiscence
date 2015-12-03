@@ -63,10 +63,11 @@ namespace Reminiscence.IO.Accessors
         /// </summary>
         public override long WriteTo(Stream stream, long position, ref long structure)
         {
-            if(stream.Position != position)
+            if (stream.Position != position)
             {
                 stream.Seek(position, SeekOrigin.Begin);
             }
+            stream.Seek(position, SeekOrigin.Begin);
             stream.Write(BitConverter.GetBytes(structure), 0, _elementSize);
             return _elementSize;
         }

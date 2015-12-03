@@ -28,14 +28,14 @@ namespace Reminiscence.IO.Accessors
     /// <summary>
     /// A memory mapped accessor that stores uints.
     /// </summary>
-    internal sealed class MappedAccessorInt32 : MappedAccessor<int>
+    public sealed class MappedAccessorInt32 : MappedAccessor<int>
     {
         private readonly byte[] _buffer;
 
         /// <summary>
         /// Creates a new memory mapped file.
         /// </summary>
-        internal MappedAccessorInt32(MemoryMap file, Stream stream)
+        public MappedAccessorInt32(MemoryMap file, Stream stream)
             : base(file, stream, 4)
         {
             _buffer = new byte[_elementSize];

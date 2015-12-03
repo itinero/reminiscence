@@ -28,7 +28,7 @@ namespace Reminiscence.IO.Accessors
     /// <summary>
     /// A memory mapped accessor that stores objects of a variable size in bytes.
     /// </summary>
-    internal sealed class MappedAccessorVariable<T> : MappedAccessor<T>
+    public sealed class MappedAccessorVariable<T> : MappedAccessor<T>
     {
         private readonly MemoryMap.ReadFromDelegate<T> _readFrom; // Holds the read-from delegate.
         private readonly MemoryMap.WriteToDelegate<T> _writeTo; // Holds the write-to delegate.
@@ -36,7 +36,7 @@ namespace Reminiscence.IO.Accessors
         /// <summary>
         /// Creates a new memory mapped file.
         /// </summary>
-        internal MappedAccessorVariable(MemoryMap file, Stream stream, 
+        public MappedAccessorVariable(MemoryMap file, Stream stream, 
             MemoryMap.ReadFromDelegate<T> readFrom, MemoryMap.WriteToDelegate<T> writeTo)
             : base(file, stream, -1)
         {

@@ -28,14 +28,14 @@ namespace Reminiscence.IO.Accessors
     /// <summary>
     /// A memory mapped accessor that stores ulongs.
     /// </summary>
-    internal sealed class MappedAccessorUInt64 : MappedAccessor<ulong>
+    public sealed class MappedAccessorUInt64 : MappedAccessor<ulong>
     {
         private readonly byte[] _buffer;
 
         /// <summary>
         /// Creates a new memory mapped acessor.
         /// </summary>
-        internal MappedAccessorUInt64(MemoryMap file, Stream stream)
+        public MappedAccessorUInt64(MemoryMap file, Stream stream)
             : base(file, stream, 8)
         {
             _buffer = new byte[_elementSize];

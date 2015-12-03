@@ -28,14 +28,14 @@ namespace Reminiscence.IO.Accessors
     /// <summary>
     /// A memory mapped accessor that stores floats.
     /// </summary>
-    internal sealed class MappedAccessorSingle : MappedAccessor<float>
+    public sealed class MappedAccessorSingle : MappedAccessor<float>
     {
         private readonly byte[] _buffer;
 
         /// <summary>
         /// Creates a new memory mapped acessor.
         /// </summary>
-        internal MappedAccessorSingle(MemoryMap file, Stream stream)
+        public MappedAccessorSingle(MemoryMap file, Stream stream)
             : base(file, stream, 4)
         {
             _buffer = new byte[_elementSize];

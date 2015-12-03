@@ -42,7 +42,7 @@ namespace Reminiscence.Arrays
         /// <summary>
         /// The default element size of one accessor.
         /// </summary>
-        public static long DefaultAccessorSize = 1024;
+        public static long DefaultAccessorSize = 1024 * 1024;
         /// <summary>
         /// The default buffer size.
         /// </summary>
@@ -93,7 +93,7 @@ namespace Reminiscence.Arrays
         /// Creates a memory mapped array.
         /// </summary>
         public Array(MemoryMap map, long length)
-            : this(map, length, 1024, 1024, 32)
+            : this(map, length, DefaultAccessorSize, 1024, 32)
         {
 
         }
@@ -103,7 +103,7 @@ namespace Reminiscence.Arrays
         /// </summary>
         public Array(MemoryMap map, long length, 
             ArrayProfile profile)
-            : this(map, length, 1024, profile.BufferSize, profile.CacheSize)
+            : this(map, length, DefaultAccessorSize, profile.BufferSize, profile.CacheSize)
         {
 
         }

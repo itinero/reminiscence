@@ -28,14 +28,14 @@ namespace Reminiscence.IO.Accessors
     /// <summary>
     /// A memory mapped accessor that stores uints.
     /// </summary>
-    internal sealed class MappedAccessorUInt32 : MappedAccessor<uint>
+    public sealed class MappedAccessorUInt32 : MappedAccessor<uint>
     {
         private readonly byte[] _buffer;
 
         /// <summary>
         /// Creates a new memory mapped file.
         /// </summary>
-        internal MappedAccessorUInt32(MemoryMap file, Stream stream)
+        public MappedAccessorUInt32(MemoryMap file, Stream stream)
             : base(file, stream, 4)
         {
             _buffer = new byte[_elementSize];
@@ -61,7 +61,10 @@ namespace Reminiscence.IO.Accessors
         /// </summary>
         public override long WriteTo(Stream stream, long position, ref uint structure)
         {
-            stream.Seek(position, SeekOrigin.Begin);
+            if (stream.Position != position)
+            {
+                stream.Seek(position, SeekOrigin.Begin);
+            }
             stream.Write(BitConverter.GetBytes(structure), 0, _elementSize);
             return _elementSize;
         }

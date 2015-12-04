@@ -329,7 +329,10 @@ namespace Reminiscence.IO
         /// </summary>
         public static void RegisterCreateAccessorFuncs()
         {
-            _accessorDelegates = new Dictionary<Type, object>();
+            if (_accessorDelegates == null)
+            {
+                _accessorDelegates = new Dictionary<Type, object>();
+            }
             _accessorDelegates.Add(typeof(int), new CreateAccessorFunc<int>(
                 (map, size) => map.CreateInt32(size)));
             _accessorDelegates.Add(typeof(uint), new CreateAccessorFunc<uint>(
@@ -355,6 +358,10 @@ namespace Reminiscence.IO
         /// </summary>
         public static void RegisterCreateAccessorFunc<T>(CreateAccessorFunc<T> func)
         {
+            if (_accessorDelegates == null)
+            {
+                _accessorDelegates = new Dictionary<Type, object>();
+            }
             _accessorDelegates[typeof(T)] = func;
         }
 

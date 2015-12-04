@@ -117,7 +117,7 @@ namespace Reminiscence.Collections
         /// <summary>
         /// Gets or sets the element at the given index.
         /// </summary>
-        public T this[int index]
+        public T this[long index]
         {
             get
             {
@@ -130,6 +130,21 @@ namespace Reminiscence.Collections
                 if (index < 0 || index >= _count) { throw new ArgumentOutOfRangeException("index"); }
 
                 _data[index] = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the element at the given index.
+        /// </summary>
+        public T this[int index]
+        {
+            get
+            {
+                return this[(long)index];
+            }
+            set
+            {
+                this[(long)index] = value;
             }
         }
 

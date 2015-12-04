@@ -34,11 +34,14 @@ namespace Reminiscence.Collections
     public class Dictionary<TKey, TValue> : System.Collections.Generic.IDictionary<TKey, TValue>
     {
         private readonly Array<uint> _hashedPointers; // a list of points to keys per hash.
-        private readonly List<uint> _linkedKeyValueList; // a linked list of (keyId, pairId, nextId).
+        private readonly List<uint> _keyValueList; // contains sections of powers of 2.
         private readonly Indexes.Index<TKey> _keys; // an index of all keys.
         private readonly Indexes.Index<TValue> _values; // an index of all values.
         private readonly Func<TKey, int> _keyGetHashCode; // a function to calculate hashcodes for keys.
+        private const int ENTRY_SIZE = 3;
         private readonly Func<TKey, TKey, bool> _keysEqual; // a function to compare keys when hashcodes collide.
+        private readonly bool _verifyUniqueKeys = true; // a flag to disable unique key checking if needed.
+        private readonly int _minimumKeyCount = 4; // minimum amount of space allocated for key-value pairs.
 
         /// <summary>
         /// Creates a new dictionary.
@@ -53,8 +56,8 @@ namespace Reminiscence.Collections
         /// Creates a new dictionary.
         /// </summary>
         public Dictionary(MemoryMap map, int hashes)
-            : this(map, hashes, 
-                (key) => key.GetHashCode(), 
+            : this(map, hashes,
+                (key) => key.GetHashCode(),
                 (key1, key2) => key1.Equals(key2))
         {
 
@@ -75,7 +78,7 @@ namespace Reminiscence.Collections
         /// Creates a new dictionary.
         /// </summary>
         public Dictionary(MemoryMap map, int hashes, IEqualityComparer<TKey> equalityComparer)
-            : this(map, hashes, 
+            : this(map, hashes,
                 (key) => equalityComparer.GetHashCode(key),
                 (key1, key2) => equalityComparer.Equals(key1, key2))
         {
@@ -88,12 +91,14 @@ namespace Reminiscence.Collections
         public Dictionary(MemoryMap map, int hashes, Func<TKey, int> keyGetHashCode, Func<TKey, TKey, bool> keyEquals)
         {
             _hashedPointers = new Array<uint>(map, hashes, ArrayProfile.NoCache);
-            _linkedKeyValueList = new List<uint>(map, 4);
+            _keyValueList = new List<uint>(map, 4);
             _keys = new Indexes.Index<TKey>(map);
             _values = new Indexes.Index<TValue>(map);
 
             _keyGetHashCode = keyGetHashCode;
             _keysEqual = keyEquals;
+
+            _keyValueList.Add(0); // zero cannot be used.
         }
 
         private int _count = 0;
@@ -105,32 +110,78 @@ namespace Reminiscence.Collections
         {
             var hash = CalculateHash(key, (int)_hashedPointers.Length);
             var pointer = _hashedPointers[hash];
-            if(pointer == 0)
+            if (pointer == 0)
             { // ok, there is no data yet here.
-                _hashedPointers[hash] = (uint)_linkedKeyValueList.Count + 1;
+                _hashedPointers[hash] = (uint)_keyValueList.Count;
+                _keyValueList.Add(1);
+                _keyValueList.Add((uint)_keys.Add(key));
+                _keyValueList.Add(this.CalculateFullHash(key));
+                _keyValueList.Add((uint)_values.Add(value));
+                for (var i = 0; i < _minimumKeyCount - 1; i++)
+                {
+                    _keyValueList.Add(0);
+                    _keyValueList.Add(0);
+                    _keyValueList.Add(0);
+                }
             }
             else
             { // ok, add at the end of the linked-list.
-                while(true)
-                {
-                    var existingKey = _keys.Get(_linkedKeyValueList[(int)pointer - 1]);
-                    if(_keysEqual(existingKey, key))
+                var keyHash = this.CalculateFullHash(key);
+                var count = _keyValueList[(int)pointer];
+                if (count > (_minimumKeyCount / 2) &&
+                  (count & (count - 1)) == 0)
+                { // a power of two, copy to the end and check duplicate keys.
+                    _hashedPointers[hash] = (uint)_keyValueList.Count;
+                    _keyValueList.Add(count + 1);
+                    for (var p = pointer + 1; p < pointer + (count * ENTRY_SIZE) + 1; p += ENTRY_SIZE)
                     {
-                        throw new ArgumentException("Key already exists.");
+                        if (_verifyUniqueKeys)
+                        {
+                            if (_keyValueList[p + 1] == keyHash)
+                            { // only check if the key full hashes match.
+                                var existingKey = _keys.Get(_keyValueList[p + 0]);
+                                if (_keysEqual(existingKey, key))
+                                {
+                                    throw new ArgumentException("Key already exists.");
+                                }
+                            }
+                        }
+                        _keyValueList.Add(_keyValueList[p]);
+                        _keyValueList.Add(_keyValueList[p + 1]);
+                        _keyValueList.Add(_keyValueList[p + 2]);
                     }
-                    if(_linkedKeyValueList[(int)pointer + 2 - 1] == 0)
+                    _keyValueList.Add((uint)_keys.Add(key));
+                    _keyValueList.Add(this.CalculateFullHash(key));
+                    _keyValueList.Add((uint)_values.Add(value));
+                    for (var p = 0; p < count - 1; p++)
                     {
-                        break;
+                        _keyValueList.Add(0);
+                        _keyValueList.Add(0);
+                        _keyValueList.Add(0);
                     }
-                    pointer = _linkedKeyValueList[(int)pointer + 2 - 1];
                 }
-                _linkedKeyValueList[(int)pointer + 2 - 1] = (uint)_linkedKeyValueList.Count + 1;
+                else
+                {
+                    if (_verifyUniqueKeys)
+                    {
+                        for (var p = pointer + 1; p < pointer + (count * ENTRY_SIZE) + 1; p += ENTRY_SIZE)
+                        {
+                            if (_keyValueList[p + 1] == keyHash)
+                            { // only check if the key full hashes match.
+                                var existingKey = _keys.Get(_keyValueList[p + 0]);
+                                if (_keysEqual(existingKey, key))
+                                {
+                                    throw new ArgumentException("Key already exists.");
+                                }
+                            }
+                        }
+                    }
+                    _keyValueList[pointer] = _keyValueList[pointer] + 1;
+                    _keyValueList[pointer + 1 + (count * ENTRY_SIZE) + 0] = (uint)_keys.Add(key);
+                    _keyValueList[pointer + 1 + (count * ENTRY_SIZE) + 1] = this.CalculateFullHash(key);
+                    _keyValueList[pointer + 1 + (count * ENTRY_SIZE) + 2] = (uint)_values.Add(value);
+                }
             }
-
-            // set actual data.
-            _linkedKeyValueList.Add((uint)_keys.Add(key));
-            _linkedKeyValueList.Add((uint)_values.Add(value));
-            _linkedKeyValueList.Add((uint)0);
 
             _count++;
         }
@@ -147,19 +198,19 @@ namespace Reminiscence.Collections
                 return false;
             }
             else
-            { // ok, search the linked-list.
-                while (true)
+            { // ok, search the keys.
+                var keyHash = this.CalculateFullHash(key);
+                var count = _keyValueList[pointer];
+                for (var p = pointer + 1; p < pointer + (count * ENTRY_SIZE) + 1; p += ENTRY_SIZE)
                 {
-                    var existingKey = _keys.Get(_linkedKeyValueList[(int)pointer - 1]);
-                    if (_keysEqual(existingKey, key))
-                    {
-                        return true;
+                    if (_keyValueList[p + 1] == keyHash)
+                    { // only check keys if also their full hashes match.
+                        var existingKey = _keys.Get(_keyValueList[p + 0]);
+                        if (_keysEqual(existingKey, key))
+                        {
+                            return true;
+                        }
                     }
-                    if (_linkedKeyValueList[(int)pointer + 2 - 1] == 0)
-                    {
-                        break;
-                    }
-                    pointer = _linkedKeyValueList[(int)pointer + 2 - 1];
                 }
                 return false;
             }
@@ -189,49 +240,29 @@ namespace Reminiscence.Collections
                 return false;
             }
             else
-            { // ok, search in the linked list.
-                TKey existingKey;
-                if (_linkedKeyValueList[(int)pointer + 2 - 1] == 0)
-                { // only one element, check the key.
-                    existingKey = _keys.Get(_linkedKeyValueList[(int)pointer - 1]);
-                    if (_keysEqual(existingKey, key))
-                    { // ok, the one key that was found matches.
-                        _hashedPointers[hash] = 0;
-                        _count--;
-                        return true;
-                    }
-                    return false;
-                }
-
-                // check the first element.
-                existingKey = _keys.Get(_linkedKeyValueList[(int)pointer - 1]);
-                if (_keysEqual(existingKey, key))
-                { // ok, the one key that was found matches.
-                    _hashedPointers[hash] = _linkedKeyValueList[(int)pointer + 2 - 1];
-                    _count--;
-                    return true;
-                }
-
-                // check the rest of the list.
-                var previous = pointer;
-                pointer = _linkedKeyValueList[(int)pointer + 2 - 1];
-                while (true)
+            { // ok, search for the given key.
+                var count = _keyValueList[pointer];
+                var keyHash = this.CalculateFullHash(key);
+                for (var p = pointer + 1; p < pointer + (count * ENTRY_SIZE) + 1; p += ENTRY_SIZE)
                 {
-                    existingKey = _keys.Get(_linkedKeyValueList[(int)pointer - 1]);
-                    if (_keysEqual(existingKey, key))
-                    { // remove this entry, point previous entry to the next one.
-                        _linkedKeyValueList[(int)previous + 2 - 1] =
-                            _linkedKeyValueList[(int)pointer + 2 - 1];
-                        _count--;
-                        return true;
-                    }
-                    previous = pointer;
-                    pointer = _linkedKeyValueList[(int)pointer + 2 - 1];
-                    if(pointer == 0)
-                    { // no more data to search for.
-                        return false;
+                    if (_keyValueList[p + 1] == keyHash)
+                    { // only check keys if also their full hashes match.
+                        var existingKey = _keys.Get(_keyValueList[p + 0]);
+                        if (_keysEqual(existingKey, key))
+                        { // copy down all others.
+                            for (; p < pointer + (count * ENTRY_SIZE) + 1; p += ENTRY_SIZE)
+                            {
+                                _keyValueList[p + 0] = _keyValueList[p + 3];
+                                _keyValueList[p + 1] = _keyValueList[p + 4];
+                                _keyValueList[p + 2] = _keyValueList[p + 5];
+                            }
+                            _keyValueList[pointer] = _keyValueList[pointer] - 1;
+                            _count--;
+                            return true;
+                        }
                     }
                 }
+                return false;
             }
         }
 
@@ -248,19 +279,19 @@ namespace Reminiscence.Collections
                 return false;
             }
             else
-            { // ok, search in the linked-list.
-                while(true) 
+            { // ok, search for the key.
+                var keyHash = this.CalculateFullHash(key);
+                var count = _keyValueList[pointer];
+                for (var p = pointer + 1; p < pointer + (count * ENTRY_SIZE) + 1; p += ENTRY_SIZE)
                 {
-                    var existingKey = _keys.Get(_linkedKeyValueList[(int)pointer - 1]);
-                    if (_keysEqual(existingKey, key))
-                    {
-                        value = _values.Get(_linkedKeyValueList[(int)pointer + 1 - 1]);
-                        return true;
-                    }
-                    pointer = _linkedKeyValueList[(int)pointer + 2 - 1];
-                    if(pointer == 0)
-                    { // no more data.
-                        break;
+                    if (_keyValueList[p + 1] == keyHash)
+                    { // only check keys if also their full hashes match.
+                        var existingKey = _keys.Get(_keyValueList[p + 0]);
+                        if (_keysEqual(existingKey, key))
+                        { // key found!
+                            value = _values.Get(_keyValueList[p + 2]);
+                            return true;
+                        }
                     }
                 }
                 value = default(TValue);
@@ -273,8 +304,11 @@ namespace Reminiscence.Collections
         /// </summary>
         public System.Collections.Generic.ICollection<TValue> Values
         {
-            get { return new System.Collections.Generic.List<TValue>(
-                this.Select(x => x.Value)); }
+            get
+            {
+                return new System.Collections.Generic.List<TValue>(
+                    this.Select(x => x.Value));
+            }
         }
 
         /// <summary>
@@ -285,7 +319,7 @@ namespace Reminiscence.Collections
             get
             {
                 TValue result;
-                if(!this.TryGetValue(key, out result))
+                if (!this.TryGetValue(key, out result))
                 {
                     throw new System.Collections.Generic.KeyNotFoundException();
                 }
@@ -297,31 +331,78 @@ namespace Reminiscence.Collections
                 var pointer = _hashedPointers[hash];
                 if (pointer == 0)
                 { // ok, there is no data yet here.
-                    _hashedPointers[hash] = (uint)_linkedKeyValueList.Count + 1;
+                    _hashedPointers[hash] = (uint)_keyValueList.Count;
+                    _keyValueList.Add(1);
+                    _keyValueList.Add((uint)_keys.Add(key));
+                    _keyValueList.Add(this.CalculateFullHash(key));
+                    _keyValueList.Add((uint)_values.Add(value));
+                    for (var i = 0; i < _minimumKeyCount - 1; i++)
+                    {
+                        _keyValueList.Add(0);
+                        _keyValueList.Add(0);
+                        _keyValueList.Add(0);
+                    }
                 }
                 else
                 { // ok, add at the end of the linked-list.
-                    while (true)
-                    {
-                        var existingKey = _keys.Get(_linkedKeyValueList[(int)pointer - 1]);
-                        if (_keysEqual(existingKey, key))
-                        { // replace existing value.
-                            _linkedKeyValueList[(int)pointer + 1 - 1] = (uint)_values.Add(value);
-                            return;
-                        }
-                        if (_linkedKeyValueList[(int)pointer + 2 - 1] == 0)
+                    var keyHash = this.CalculateFullHash(key);
+                    var count = _keyValueList[(int)pointer];
+                    if (count > (_minimumKeyCount / 2) &&
+                      (count & (count - 1)) == 0)
+                    { // a power of two, copy to the end and check duplicate keys.
+                        _hashedPointers[hash] = (uint)_keyValueList.Count;
+                        _keyValueList.Add(count + 1);
+                        for (var p = pointer + 1; p < pointer + (count * ENTRY_SIZE) + 1; p += ENTRY_SIZE)
                         {
-                            break;
+                            if (_verifyUniqueKeys)
+                            {
+                                if (_keyValueList[p + 1] == keyHash)
+                                { // only check if the key full hashes match.
+                                    var existingKey = _keys.Get(_keyValueList[p + 0]);
+                                    if (_keysEqual(existingKey, key))
+                                    {
+                                        _keyValueList[p + 2] = (uint)_values.Add(value);
+                                        return;
+                                    }
+                                }
+                            }
+                            _keyValueList.Add(_keyValueList[p]);
+                            _keyValueList.Add(_keyValueList[p + 1]);
+                            _keyValueList.Add(_keyValueList[p + 2]);
                         }
-                        pointer = _linkedKeyValueList[(int)pointer + 2 - 1];
+                        _keyValueList.Add((uint)_keys.Add(key));
+                        _keyValueList.Add(this.CalculateFullHash(key));
+                        _keyValueList.Add((uint)_values.Add(value));
+                        for (var p = 0; p < count - 1; p++)
+                        {
+                            _keyValueList.Add(0);
+                            _keyValueList.Add(0);
+                            _keyValueList.Add(0);
+                        }
                     }
-                    _linkedKeyValueList[(int)pointer + 2 - 1] = (uint)_linkedKeyValueList.Count + 1;
+                    else
+                    {
+                        if (_verifyUniqueKeys)
+                        {
+                            for (var p = pointer + 1; p < pointer + (count * ENTRY_SIZE) + 1; p += ENTRY_SIZE)
+                            {
+                                if (_keyValueList[p + 1] == keyHash)
+                                { // only check if the key full hashes match.
+                                    var existingKey = _keys.Get(_keyValueList[p + 0]);
+                                    if (_keysEqual(existingKey, key))
+                                    {
+                                        _keyValueList[p + 2] = (uint)_values.Add(value);
+                                        return;
+                                    }
+                                }
+                            }
+                        }
+                        _keyValueList[pointer] = _keyValueList[pointer] + 1;
+                        _keyValueList[pointer + 1 + (count * ENTRY_SIZE) + 0] = (uint)_keys.Add(key);
+                        _keyValueList[pointer + 1 + (count * ENTRY_SIZE) + 1] = this.CalculateFullHash(key);
+                        _keyValueList[pointer + 1 + (count * ENTRY_SIZE) + 2] = (uint)_values.Add(value);
+                    }
                 }
-
-                // set actual data.
-                _linkedKeyValueList.Add((uint)_keys.Add(key));
-                _linkedKeyValueList.Add((uint)_values.Add(value));
-                _linkedKeyValueList.Add((uint)0);
 
                 _count++;
             }
@@ -344,7 +425,7 @@ namespace Reminiscence.Collections
             {
                 _hashedPointers[i] = 0;
             }
-                _count = 0;
+            _count = 0;
         }
 
         /// <summary>
@@ -353,7 +434,7 @@ namespace Reminiscence.Collections
         public bool Contains(System.Collections.Generic.KeyValuePair<TKey, TValue> item)
         {
             TValue value;
-            if(!this.TryGetValue(item.Key, out value))
+            if (!this.TryGetValue(item.Key, out value))
             {
                 return false;
             }
@@ -366,7 +447,7 @@ namespace Reminiscence.Collections
         public void CopyTo(System.Collections.Generic.KeyValuePair<TKey, TValue>[] array, int arrayIndex)
         {
             int i = 0;
-            foreach(var element in this)
+            foreach (var element in this)
             {
                 array[arrayIndex + i] = element;
                 i++;
@@ -394,7 +475,7 @@ namespace Reminiscence.Collections
         /// </summary>
         public bool Remove(System.Collections.Generic.KeyValuePair<TKey, TValue> item)
         {
-            if(this.Contains(item))
+            if (this.Contains(item))
             {
                 return this.Remove(item.Key);
             }
@@ -419,6 +500,8 @@ namespace Reminiscence.Collections
             private Dictionary<TKey, TValue> _dic;
             private int _hash = -1;
             private uint _pointer = 0;
+            private int _count = -1;
+            private uint _i = 0;
 
             /// <summary>
             /// Creates a new enumerator.
@@ -436,12 +519,13 @@ namespace Reminiscence.Collections
             {
                 get
                 {
-                    if(_hash == 0)
+                    if (_hash == 0)
                     {
                         throw new InvalidOperationException("Enumerator not initialized.");
                     }
-                    return new System.Collections.Generic.KeyValuePair<TKey, TValue>(_dic._keys.Get(_dic._linkedKeyValueList[(int)_pointer]),
-                        _dic._values.Get(_dic._linkedKeyValueList[(int)_pointer + 1]));
+                    return new System.Collections.Generic.KeyValuePair<TKey, TValue>(
+                        _dic._keys.Get(_dic._keyValueList[_pointer + 1 + (_i * ENTRY_SIZE) + 0]),
+                        _dic._values.Get(_dic._keyValueList[_pointer + 1 + (_i * ENTRY_SIZE) + 2]));
                 }
             }
 
@@ -455,40 +539,45 @@ namespace Reminiscence.Collections
 
             public bool MoveNext()
             {
-                if(_hash < 0)
-                { 
+                if (_hash < 0)
+                {
                     _hash = -1;
                     return this.MoveNextHash();
                 }
                 else
                 { // move to the next linked-list entry.
-                    _pointer = _dic._linkedKeyValueList[(int)_pointer + 2];
-                    if(_pointer == 0)
+                    _i++;
+                    if (_i == _count)
                     { // move to the next hash.
                         return this.MoveNextHash();
                     }
-                    _pointer--;
                     return true;
                 }
             }
 
             /// <summary>
-            /// Moves to the next hash.
+            /// Moves to the next hash that has data.
             /// </summary>
             private bool MoveNextHash()
             {
-                _hash++;
-                while (_hash < _dic._hashedPointers.Length &&
-                    _dic._hashedPointers[_hash] == 0)
+                _count = 0;
+                while (_count == 0)
                 {
                     _hash++;
+                    while (_hash < _dic._hashedPointers.Length &&
+                        _dic._hashedPointers[_hash] == 0)
+                    {
+                        _hash++;
+                    }
+                    if (_hash == _dic._hashedPointers.Length)
+                    { // empty dictionary or the end was reached.
+                        return false;
+                    }
+                    // a pointer should have been found.
+                    _pointer = _dic._hashedPointers[_hash];
+                    _count = (int)_dic._keyValueList[_pointer];
                 }
-                if (_hash == _dic._hashedPointers.Length)
-                { // empty dictionary or the end was reached.
-                    return false;
-                }
-                // a point should have been found.
-                _pointer = _dic._hashedPointers[_hash] - 1;
+                _i = 0;
                 return true;
             }
 
@@ -498,7 +587,9 @@ namespace Reminiscence.Collections
             public void Reset()
             {
                 _hash = -1;
+                _i = 0;
                 _pointer = 0;
+                _count = -1;
             }
 
             /// <summary>
@@ -516,11 +607,20 @@ namespace Reminiscence.Collections
         private int CalculateHash(TKey obj, int size)
         {
             var hash = (_keyGetHashCode(obj) % size);
-            if(hash > 0)
+            if (hash > 0)
             {
                 return hash;
             }
             return -hash;
+        }
+
+        /// <summary>
+        /// Calculates a complete hashcode and converts this to a Uint32.
+        /// </summary>
+        public uint CalculateFullHash(TKey obj)
+        {
+            return BitConverter.ToUInt32(
+                BitConverter.GetBytes(_keyGetHashCode(obj)), 0);
         }
     }
 }

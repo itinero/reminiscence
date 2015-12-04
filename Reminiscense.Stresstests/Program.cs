@@ -31,8 +31,11 @@ namespace Reminiscense.Stresstests
             // sets the filename.
             Global.FileName = args[0];
 
+            // test dictionaries first.
+            Collections.DictionaryTests.TestRandom();
+
             // test arrays first.
-            Arrays.ArrayTests.Test();
+            //Arrays.ArrayTests.Test();
 
             Console.WriteLine("Done!");
             Console.ReadLine();

@@ -221,8 +221,6 @@ namespace Reminiscence.Tests.Collections
         [Test]
         public void TestItemGetOrSet()
         {
-            MockObject.RegisterAccessorCreateFunc();
-
             using (var map = new MemoryMapStream())
             {
                 var dictionary = new Dictionary<string, string>(map);
@@ -235,6 +233,8 @@ namespace Reminiscence.Tests.Collections
                     });
                 Assert.AreEqual("Abelshausen", dictionary["Ben"]);
             }
+
+            MockObject.RegisterAccessorCreateFunc();
 
             using (var map = new MemoryMapStream())
             {
@@ -278,7 +278,6 @@ namespace Reminiscence.Tests.Collections
         [Test]
         public void TestEnumerators()
         {
-            MockObject.RegisterAccessorCreateFunc();
 
             using (var map = new MemoryMapStream())
             {
@@ -292,6 +291,8 @@ namespace Reminiscence.Tests.Collections
                 Assert.AreEqual(1, refDictionary.Count);
                 Assert.AreEqual("Abelshausen", dictionary["Ben"]);
             }
+
+            MockObject.RegisterAccessorCreateFunc();
 
             using (var map = new MemoryMapStream())
             {

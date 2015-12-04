@@ -42,6 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Arrays\ArrayTests.cs" />
+    <Compile Include="Collections\DictionaryTests.cs" />
     <Compile Include="Global.cs" />
     <Compile Include="PerformanceInfoConsumer.cs" />
     <Compile Include="Program.cs" />

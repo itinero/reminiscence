@@ -81,7 +81,7 @@ namespace Reminiscence.Tests.Collections
 
                 Assert.AreEqual(1025, list.Count);
                 Assert.AreEqual(100, list[0]);
-                Assert.AreEqual(2048, list.Capacity);
+                Assert.AreEqual(1049600, list.Capacity);
             }
         }
 
@@ -112,7 +112,7 @@ namespace Reminiscence.Tests.Collections
                     list.Add(i + 101);
                 }
                 list.Clear();
-                Assert.AreEqual(2048, list.Capacity);
+                Assert.AreEqual(1049600, list.Capacity);
             }
         }
 

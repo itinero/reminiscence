@@ -91,9 +91,9 @@ namespace Reminiscence.Collections
         public Dictionary(MemoryMap map, int hashes, Func<TKey, int> keyGetHashCode, Func<TKey, TKey, bool> keyEquals)
         {
             _hashedPointers = new Array<uint>(map, hashes, ArrayProfile.NoCache);
-            _keyValueList = new List<uint>(map, 4, ArrayProfile.NoCache);
-            _keys = new Indexes.Index<TKey>(map);
-            _values = new Indexes.Index<TValue>(map);
+            _keyValueList = new List<uint>(map, 1024);
+            _keys = new Indexes.Index<TKey>(map, 1024 * 1024 * 4);
+            _values = new Indexes.Index<TValue>(map, 1024 * 1024 * 4);
 
             _keyGetHashCode = keyGetHashCode;
             _keysEqual = keyEquals;
@@ -117,12 +117,7 @@ namespace Reminiscence.Collections
                 _keyValueList.Add((uint)_keys.Add(key));
                 _keyValueList.Add(this.CalculateFullHash(key));
                 _keyValueList.Add((uint)_values.Add(value));
-                for (var i = 0; i < _minimumKeyCount - 1; i++)
-                {
-                    _keyValueList.Add(0);
-                    _keyValueList.Add(0);
-                    _keyValueList.Add(0);
-                }
+                _keyValueList.AddDontCare((_minimumKeyCount - 1) * 3);
             }
             else
             { // ok, add at the end of the linked-list.
@@ -153,12 +148,7 @@ namespace Reminiscence.Collections
                     _keyValueList.Add((uint)_keys.Add(key));
                     _keyValueList.Add(this.CalculateFullHash(key));
                     _keyValueList.Add((uint)_values.Add(value));
-                    for (var p = 0; p < count - 1; p++)
-                    {
-                        _keyValueList.Add(0);
-                        _keyValueList.Add(0);
-                        _keyValueList.Add(0);
-                    }
+                    _keyValueList.AddDontCare((int)(count - 1) * 3);
                 }
                 else
                 {
@@ -336,12 +326,7 @@ namespace Reminiscence.Collections
                     _keyValueList.Add((uint)_keys.Add(key));
                     _keyValueList.Add(this.CalculateFullHash(key));
                     _keyValueList.Add((uint)_values.Add(value));
-                    for (var i = 0; i < _minimumKeyCount - 1; i++)
-                    {
-                        _keyValueList.Add(0);
-                        _keyValueList.Add(0);
-                        _keyValueList.Add(0);
-                    }
+                    _keyValueList.AddDontCare((_minimumKeyCount - 1) * 3);
                 }
                 else
                 { // ok, add at the end of the linked-list.
@@ -373,12 +358,7 @@ namespace Reminiscence.Collections
                         _keyValueList.Add((uint)_keys.Add(key));
                         _keyValueList.Add(this.CalculateFullHash(key));
                         _keyValueList.Add((uint)_values.Add(value));
-                        for (var p = 0; p < count - 1; p++)
-                        {
-                            _keyValueList.Add(0);
-                            _keyValueList.Add(0);
-                            _keyValueList.Add(0);
-                        }
+                        _keyValueList.AddDontCare((int)(count - 1) * 3);
                     }
                     else
                     {

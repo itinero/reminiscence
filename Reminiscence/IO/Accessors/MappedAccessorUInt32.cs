@@ -46,7 +46,10 @@ namespace Reminiscence.IO.Accessors
         /// </summary>
         public override long ReadFrom(Stream stream, long position, ref uint structure)
         {
-            stream.Seek(position, SeekOrigin.Begin);
+            if(stream.Position != position)
+            {
+                stream.Seek(position, SeekOrigin.Begin);
+            }
             if(stream.Read(_buffer, 0, _elementSize) != _elementSize)
             {
                 structure = 0;
@@ -65,7 +68,6 @@ namespace Reminiscence.IO.Accessors
             {
                 stream.Seek(position, SeekOrigin.Begin);
             }
-            stream.Seek(position, SeekOrigin.Begin);
             stream.Write(BitConverter.GetBytes(structure), 0, _elementSize);
             return _elementSize;
         }

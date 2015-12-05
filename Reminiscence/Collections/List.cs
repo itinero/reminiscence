@@ -160,6 +160,14 @@ namespace Reminiscence.Collections
         }
 
         /// <summary>
+        /// Adds a number of don't care elements.
+        /// </summary>
+        public void AddDontCare(int count)
+        {
+            _count += count;
+        }
+
+        /// <summary>
         /// Clears all data.
         /// </summary>
         public void Clear()
@@ -302,7 +310,7 @@ namespace Reminiscence.Collections
 
         #region Data management
 
-        private int _block = 1024;
+        private int _block = 1024 * 1024;
 
         /// <summary>
         /// Resizes the internal array for a future count.
@@ -317,7 +325,7 @@ namespace Reminiscence.Collections
             if (current != _data.Length)
             { // resize if needed.
                 _data.Resize(current);
-            }
+            } 
         }
 
         #endregion

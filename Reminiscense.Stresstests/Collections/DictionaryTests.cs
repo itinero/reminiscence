@@ -46,7 +46,7 @@ namespace Reminiscense.Stresstests.Collections
                     var random = new Random();
                     var dictionary = new Dictionary<int, long>(map);
 
-                    var count = 65536;
+                    var count = 65536 * 2;
                     var perf = new PerformanceInfoConsumer(
                         string.Format("Write Dictionary Random"), 1000);
                     perf.Start();

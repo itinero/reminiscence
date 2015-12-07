@@ -33,7 +33,7 @@ namespace Reminiscence.Collections
     /// </summary>
     public class Dictionary<TKey, TValue> : System.Collections.Generic.IDictionary<TKey, TValue>
     {
-        private readonly Array<uint> _hashedPointers; // a list of points to keys per hash.
+        private readonly ArrayBase<uint> _hashedPointers; // a list of points to keys per hash.
         private readonly List<uint> _keyValueList; // contains sections of powers of 2.
         private readonly Indexes.Index<TKey> _keys; // an index of all keys.
         private readonly Indexes.Index<TValue> _values; // an index of all values.
@@ -42,6 +42,65 @@ namespace Reminiscence.Collections
         private readonly Func<TKey, TKey, bool> _keysEqual; // a function to compare keys when hashcodes collide.
         private readonly bool _verifyUniqueKeys = true; // a flag to disable unique key checking if needed.
         private readonly int _minimumKeyCount = 4; // minimum amount of space allocated for key-value pairs.
+
+        /// <summary>
+        /// Creates a new dictionary.
+        /// </summary>
+        public Dictionary()
+            : this(1024)
+        {
+
+        }
+
+        /// <summary>
+        /// Creates a new dictionary.
+        /// </summary>
+        public Dictionary(int hashes)
+            : this(hashes,
+                (key) => key.GetHashCode(),
+                (key1, key2) => key1.Equals(key2))
+        {
+
+        }
+
+        /// <summary>
+        /// Creates a new dictionary.
+        /// </summary>
+        public Dictionary(IEqualityComparer<TKey> equalityComparer)
+            : this(1024,
+                (key) => equalityComparer.GetHashCode(key),
+                (key1, key2) => equalityComparer.Equals(key1, key2))
+        {
+
+        }
+
+        /// <summary>
+        /// Creates a new dictionary.
+        /// </summary>
+        public Dictionary(int hashes, IEqualityComparer<TKey> equalityComparer)
+            : this(hashes,
+                (key) => equalityComparer.GetHashCode(key),
+                (key1, key2) => equalityComparer.Equals(key1, key2))
+        {
+
+        }
+
+        /// <summary>
+        /// Creates a new dictionary.
+        /// </summary>
+        public Dictionary(int hashes, Func<TKey, int> keyGetHashCode, Func<TKey, TKey, bool> keyEquals)
+        {
+            var map = new MemoryMapStream(new System.IO.MemoryStream());
+            _hashedPointers = new MemoryArray<uint>(hashes);
+            _keyValueList = new List<uint>();
+            _keys = new Indexes.Index<TKey>(map, 1024 * 1024 * 4);
+            _values = new Indexes.Index<TValue>(map, 1024 * 1024 * 4);
+
+            _keyGetHashCode = keyGetHashCode;
+            _keysEqual = keyEquals;
+
+            _keyValueList.Add(0); // zero cannot be used.
+        }
 
         /// <summary>
         /// Creates a new dictionary.

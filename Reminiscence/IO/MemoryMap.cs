@@ -322,35 +322,39 @@ namespace Reminiscence.IO
         /// <summary>
         /// Holds accessor creating functions.
         /// </summary>
-        private static System.Collections.Generic.Dictionary<Type, object> _accessorDelegates;
+        private static System.Collections.Generic.Dictionary<Type, object> _accessorDelegates = 
+            new Dictionary<Type, object>();
 
         /// <summary>
         /// Registers default accessors.
         /// </summary>
         public static void RegisterCreateAccessorFuncs()
         {
-            if (_accessorDelegates == null)
+            lock (_accessorDelegates)
             {
-                _accessorDelegates = new Dictionary<Type, object>();
+                if (_accessorDelegates == null)
+                {
+                    _accessorDelegates = new Dictionary<Type, object>();
+                }
+                _accessorDelegates.Add(typeof(int), new CreateAccessorFunc<int>(
+                    (map, size) => map.CreateInt32(size)));
+                _accessorDelegates.Add(typeof(uint), new CreateAccessorFunc<uint>(
+                    (map, size) => map.CreateUInt32(size)));
+                _accessorDelegates.Add(typeof(long), new CreateAccessorFunc<long>(
+                    (map, size) => map.CreateInt64(size)));
+                _accessorDelegates.Add(typeof(ulong), new CreateAccessorFunc<ulong>(
+                    (map, size) => map.CreateUInt64(size)));
+                _accessorDelegates.Add(typeof(float), new CreateAccessorFunc<float>(
+                    (map, size) => map.CreateSingle(size)));
+                _accessorDelegates.Add(typeof(double), new CreateAccessorFunc<double>(
+                    (map, size) => map.CreateDouble(size)));
+                _accessorDelegates.Add(typeof(string), new CreateAccessorFunc<string>(
+                    (map, size) => map.CreateVariableString(size)));
+                _accessorDelegates.Add(typeof(uint[]), new CreateAccessorFunc<uint[]>(
+                    (map, size) => map.CreateVariableUInt32Array(size)));
+                _accessorDelegates.Add(typeof(int[]), new CreateAccessorFunc<int[]>(
+                    (map, size) => map.CreateVariableInt32Array(size)));
             }
-            _accessorDelegates.Add(typeof(int), new CreateAccessorFunc<int>(
-                (map, size) => map.CreateInt32(size)));
-            _accessorDelegates.Add(typeof(uint), new CreateAccessorFunc<uint>(
-                (map, size) => map.CreateUInt32(size)));
-            _accessorDelegates.Add(typeof(long), new CreateAccessorFunc<long>(
-                (map, size) => map.CreateInt64(size)));
-            _accessorDelegates.Add(typeof(ulong), new CreateAccessorFunc<ulong>(
-                (map, size) => map.CreateUInt64(size)));
-            _accessorDelegates.Add(typeof(float), new CreateAccessorFunc<float>(
-                (map, size) => map.CreateSingle(size)));
-            _accessorDelegates.Add(typeof(double), new CreateAccessorFunc<double>(
-                (map, size) => map.CreateDouble(size)));
-            _accessorDelegates.Add(typeof(string), new CreateAccessorFunc<string>(
-                (map, size) => map.CreateVariableString(size)));
-            _accessorDelegates.Add(typeof(uint[]), new CreateAccessorFunc<uint[]>(
-                (map, size) => map.CreateVariableUInt32Array(size)));
-            _accessorDelegates.Add(typeof(int[]), new CreateAccessorFunc<int[]>(
-                (map, size) => map.CreateVariableInt32Array(size)));
         }
 
         /// <summary>
@@ -358,11 +362,14 @@ namespace Reminiscence.IO
         /// </summary>
         public static void RegisterCreateAccessorFunc<T>(CreateAccessorFunc<T> func)
         {
-            if (_accessorDelegates == null)
+            lock (_accessorDelegates)
             {
-                _accessorDelegates = new Dictionary<Type, object>();
+                if (_accessorDelegates == null)
+                {
+                    _accessorDelegates = new Dictionary<Type, object>();
+                }
+                _accessorDelegates[typeof(T)] = func;
             }
-            _accessorDelegates[typeof(T)] = func;
         }
 
         /// <summary>
@@ -376,20 +383,23 @@ namespace Reminiscence.IO
         /// Gets the create accessor function for the given type.
         /// </summary>
         public static CreateAccessorFunc<T> GetCreateAccessorFuncFor<T>()
-        {
+        { 
             var type = typeof(T);
-            if (_accessorDelegates == null ||
-               _accessorDelegates.Count == 0)
-            { // register accessors.
-                MemoryMap.RegisterCreateAccessorFuncs();
-            }
-            object value;
-            if(!_accessorDelegates.TryGetValue(type, out value))
+            lock (_accessorDelegates)
             {
-                throw new NotSupportedException(string.Format("Type {0} not supported, try explicity registering an accessor creating function.",
-                    type));
+                if (_accessorDelegates == null ||
+                   _accessorDelegates.Count == 0)
+                { // register accessors.
+                    MemoryMap.RegisterCreateAccessorFuncs();
+                }
+                object value;
+                if (!_accessorDelegates.TryGetValue(type, out value))
+                {
+                    throw new NotSupportedException(string.Format("Type {0} not supported, try explicity registering an accessor creating function.",
+                        type));
+                }
+                return (CreateAccessorFunc<T>)value;
             }
-            return (CreateAccessorFunc<T>)value;
         }
     }
 }

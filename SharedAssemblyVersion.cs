@@ -1,6 +1,6 @@
 ﻿// The MIT License (MIT)
 
-// Copyright (c) 2015 Ben Abelshausen
+// Copyright (c) 2016 Ben Abelshausen
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -22,11 +22,11 @@
 
 using System.Reflection;
 
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("SharpSoftware")]
 [assembly: AssemblyProduct("Reminiscence")]
-[assembly: AssemblyCopyright("Copyright © Ben Abelshausen 2015")]
+[assembly: AssemblyCopyright("Copyright © Ben Abelshausen 2016, The MIT License (MIT)")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
-[assembly: AssemblyVersion("0.1.0.9999")] // semantic versioning Major.Minor.Patch.Build (9999 will be updated by CI server)
-[assembly: AssemblyInformationalVersion("Local Build Version")] // do not change this; build server replace this automatically.
+[assembly: AssemblyInformationalVersion("1.0.0-rc1.9999")] // semantic versioning Major.Minor.Patch.Build (9999 will be updated by CI server)
+[assembly: AssemblyVersion("1.0.0.9999")] // do not change this; build server update this automatically (.9999 will be updated by CI server with -{buildnumber})

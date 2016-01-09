@@ -1,6 +1,6 @@
 ﻿// The MIT License (MIT)
 
-// Copyright (c) 2015 Ben Abelshausen
+// Copyright (c) 2016 Ben Abelshausen
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,6 +21,7 @@
 // THE SOFTWARE.
 
 using System;
+using System.IO;
 
 namespace Reminiscense.Stresstests
 {
@@ -29,14 +30,15 @@ namespace Reminiscense.Stresstests
         static void Main(string[] args)
         {
             // sets the filename.
-            Global.FileName = args[0];
+            Global.FileName = "temp.routing";
 
             // test dictionaries first.
             Collections.DictionaryTests.TestRandom();
 
             // test arrays first.
-            //Arrays.ArrayTests.Test();
+            Arrays.ArrayTests.Test();
 
+            File.Delete("temp.routing");
             Console.WriteLine("Done!");
             Console.ReadLine();
         }

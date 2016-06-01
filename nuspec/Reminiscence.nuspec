@@ -6,9 +6,9 @@
         <title>Reminiscence</title>
         <authors>Ben Abelshausen</authors>
         <owners>Ben Abelshausen</owners>
-        <licenseUrl>https://raw.githubusercontent.com/OsmSharp/reminiscence/master/license.md</licenseUrl>
-        <projectUrl>https://github.com/OsmSharp/reminiscence</projectUrl>
-        <iconUrl>https://raw.githubusercontent.com/OsmSharp/reminiscence/master/nuspec/icon.png</iconUrl>
+        <licenseUrl>https://raw.githubusercontent.com/itinero/reminiscence/master/license.md</licenseUrl>
+        <projectUrl>https://github.com/itinero/reminiscence</projectUrl>
+        <iconUrl>https://raw.githubusercontent.com/itinero/reminiscence/master/nuspec/icon.png</iconUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>Simple cross-platform memory mapping for .NET/Mono.</description>
         <summary>Reminiscence is a lightweight crossplatform memorymapping library to bring some form of memorymapping to .NET/Mono on any platform.</summary>

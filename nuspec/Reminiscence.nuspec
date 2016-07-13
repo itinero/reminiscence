@@ -16,7 +16,7 @@
         <tags>memory, memorymapping, collections</tags>
     </metadata>
     <files>
-      <file src="src\Reminiscence\bin\Debug\portable40-net403+sl5+win8+wp8\Reminiscence.dll" target="lib\portable-net403+sl50+win+wp80+Xamarin.iOS10+MonoAndroid10+MonoTouch10" />
-      <file src="src\Reminiscence\bin\Debug\netstandard1.6\Reminiscence.dll" target="lib\netstandard1.6" />
+      <file src="src\Reminiscence\bin\Release\portable40-net403+sl5+win8+wp8\Reminiscence.dll" target="lib\portable-net403+sl50+win+wp80+Xamarin.iOS10+MonoAndroid10+MonoTouch10" />
+      <file src="src\Reminiscence\bin\Release\netstandard1.6\Reminiscence.dll" target="lib\netstandard1.6" />
     </files>
 </package>

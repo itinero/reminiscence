@@ -3,11 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.30723.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Reminiscence", "Reminiscence\Reminiscence.csproj", "{A5AAD5C6-1C00-49BB-8CA8-8AE8C445BDCD}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{06D25B36-2366-40EE-81C3-DC9DD7598DFA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Reminiscence.Tests", "Reminiscence.Tests\Reminiscence.Tests.csproj", "{B4DE8901-0C34-40FB-A944-CD23F3F1C812}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Reminiscence", "src\Reminiscence\Reminiscence.csproj", "{A5AAD5C6-1C00-49BB-8CA8-8AE8C445BDCD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Reminiscense.Stresstests", "Reminiscense.Stresstests\Reminiscense.Stresstests.csproj", "{C575FCEF-CC01-4321-9DA2-A3E80D00281E}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{2701B62F-5FC1-4EAD-A00A-9DA3B51672C9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Reminiscence.Tests", "test\Reminiscence.Tests\Reminiscence.Tests.csproj", "{B4DE8901-0C34-40FB-A944-CD23F3F1C812}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Reminiscense.Stresstests", "src\Reminiscense.Stresstests\Reminiscense.Stresstests.csproj", "{C575FCEF-CC01-4321-9DA2-A3E80D00281E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -30,5 +34,10 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A5AAD5C6-1C00-49BB-8CA8-8AE8C445BDCD} = {06D25B36-2366-40EE-81C3-DC9DD7598DFA}
+		{B4DE8901-0C34-40FB-A944-CD23F3F1C812} = {2701B62F-5FC1-4EAD-A00A-9DA3B51672C9}
+		{C575FCEF-CC01-4321-9DA2-A3E80D00281E} = {06D25B36-2366-40EE-81C3-DC9DD7598DFA}
 	EndGlobalSection
 EndGlobal

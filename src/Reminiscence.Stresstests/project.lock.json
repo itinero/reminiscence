@@ -2030,15 +2030,15 @@
       },
       "Reminiscence/1.0.0": {
         "type": "project",
-        "framework": ".NETStandard,Version=v1.6",
+        "framework": ".NETStandard,Version=v1.3",
         "dependencies": {
           "NETStandard.Library": "1.6.0"
         },
         "compile": {
-          "netstandard1.6/Reminiscence.dll": {}
+          "netstandard1.3/Reminiscence.dll": {}
         },
         "runtime": {
-          "netstandard1.6/Reminiscence.dll": {}
+          "netstandard1.3/Reminiscence.dll": {}
         }
       }
     }

@@ -216,7 +216,7 @@ namespace Reminiscence.Arrays
 
                 if (_bufferSize == 0)
                 { // don't use buffer(s).
-                    var arrayIdx = (long)System.Math.Floor(idx / _accessorSize);
+                    var arrayIdx = (long)System.Math.Floor((double)idx / _accessorSize);
                     var localIdx = idx % _accessorSize;
                     var localPosition = localIdx * _accessors[(int)arrayIdx].ElementSize;
 
@@ -239,7 +239,7 @@ namespace Reminiscence.Arrays
 
                 if (_bufferSize == 0)
                 { // don't use buffer(s).
-                    var arrayIdx = (long)System.Math.Floor(idx / _accessorSize);
+                    var arrayIdx = (long)System.Math.Floor((double)idx / _accessorSize);
                     var localIdx = idx % _accessorSize;
                     var localPosition = localIdx * _accessors[(int)arrayIdx].ElementSize;
                     
@@ -286,7 +286,7 @@ namespace Reminiscence.Arrays
         {
             if (buffer.IsDirty)
             {
-                var arrayIdx = (long)System.Math.Floor(buffer.Position / _accessorSize);
+                var arrayIdx = (long)System.Math.Floor((double)buffer.Position / _accessorSize);
                 var localIdx = buffer.Position % _accessorSize;
                 var localPosition = localIdx * _accessors[(int)arrayIdx].ElementSize;
 
@@ -327,7 +327,7 @@ namespace Reminiscence.Arrays
                 {
                     var newBuffer = new T[_bufferSize];
 
-                    var arrayIdx = (long)System.Math.Floor(bufferPosition / _accessorSize);
+                    var arrayIdx = (long)System.Math.Floor((double)bufferPosition / _accessorSize);
                     var localIdx = bufferPosition % _accessorSize;
                     var localPosition = localIdx * _accessors[(int)arrayIdx].ElementSize;
 

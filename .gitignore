@@ -32,6 +32,7 @@ test-results*/
 *.patch
 .vs/
 TestResult.xml
+*.routing
 
 packages/*
 !packages/repositories.config

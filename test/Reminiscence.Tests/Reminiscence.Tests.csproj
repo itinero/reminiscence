@@ -18,6 +18,8 @@
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
+
   <ItemGroup>
     <ProjectReference Include="..\..\src\Reminiscence\Reminiscence.csproj" />
   </ItemGroup>

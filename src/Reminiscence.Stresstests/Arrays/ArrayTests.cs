@@ -24,6 +24,7 @@ using Reminiscence.Arrays;
 using Reminiscence.IO;
 using System;
 using System.IO;
+using Xunit;
 
 namespace Reminiscense.Stresstests.Arrays
 {
@@ -164,6 +165,27 @@ namespace Reminiscense.Stresstests.Arrays
                     perf.Stop();
                 }
             }
+        }
+
+        /// <summary>
+        /// Tests a huge array, reading and writing elements.
+        /// </summary>
+        public static void TestHugeArray()
+        {
+            var array = new MemoryArray<long>(1024 * 1024);
+            for (var i = 0L; i < (long)int.MaxValue * 2; i++)
+            {
+                if (i >= array.Length)
+                {
+                    array.Resize(array.Length + (1024 * 1024));
+                }
+                array[i] = i * 4 + i / 3;
+
+                var j = array[i];
+
+                Assert.Equal(j, i * 4 + i / 3);
+            }
+
         }
     }
 }

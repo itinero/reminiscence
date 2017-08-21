@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using NUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Reminiscence.Collections;
 using Reminiscence.IO;
 using System;
@@ -31,13 +31,13 @@ namespace Reminiscence.Tests.Collections
     /// <summary>
     /// Contains tests for the dictionary.
     /// </summary>
-    [TestFixture]
+    [TestClass]
     public class DictionaryTests
     {
         /// <summary>
         /// Test creating.
         /// </summary>
-        [Test]
+        [TestMethod]
         public void TestCreate()
         {
             using(var map = new MemoryMapStream())
@@ -51,7 +51,7 @@ namespace Reminiscence.Tests.Collections
         /// <summary>
         /// Tests adding a value.
         /// </summary>
-        [Test]
+        [TestMethod]
         public void TestAdd()
         {
             using (var map = new MemoryMapStream())
@@ -61,7 +61,7 @@ namespace Reminiscence.Tests.Collections
                 dictionary.Add("Ben", "Abelshausen");
                 Assert.AreEqual("Abelshausen", dictionary["Ben"]);
 
-                Assert.Catch<ArgumentException>(() => dictionary.Add("Ben", "Not Abelshausen"));
+                Assert.ThrowsException<ArgumentException>(() => dictionary.Add("Ben", "Not Abelshausen"));
             }
 
             MockObject.RegisterAccessorCreateFunc();
@@ -72,7 +72,7 @@ namespace Reminiscence.Tests.Collections
                 dictionary.Add(new MockObject("Ben"), "Abelshausen");
                 Assert.AreEqual("Abelshausen", dictionary[new MockObject("Ben")]);
 
-                Assert.Catch<ArgumentException>(() => dictionary.Add(new MockObject("Ben"), "Not Abelshausen"));
+                Assert.ThrowsException<ArgumentException>(() => dictionary.Add(new MockObject("Ben"), "Not Abelshausen"));
 
                 dictionary.Add(new MockObject("Ben1"), "Abelshausen");
                 Assert.AreEqual("Abelshausen", dictionary[new MockObject("Ben1")]);
@@ -90,7 +90,7 @@ namespace Reminiscence.Tests.Collections
         /// <summary>
         /// Tests contains key.
         /// </summary>
-        [Test]
+        [TestMethod]
         public void TestContainsKey()
         {
             using (var map = new MemoryMapStream())
@@ -129,7 +129,7 @@ namespace Reminiscence.Tests.Collections
         /// <summary>
         /// Test getting a value.
         /// </summary>
-        [Test]
+        [TestMethod]
         public void TestTryGetValue()
         {
             using (var map = new MemoryMapStream())
@@ -171,7 +171,7 @@ namespace Reminiscence.Tests.Collections
         /// <summary>
         /// Tests removing a key.
         /// </summary>
-        [Test]
+        [TestMethod]
         public void TestRemoveKey()
         {
             using (var map = new MemoryMapStream())
@@ -218,7 +218,7 @@ namespace Reminiscence.Tests.Collections
         /// <summary>
         /// Tests removing a key.
         /// </summary>
-        [Test]
+        [TestMethod]
         public void TestItemGetOrSet()
         {
             using (var map = new MemoryMapStream())
@@ -227,7 +227,7 @@ namespace Reminiscence.Tests.Collections
 
                 dictionary["Ben"] = "Abelshausen";
 
-                Assert.Catch<System.Collections.Generic.KeyNotFoundException>(() =>
+                Assert.ThrowsException<System.Collections.Generic.KeyNotFoundException>(() =>
                     {
                         var t = dictionary["Ben2"];
                     });
@@ -247,7 +247,7 @@ namespace Reminiscence.Tests.Collections
                 dictionary[new MockObject("Ben4")] = "Abelshausen4";
                 dictionary[new MockObject("Ben5")] = "Abelshausen5";
 
-                Assert.Catch<System.Collections.Generic.KeyNotFoundException>(() =>
+                Assert.ThrowsException<System.Collections.Generic.KeyNotFoundException>(() =>
                     {
                         var t = dictionary[new MockObject("Ben6")];
                     });
@@ -275,7 +275,7 @@ namespace Reminiscence.Tests.Collections
         /// <summary>
         /// Tests the enumerators.
         /// </summary>
-        [Test]
+        [TestMethod]
         public void TestEnumerators()
         {
 

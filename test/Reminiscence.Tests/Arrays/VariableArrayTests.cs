@@ -20,24 +20,23 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using NUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Reminiscence.Arrays;
 using Reminiscence.IO;
 using System;
-using System.IO;
 
 namespace Reminiscence.Tests.Arrays
 {
     /// <summary>
     /// Contains tests for the variable array.
     /// </summary>
-    [TestFixture]
+    [TestClass]
     public class VariableArrayTests
     {
         /// <summary>
         /// Tests argument checks.
         /// </summary>
-        [Test]
+        [TestMethod]
         public void ArgumentTest()
         {
             using (var map = new MemoryMapStream())
@@ -45,21 +44,21 @@ namespace Reminiscence.Tests.Arrays
                 using (var array = new VariableArray<string>(map, 1024, 10))
                 {
                     Assert.AreEqual(10, array.Length);
-                    Assert.Catch<ArgumentOutOfRangeException>(() =>
+                    Assert.ThrowsException<ArgumentOutOfRangeException>(() =>
                     {
                         array[1001] = 10.ToString();
                     });
-                    Assert.Catch<ArgumentOutOfRangeException>(() =>
+                    Assert.ThrowsException<ArgumentOutOfRangeException>(() =>
                     {
                         array[-1] = 10.ToString();
                     });
 
                     string value;
-                    Assert.Catch<ArgumentOutOfRangeException>(() =>
+                    Assert.ThrowsException<ArgumentOutOfRangeException>(() =>
                     {
                         value = array[1001];
                     });
-                    Assert.Catch<ArgumentOutOfRangeException>(() =>
+                    Assert.ThrowsException<ArgumentOutOfRangeException>(() =>
                     {
                         value = array[-1];
                     });
@@ -70,7 +69,7 @@ namespace Reminiscence.Tests.Arrays
         /// <summary>
         /// Tests for the array when it has zero-size.
         /// </summary>
-        [Test]
+        [TestMethod]
         public void ZeroSizeTest()
         {
             using (var map = new MemoryMapStream())
@@ -90,7 +89,7 @@ namespace Reminiscence.Tests.Arrays
         /// <summary>
         /// A test for the huge array.
         /// </summary>
-        [Test]
+        [TestMethod]
         public void CompareToArrayTest()
         {
             var randomGenerator = new System.Random(66707770); // make this deterministic 
@@ -127,7 +126,7 @@ namespace Reminiscence.Tests.Arrays
         /// <summary>
         /// Tests resizing the array.
         /// </summary>
-        [Test]
+        [TestMethod]
         public void ResizeTests()
         {
             var randomGenerator = new System.Random(66707770); // make this deterministic 
@@ -202,7 +201,7 @@ namespace Reminiscence.Tests.Arrays
         ///// <summary>
         ///// Tests write to stream.
         ///// </summary>
-        //[Test]
+        //[TestMethod]
         //public void TestWriteToAndReadFrom()
         //{
         //    using (var map = new MappedStream())

@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using NUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Reminiscence.Arrays;
 using System;
 
@@ -29,28 +29,28 @@ namespace Reminiscence.Tests.Arrays
     /// <summary>
     /// Contains new memory array tests.
     /// </summary>
-    [TestFixture]
+    [TestClass]
     public class MemoryArrayTests
     {
         /// <summary>
         /// Tests the argument verifications on the constructors.
         /// </summary>
-        [Test]
+        [TestMethod]
         public void ConstructorParameterExceptions()
         {
-            Assert.Catch<ArgumentOutOfRangeException>(() =>
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() =>
             {
                 new MemoryArray<int>(-1);
             });
-            Assert.Catch<ArgumentOutOfRangeException>(() =>
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() =>
             {
                 new MemoryArray<int>(-1, 2);
             });
-            Assert.Catch<ArgumentOutOfRangeException>(() =>
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() =>
             {
                 new MemoryArray<int>(10, -1);
             });
-            Assert.Catch<ArgumentOutOfRangeException>(() =>
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() =>
             {
                 new MemoryArray<int>(10, 3);
             });
@@ -59,7 +59,7 @@ namespace Reminiscence.Tests.Arrays
         /// <summary>
         /// A comparison test for the huge array to a regular array.
         /// </summary>
-        [Test]
+        [TestMethod]
         public void CompareToArrayTest()
         {
             var stringArrayRef = new string[1000];
@@ -89,7 +89,7 @@ namespace Reminiscence.Tests.Arrays
         /// <summary>
         /// A test resizing a huge array 
         /// </summary>
-        [Test]
+        [TestMethod]
         public void ResizeTest()
         {
             var stringArrayRef = new string[1000];

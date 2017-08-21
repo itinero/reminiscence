@@ -234,6 +234,80 @@ namespace Reminiscence.IO
         protected abstract MappedAccessor<long> DoCreateNewInt64(long position, long sizeInByte);
 
         /// <summary>
+        /// Creates a new memory mapped accessor for a given part of this file with given size in bytes and the start position.
+        /// </summary>
+        public MappedAccessor<short> CreateInt16(long position, long sizeInElements)
+        {
+            var sizeInBytes = sizeInElements * 2;
+            var accessor = this.DoCreateNewInt16(position, sizeInBytes);
+            _accessors.Add(accessor);
+
+            var nextPosition = position + sizeInBytes;
+            if (nextPosition > _nextPosition)
+            {
+                _nextPosition = nextPosition;
+            }
+
+            return accessor;
+        }
+
+        /// <summary>
+        /// Creates a new empty memory mapped accessor with given size in bytes.
+        /// </summary>
+        public MappedAccessor<short> CreateInt16(long sizeInElements)
+        {
+            var sizeInBytes = sizeInElements * 2;
+            var accessor = this.DoCreateNewInt16(_nextPosition, sizeInBytes);
+            _accessors.Add(accessor);
+
+            _nextPosition = _nextPosition + sizeInBytes;
+
+            return accessor;
+        }
+
+        /// <summary>
+        /// Creates a new memory mapped file based on the given stream and the given size in bytes.
+        /// </summary>
+        protected abstract MappedAccessor<short> DoCreateNewInt16(long position, long sizeInByte);
+
+        /// <summary>
+        /// Creates a new memory mapped accessor for a given part of this file with given size in bytes and the start position.
+        /// </summary>
+        public MappedAccessor<ushort> CreateUInt16(long position, long sizeInElements)
+        {
+            var sizeInBytes = sizeInElements * 2;
+            var accessor = this.DoCreateNewUInt16(position, sizeInBytes);
+            _accessors.Add(accessor);
+
+            var nextPosition = position + sizeInBytes;
+            if (nextPosition > _nextPosition)
+            {
+                _nextPosition = nextPosition;
+            }
+
+            return accessor;
+        }
+
+        /// <summary>
+        /// Creates a new empty memory mapped accessor with given size in bytes.
+        /// </summary>
+        public MappedAccessor<ushort> CreateUInt16(long sizeInElements)
+        {
+            var sizeInBytes = sizeInElements * 2;
+            var accessor = this.DoCreateNewUInt16(_nextPosition, sizeInBytes);
+            _accessors.Add(accessor);
+
+            _nextPosition = _nextPosition + sizeInBytes;
+
+            return accessor;
+        }
+
+        /// <summary>
+        /// Creates a new memory mapped file based on the given stream and the given size in bytes.
+        /// </summary>
+        protected abstract MappedAccessor<ushort> DoCreateNewUInt16(long position, long sizeInByte);
+
+        /// <summary>
         /// A delegate to facilitate reading a variable-sized object.
         /// </summary>
         public delegate long ReadFromDelegate<T>(Stream stream, long position, ref T structure);
@@ -336,6 +410,10 @@ namespace Reminiscence.IO
                 {
                     _accessorDelegates = new Dictionary<Type, object>();
                 }
+                _accessorDelegates.Add(typeof(short), new CreateAccessorFunc<short>(
+                    (map, size) => map.CreateInt16(size)));
+                _accessorDelegates.Add(typeof(ushort), new CreateAccessorFunc<ushort>(
+                    (map, size) => map.CreateUInt16(size)));
                 _accessorDelegates.Add(typeof(int), new CreateAccessorFunc<int>(
                     (map, size) => map.CreateInt32(size)));
                 _accessorDelegates.Add(typeof(uint), new CreateAccessorFunc<uint>(

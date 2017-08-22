@@ -86,7 +86,7 @@ namespace Reminiscence.Arrays
         /// <param name="count">The number of elements to copy.</param>
         public virtual void CopyFrom(ArrayBase<T> array, long index, long start, long count)
         {
-            for (int idx = 0; idx < count; idx++)
+            for (long idx = 0; idx < count; idx++)
             {
                 this[index + idx] = array[start + idx];
             }
@@ -98,7 +98,7 @@ namespace Reminiscence.Arrays
         public virtual void CopyFrom(Stream stream)
         {
             var position = stream.Position;
-            var i = 0;
+            long i = 0;
             using (var accessor = MemoryMap.GetCreateAccessorFuncFor<T>()(new MemoryMapStream(), 0))
             {
                 var element = default(T);
@@ -117,7 +117,7 @@ namespace Reminiscence.Arrays
         public virtual long CopyTo(Stream stream)
         {
             var position = stream.Position;
-            var i = 0;
+            long i = 0;
             using (var accessor = MemoryMap.GetCreateAccessorFuncFor<T>()(new MemoryMapStream(), 0))
             {
                 var element = default(T);

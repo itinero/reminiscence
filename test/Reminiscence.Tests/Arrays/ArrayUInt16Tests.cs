@@ -1,6 +1,6 @@
 ﻿// The MIT License (MIT)
 
-// Copyright (c) 2016 Ben Abelshausen
+// Copyright (c) 2015 Ben Abelshausen
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,13 +20,37 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System.Reflection;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Reminiscence.Arrays;
+using Reminiscence.IO;
 
-[assembly: AssemblyCompany("SharpSoftware")]
-[assembly: AssemblyProduct("Reminiscence")]
-[assembly: AssemblyCopyright("Copyright © Ben Abelshausen 2016, The MIT License (MIT)")]
-[assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]
+namespace Reminiscence.Tests.Arrays
+{
+    /// <summary>
+    /// Contains tests for an array of ushorts.
+    /// </summary>
+    [TestClass]
+    public class ArrayUInt16Tests
+    {
+        /// <summary>
+        /// Tests the basics.
+        /// </summary>
+        [TestMethod]
+        public void TestBasics()
+        {
+            using (var map = new MemoryMapStream())
+            {
+                var array = new Array<ushort>(map, 1024);
+                for (ushort i = 0; i < 1024; i++)
+                {
+                    array[i] = (ushort)(i ^ 6983);
+                }
 
-[assembly: AssemblyInformationalVersion("1.1.0")] // semantic versioning Major.Minor.Patch.Build (9999 will be updated by CI server)
-[assembly: AssemblyVersion("1.1.0")] // do not change this; build server update this automatically (.9999 will be updated by CI server with -{buildnumber})
+                for (ushort i = 0; i < 1024; i++)
+                {
+                    Assert.AreEqual(array[i], (ushort)(i ^ 6983));
+                }
+            }
+        }
+    }
+}

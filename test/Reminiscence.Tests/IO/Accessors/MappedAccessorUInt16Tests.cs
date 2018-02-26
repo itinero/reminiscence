@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Reminiscence.IO;
 
 namespace Reminiscence.Tests.IO.Accessors
@@ -28,13 +28,12 @@ namespace Reminiscence.Tests.IO.Accessors
     /// <summary>
     /// Contains tests for accessors for ushorts.
     /// </summary>
-    [TestClass]
     public class MappedAccessorUInt16Tests
     {
         /// <summary>
         /// Tests the basics of what accessor is supposed to do.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestBasics()
         {
             using (var map = new MemoryMapStream())

@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Reminiscence.Indexes;
 using Reminiscence.IO;
 using System.IO;
@@ -30,13 +30,12 @@ namespace Reminiscence.Tests.Indexes
     /// <summary>
     /// Contains tests for the index.
     /// </summary>
-    [TestClass]
     public class IndexTests
     {
         /// <summary>
         /// Tests an index with just one element.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestOneElement()
         {
             using(var map = new MemoryMapStream())
@@ -50,7 +49,7 @@ namespace Reminiscence.Tests.Indexes
         /// <summary>
         /// Tests and index with tiny accessors.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestTinyAccessors()
         {
             using (var map = new MemoryMapStream())

@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Reminiscence.Arrays;
 using Reminiscence.IO;
 
@@ -29,13 +29,12 @@ namespace Reminiscence.Tests.Arrays
     /// <summary>
     /// Contains tests for an array of ushorts.
     /// </summary>
-    [TestClass]
     public class ArrayUInt16Tests
     {
         /// <summary>
         /// Tests the basics.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestBasics()
         {
             using (var map = new MemoryMapStream())

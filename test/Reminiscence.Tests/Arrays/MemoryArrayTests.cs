@@ -144,5 +144,35 @@ namespace Reminiscence.Tests.Arrays
                 Assert.AreEqual(stringArrayRef[idx], stringArray[idx]);
             }
         }
+
+        /// <summary>
+        /// A comparison test for the memory array to a regular array with a tiny block size.
+        /// </summary>
+        [Test]
+        public void CompareToArrayTestWithTinyBlockSize()
+        {
+            var stringArrayRef = new string[1000];
+            var stringArray = new MemoryArray<string>(1000, 8);
+
+            var randomGenerator = new System.Random(66707770); // make this deterministic 
+            for (var idx = 0; idx < 1000; idx++)
+            {
+                if (randomGenerator.Next(4) >= 2)
+                { // add data.
+                    stringArrayRef[idx] = idx.ToString();
+                    stringArray[idx] = idx.ToString();
+                }
+                else
+                {
+                    stringArrayRef[idx] = null;
+                    stringArray[idx] = null;
+                }
+            }
+
+            for (var idx = 0; idx < 1000; idx++)
+            {
+                Assert.AreEqual(stringArrayRef[idx], stringArray[idx]);
+            }
+        }
     }
 }

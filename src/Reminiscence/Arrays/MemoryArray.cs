@@ -54,6 +54,7 @@ namespace Reminiscence.Arrays
 
             _blockSize = blockSize;
             _size = size;
+            _arrayPow = ExpOf2(blockSize);
 
             var blockCount = (long)System.Math.Ceiling((double)size / _blockSize);
             blocks = new T[blockCount][];
@@ -65,6 +66,16 @@ namespace Reminiscence.Arrays
             {
                 blocks[blockCount - 1] = new T[size - ((blockCount - 1) * _blockSize)];
             }
+        }
+
+        private static int ExpOf2(int powerOf2)
+        { // this can probably be faster but it needs to run once in the constructor,
+            // feel free to improve but not crucial.
+            if (powerOf2 == 1)
+            {
+                return 0;
+            }
+            return ExpOf2(powerOf2 / 2) + 1;
         }
 
         /// <summary>

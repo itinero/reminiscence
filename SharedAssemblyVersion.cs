@@ -24,9 +24,9 @@ using System.Reflection;
 
 [assembly: AssemblyCompany("SharpSoftware")]
 [assembly: AssemblyProduct("Reminiscence")]
-[assembly: AssemblyCopyright("Copyright © Ben Abelshausen 2016, The MIT License (MIT)")]
+[assembly: AssemblyCopyright("Copyright © Ben Abelshausen 2018, The MIT License (MIT)")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
-[assembly: AssemblyInformationalVersion("1.1.0-pre02")] // semantic versioning Major.Minor.Patch.Build (9999 will be updated by CI server)
-[assembly: AssemblyVersion("1.1.0")] // do not change this; build server update this automatically (.9999 will be updated by CI server with -{buildnumber})
+[assembly: AssemblyInformationalVersion("1.2.0-pre01")] // semantic versioning Major.Minor.Patch.Build (9999 will be updated by CI server)
+[assembly: AssemblyVersion("1.2.0")] // do not change this; build server update this automatically (.9999 will be updated by CI server with -{buildnumber})

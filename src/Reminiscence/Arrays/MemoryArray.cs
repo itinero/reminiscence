@@ -49,7 +49,7 @@ namespace Reminiscence.Arrays
         public MemoryArray(long size, int blockSize)
         {
             if (size < 0) { throw new ArgumentOutOfRangeException("Size needs to be bigger than or equal to zero."); }
-            if (blockSize < 0) { throw new ArgumentOutOfRangeException("Blocksize needs to be bigger than or equal to zero."); }
+            if (blockSize <= 0) { throw new ArgumentOutOfRangeException("Blocksize needs to be bigger than or equal to zero."); }
             if ((blockSize & (blockSize - 1)) != 0) { throw new ArgumentOutOfRangeException("Blocksize needs to be a power of 2."); }
 
             _blockSize = blockSize;

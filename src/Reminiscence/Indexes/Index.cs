@@ -144,7 +144,10 @@ namespace Reminiscence.Indexes
         /// </summary>
         public long Add(T element)
         {
-            if (this.IsReadonly) { throw new InvalidOperationException("Cannot add new element, index is readonly."); }
+            if (this.IsReadonly) 
+            { // make writable using a memory stream.
+                this.MakeWritable(new MemoryMapStream());
+            }
 
             var accessor = _accessors[_accessors.Count - 1]; // always write to the last accessor.
             var size = accessor.WriteTo(_nextPositionInBytes - ((_accessors.Count - 1) * _accessorSize), ref element);

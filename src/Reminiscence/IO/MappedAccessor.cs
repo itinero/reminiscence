@@ -31,8 +31,14 @@ namespace Reminiscence.IO
     public abstract class MappedAccessor<T> : IDisposable
     {
         private MemoryMap _file; // Holds the file that created this accessor.
-        protected Stream _stream; // Holds the stream.
-        protected int _elementSize; // The size of a single element.
+        /// <summary>
+        /// Holds the stream.
+        /// </summary>
+        protected Stream _stream;
+        /// <summary>
+        /// The size of a single element if constant.
+        /// </summary>
+        protected int _elementSize;
 
         /// <summary>
         /// Creates a new mapped accessor.

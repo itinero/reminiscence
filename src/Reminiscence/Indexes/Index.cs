@@ -32,12 +32,12 @@ namespace Reminiscence.Indexes
     /// </summary>
     public class Index<T> : IDisposable, ISerializableToStream
     {
-        private readonly MemoryMap.CreateAccessorFunc<T> _createAccessor;
+        private MemoryMap.CreateAccessorFunc<T> _createAccessor;
         private readonly System.Collections.Generic.List<MappedAccessor<T>> _accessors;
         private readonly System.Collections.Generic.List<long> _accessorBytesLost;
-        private readonly long _accessorSize;
-        private readonly long _accessorSizeElements;
-        private readonly MemoryMap _map;
+        private long _accessorSize;
+        private long _accessorSizeElements;
+        private MemoryMap _map;
 
         /// <summary>
         /// Creates a new index based on one fixed-size accessor.
@@ -111,6 +111,31 @@ namespace Reminiscence.Indexes
             get
             {
                 return _createAccessor == null;
+            }
+        }
+
+        /// <summary>
+        /// Make this index writable again by injecting a new memory map.
+        /// </summary>
+        public void MakeWritable(MemoryMap map)
+        {
+            if (!this.IsReadonly)
+            {
+                throw new InvalidOperationException("Index is already writable, check IsReadonly.");
+            }
+
+            var accessor = _accessors[0];
+            _map = map;
+            _createAccessor = MemoryMap.GetCreateAccessorFuncFor<T>();
+            _accessorSize = accessor.Capacity; // the only way to handle this now.
+            _nextPositionInBytes = _accessorSize;
+            if(!accessor.ElementSizeFixed)
+            { // use the size in bytes.
+                _accessorSizeElements = _accessorSize;
+            }
+            else
+            { // use the size in elements.
+                _accessorSizeElements = accessor.CapacityElements;
             }
         }
 

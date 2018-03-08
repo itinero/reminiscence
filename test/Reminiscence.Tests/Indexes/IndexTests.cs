@@ -20,10 +20,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+using System.IO;
 using NUnit.Framework;
 using Reminiscence.Indexes;
 using Reminiscence.IO;
-using System.IO;
 
 namespace Reminiscence.Tests.Indexes
 {
@@ -52,9 +52,9 @@ namespace Reminiscence.Tests.Indexes
         [Test]
         public void TestTinyAccessors()
         {
-            using (var map = new MemoryMapStream())
+            using(var map = new MemoryMapStream())
             {
-                using (var tempStream = new MemoryStream(new byte[1024]))
+                using(var tempStream = new MemoryStream(new byte[1024]))
                 {
                     var index = new Index<string>(map, 32);
 
@@ -133,11 +133,12 @@ namespace Reminiscence.Tests.Indexes
         /// <summary>
         /// Tests copying the data to a stream.
         /// </summary>
+        [Test]
         public void TestCopyTo()
         {
-            using (var map = new MemoryMapStream())
+            using(var map = new MemoryMapStream())
             {
-                using (var refStream = new MemoryStream(new byte[1024]))
+                using(var refStream = new MemoryStream(new byte[1024]))
                 {
                     // write to index and to a stream.
                     var index = new Index<string>(map, 32);
@@ -188,7 +189,7 @@ namespace Reminiscence.Tests.Indexes
 
                     refStream.SetLength(refStream.Position);
 
-                    using(var indexStream = new MemoryStream((int)index.SizeInBytes))
+                    using(var indexStream = new MemoryStream((int) index.SizeInBytes))
                     {
                         var refBytes = refStream.ToArray();
 
@@ -198,13 +199,13 @@ namespace Reminiscence.Tests.Indexes
                         Assert.AreEqual(index.SizeInBytes, bytes.Length);
                         Assert.AreEqual(index.SizeInBytes, refBytes.Length);
 
-                        for(var i = 0; i < bytes.Length; i++)
+                        for (var i = 0; i < bytes.Length; i++)
                         {
                             Assert.AreEqual(refBytes[i], bytes[i]);
                         }
                     }
 
-                    using (var indexStream = new MemoryStream((int)index.SizeInBytes + 8))
+                    using(var indexStream = new MemoryStream((int) index.SizeInBytes + 8))
                     {
                         var refBytes = refStream.ToArray();
 
@@ -226,14 +227,15 @@ namespace Reminiscence.Tests.Indexes
         /// <summary>
         /// Tests create from.
         /// </summary>
+        [Test]
         public void TestCreateFrom()
         {
             byte[] data = null;
             var indexDictionary = new System.Collections.Generic.Dictionary<long, string>();
 
-            using (var indexStream = new MemoryStream())
+            using(var indexStream = new MemoryStream())
             {
-                using (var map = new MemoryMapStream())
+                using(var map = new MemoryMapStream())
                 {
                     // write to index and to a stream.
                     var index = new Index<string>(map, 32);
@@ -277,18 +279,18 @@ namespace Reminiscence.Tests.Indexes
                 }
             }
 
-            using (var indexStream = new MemoryStream(data))
+            using(var indexStream = new MemoryStream(data))
             {
                 var index = Index<string>.CreateFromWithSize(indexStream);
 
-                foreach(var refIndexElement in indexDictionary)
+                foreach (var refIndexElement in indexDictionary)
                 {
                     var value = index.Get(refIndexElement.Key);
                     Assert.AreEqual(refIndexElement.Value, value);
                 }
             }
 
-            using (var indexStream = new MemoryStream(data))
+            using(var indexStream = new MemoryStream(data))
             {
                 var index = Index<string>.CreateFromWithSize(indexStream, true);
 
@@ -303,14 +305,15 @@ namespace Reminiscence.Tests.Indexes
         /// <summary>
         /// Tests create from and copy to in a row.
         /// </summary>
+        [Test]
         public void TestCreateFromAndCopyTo()
         {
             byte[] data = null;
             var indexDictionary = new System.Collections.Generic.Dictionary<long, string>();
 
-            using (var indexStream = new MemoryStream())
+            using(var indexStream = new MemoryStream())
             {
-                using (var map = new MemoryMapStream())
+                using(var map = new MemoryMapStream())
                 {
                     // write to index and to a stream.
                     var index = new Index<string>(map, 32);
@@ -354,7 +357,7 @@ namespace Reminiscence.Tests.Indexes
                 }
             }
 
-            using (var indexStream = new MemoryStream(data))
+            using(var indexStream = new MemoryStream(data))
             {
                 var index = Index<string>.CreateFromWithSize(indexStream);
 
@@ -368,6 +371,92 @@ namespace Reminiscence.Tests.Indexes
                 {
                     var size = index.CopyToWithSize(outputData);
                     Assert.AreEqual(data.Length, size);
+                }
+            }
+        }
+        /// <summary>
+        /// Tests make writable after deserialization.
+        /// </summary>
+        [Test]
+        public void TestMakeWritable()
+        {
+            byte[] data = null;
+            var indexDictionary = new System.Collections.Generic.Dictionary<long, string>();
+
+            // write to index and to a stream.
+            var index = new Index<string>();
+
+            var element = "Ben";
+            var id = index.Add(element);
+            indexDictionary[id] = element;
+            element = "Abelshausen";
+            id = index.Add(element);
+            indexDictionary[id] = element;
+            element = "is";
+            id = index.Add(element);
+            indexDictionary[id] = element;
+            element = "the";
+            id = index.Add(element);
+            indexDictionary[id] = element;
+            element = "author";
+            id = index.Add(element);
+            indexDictionary[id] = element;
+            element = "of";
+            id = index.Add(element);
+            indexDictionary[id] = element;
+            element = "this";
+            id = index.Add(element);
+            indexDictionary[id] = element;
+            element = "library";
+            id = index.Add(element);
+            indexDictionary[id] = element;
+            element = "and";
+            id = index.Add(element);
+            indexDictionary[id] = element;
+            element = "this";
+            id = index.Add(element);
+            indexDictionary[id] = element;
+            element = "test!";
+            id = index.Add("test!");
+            indexDictionary[id] = element;
+
+            using(var indexStream = new MemoryStream())
+            {
+                index.CopyToWithSize(indexStream);
+                data = indexStream.ToArray();
+            }
+
+            using(var indexStream = new MemoryStream(data))
+            {
+                index = Index<string>.CreateFromWithSize(indexStream);
+                index.MakeWritable(new MemoryMapStream());
+
+                element = "These";
+                id = index.Add(element);
+                indexDictionary[id] = element;
+                element = "are";
+                id = index.Add(element);
+                indexDictionary[id] = element;
+                element = "updates";
+                id = index.Add(element);
+                indexDictionary[id] = element;
+                element = "that";
+                id = index.Add(element);
+                indexDictionary[id] = element;
+                element = "are";
+                id = index.Add(element);
+                indexDictionary[id] = element;
+                element = "now";
+                id = index.Add(element);
+                indexDictionary[id] = element;
+                element = "possible";
+                id = index.Add(element);
+                indexDictionary[id] = element;
+
+                foreach (var refIndexElement in indexDictionary)
+                {
+                    var value = index.Get(refIndexElement.Key);
+                    Assert.AreEqual(refIndexElement.Value, value);
                 }
             }
         }

@@ -20,7 +20,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using NUnit.Framework;
 using Reminiscence.Indexes;
 using Reminiscence.IO;
@@ -459,6 +461,77 @@ namespace Reminiscence.Tests.Indexes
                     Assert.AreEqual(refIndexElement.Value, value);
                 }
             }
+        }
+
+        /// <summary>
+        /// Tests enumeration.
+        /// </summary>
+        [Test]
+        public void TestEnumerationString()
+        {
+            var index = new Index<string>(new MemoryMapStream(), 32);
+            var id = index.Add("this");
+            id = index.Add("is");
+            id = index.Add("another");
+            id = index.Add("test");
+            id = index.Add("sentence");
+
+            var stringBuilder = new StringBuilder();
+            foreach (var pair in index)
+            {
+                stringBuilder.Append(pair.Value);
+            }
+            Assert.AreEqual("thisisanothertestsentence", stringBuilder.ToString());
+        }
+
+        /// <summary>
+        /// Tests enumeration.
+        /// </summary>
+        [Test]
+        public void TestEnumerationUInt32Array()
+        {
+            var index = new Index<uint[]>(new MemoryMapStream(), 32);
+            var id = index.Add(new uint[] { 1, 2 });
+            id = index.Add(new uint[] { 3, 4 });
+            id = index.Add(new uint[] { 5, 6, 7 });
+            id = index.Add(new uint[] { 8, 9 });
+            id = index.Add(new uint[] { 10 });
+
+            var list = new List<uint>();
+            foreach (var pair in index)
+            {
+                foreach (var item in pair.Value)
+                {
+                    list.Add(item);
+                }
+            }
+            Assert.AreEqual(new uint[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }, 
+                list);
+        }
+
+        /// <summary>
+        /// Tests enumeration.
+        /// </summary>
+        [Test]
+        public void TestEnumerationInt32Array()
+        {
+            var index = new Index<int[]>(new MemoryMapStream(), 32);
+            var id = index.Add(new int[] { 1, 2 });
+            id = index.Add(new int[] { 3, 4 });
+            id = index.Add(new int[] { 5, 6, 7 });
+            id = index.Add(new int[] { 8, 9 });
+            id = index.Add(new int[] { 10 });
+
+            var list = new List<int>();
+            foreach (var pair in index)
+            {
+                foreach (var item in pair.Value)
+                {
+                    list.Add(item);
+                }
+            }
+            Assert.AreEqual(new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }, 
+                list);
         }
     }
 }

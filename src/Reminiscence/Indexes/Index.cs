@@ -23,6 +23,8 @@
 using Reminiscence.IO;
 using Reminiscence.IO.Streams;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Reminiscence.Indexes
@@ -30,7 +32,7 @@ namespace Reminiscence.Indexes
     /// <summary>
     /// An index mapping variable-sized elements to id's. The id's represent the position as if a continuous byte stream.
     /// </summary>
-    public class Index<T> : IDisposable, ISerializableToStream
+    public partial class Index<T> : IDisposable, ISerializableToStream, IEnumerable<KeyValuePair<long, T>>
     {
         private MemoryMap.CreateAccessorFunc<T> _createAccessor;
         private readonly System.Collections.Generic.List<MappedAccessor<T>> _accessors;
@@ -314,6 +316,20 @@ namespace Reminiscence.Indexes
                 var accessor = MemoryMap.GetCreateAccessorFuncFor<T>()(map, size);
                 return new Index<T>(accessor);
             }
+        }
+
+        /// <summary>
+        /// Gets the enumerator for this index.
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerator<KeyValuePair<long, T>> GetEnumerator()
+        {
+            return new Enumerator(this);
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return this.GetEnumerator();
         }
     }
 }

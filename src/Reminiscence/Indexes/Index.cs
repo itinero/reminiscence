@@ -131,6 +131,11 @@ namespace Reminiscence.Indexes
             _createAccessor = MemoryMap.GetCreateAccessorFuncFor<T>();
             _accessorSize = accessor.Capacity; // the only way to handle this now.
             _nextPositionInBytes = _accessorSize;
+            if (_accessorSize == 0)
+            { // this was empty, start over.
+                _accessors.Clear();
+                _accessorSize = 1024;
+            }
             if(!accessor.ElementSizeFixed)
             { // use the size in bytes.
                 _accessorSizeElements = _accessorSize;
@@ -138,6 +143,10 @@ namespace Reminiscence.Indexes
             else
             { // use the size in elements.
                 _accessorSizeElements = accessor.CapacityElements;
+            }
+            if (_accessors.Count == 0)
+            { // was empty, create at least one.
+                _accessors.Add(_createAccessor(_map, _accessorSizeElements));
             }
         }
 

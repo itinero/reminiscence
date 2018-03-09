@@ -585,5 +585,25 @@ namespace Reminiscence.Tests.Indexes
             var enumerator = index.GetEnumerator();
             Assert.False(enumerator.MoveNext());
         }
+
+        /// <summary>
+        /// Tests making an empty serialized index writable.
+        /// </summary>
+        [Test]
+        public void TestMakeWritableEmpty()
+        {
+            var index = new Index<int[]>(new MemoryMapStream(), 32);
+
+            using (var stream = new MemoryStream())
+            {
+                index.CopyToWithSize(stream);
+                stream.Seek(0, SeekOrigin.Begin);
+                index = Index<int[]>.CreateFromWithSize(stream);
+            }
+            
+            var id = index.Add(new int[] { 10, 100 });
+            Assert.AreEqual(id, 0);
+            Assert.AreEqual(new int[] { 10, 100 }, index.Get(id));
+        }
     }
 }

@@ -53,6 +53,11 @@ namespace Reminiscence.Indexes
                 {
                     _accessorIdx = 0;
                     _nextId = 0;
+
+                    if (_parent.SizeInBytes == 0)
+                    {
+                        return false;
+                    }
                 }
 
                 // calculate accessor id.

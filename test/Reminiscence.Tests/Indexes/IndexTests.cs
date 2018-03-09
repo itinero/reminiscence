@@ -22,6 +22,7 @@
 
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using NUnit.Framework;
 using Reminiscence.Indexes;
@@ -532,6 +533,57 @@ namespace Reminiscence.Tests.Indexes
             }
             Assert.AreEqual(new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }, 
                 list);
+        }
+
+        /// <summary>
+        /// Tests enumeration.
+        /// </summary>
+        [Test]
+        public void TestEnumerationAfterDeserializationInt32Array()
+        {
+            var index = new Index<int[]>(new MemoryMapStream(), 32);
+            var id = index.Add(new int[] { 1, 2 });
+            id = index.Add(new int[] { 3, 4 });
+            id = index.Add(new int[] { 5, 6, 7 });
+            id = index.Add(new int[] { 8, 9 });
+            id = index.Add(new int[] { 10 });
+
+            using (var stream = new MemoryStream())
+            {
+                index.CopyToWithSize(stream);
+                stream.Seek(0, SeekOrigin.Begin);
+                index = Index<int[]>.CreateFromWithSize(stream);
+            }
+
+            var list = new List<int>();
+            foreach (var pair in index)
+            {
+                foreach (var item in pair.Value)
+                {
+                    list.Add(item);
+                }
+            }
+            Assert.AreEqual(new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }, 
+                list);
+        }
+
+        /// <summary>
+        /// Tests enumeration.
+        /// </summary>
+        [Test]
+        public void TestEnumerationAfterDeserializationEmpty()
+        {
+            var index = new Index<int[]>(new MemoryMapStream(), 32);
+
+            using (var stream = new MemoryStream())
+            {
+                index.CopyToWithSize(stream);
+                stream.Seek(0, SeekOrigin.Begin);
+                index = Index<int[]>.CreateFromWithSize(stream);
+            }
+            
+            var enumerator = index.GetEnumerator();
+            Assert.False(enumerator.MoveNext());
         }
     }
 }

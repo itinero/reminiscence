@@ -165,6 +165,8 @@ namespace Reminiscence.Collections
         public void AddDontCare(int count)
         {
             _count += count;
+            
+            this.ResizeFor(_count);
         }
 
         /// <summary>

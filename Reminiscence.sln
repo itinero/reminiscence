@@ -1,4 +1,4 @@
-
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26730.3
@@ -8,9 +8,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{01706FCD-BF79-4B07-A3A3-B5BF9666901A}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
-		license.md = license.md
 		README.md = README.md
 		SharedAssemblyVersion.cs = SharedAssemblyVersion.cs
+		LICENSE.md = LICENSE.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{6C24733A-B1F7-4AF0-8885-DC35B0084EBE}"

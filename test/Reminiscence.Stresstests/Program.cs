@@ -34,13 +34,14 @@ namespace Reminiscense.Stresstests
 
             // test dictionaries first.
             Collections.DictionaryTests.TestRandom();
+            Collections.DictionaryTests.TestRandomString();
+            Collections.DictionaryTests.TestRandomStringInMemory();
 
             // test arrays first.
             Arrays.ArrayTests.Test();
 
             File.Delete("temp.routing");
             Console.WriteLine("Done!");
-            Console.ReadLine();
         }
     }
 }

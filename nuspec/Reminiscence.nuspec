@@ -11,14 +11,17 @@
         <iconUrl>https://raw.githubusercontent.com/itinero/reminiscence/master/nuspec/icon.png</iconUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>Simple cross-platform memory mapping for .NET/Mono.</description>
-        <summary>Reminiscence is a lightweight crossplatform memorymapping library to bring some form of memorymapping to .NET/Mono on any platform.</summary>
+        <summary>Reminiscence is a lightweight cross platform memory mapping library to bring some form of memory mapping to .NET on any platform.
+        </summary>
         <copyright>Ben Abelshausen</copyright>
         <tags>memory, memorymapping, collections</tags>
     </metadata>
     <files>
-      <file src="src\Reminiscence\bin\Release\portable40-net403+sl5+win8+wp8\Reminiscence.dll" target="lib\portable-net403+sl50+win+wp80+Xamarin.iOS10+MonoAndroid10+MonoTouch10" />
-      <file src="src\Reminiscence\bin\Release\netstandard1.3\Reminiscence.dll" target="lib\netstandard1.3" />
-      <file src="src\Reminiscence\bin\Release\net40\Reminiscence.dll" target="lib\net40" />
-      <file src="src\Reminiscence\bin\Release\net45\Reminiscence.dll" target="lib\net45" />
+        <file src="src\Reminiscence\bin\Release\portable40-net403+sl5+win8+wp8\Reminiscence.dll"
+              target="lib\portable-net403+sl50+win+wp80+Xamarin.iOS10+MonoAndroid10+MonoTouch10"/>
+        <file src="src\Reminiscence\bin\Release\netstandard1.3\Reminiscence.dll" target="lib\netstandard1.3"/>
+        <file src="src\Reminiscence\bin\Release\netstandard2.0\Reminiscence.dll" target="lib\netstandard2.0"/>
+        <file src="src\Reminiscence\bin\Release\net40\Reminiscence.dll" target="lib\net40"/>
+        <file src="src\Reminiscence\bin\Release\net45\Reminiscence.dll" target="lib\net45"/>
     </files>
 </package>

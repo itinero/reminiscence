@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Reminiscence.Arrays;
 using System;
 
@@ -29,28 +29,27 @@ namespace Reminiscence.Tests.Arrays
     /// <summary>
     /// Contains new memory array tests.
     /// </summary>
-    [TestClass]
     public class MemoryArrayTests
     {
         /// <summary>
         /// Tests the argument verifications on the constructors.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ConstructorParameterExceptions()
         {
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() =>
+            Assert.Catch<ArgumentOutOfRangeException>(() =>
             {
                 new MemoryArray<int>(-1);
             });
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() =>
+            Assert.Catch<ArgumentOutOfRangeException>(() =>
             {
                 new MemoryArray<int>(-1, 2);
             });
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() =>
+            Assert.Catch<ArgumentOutOfRangeException>(() =>
             {
                 new MemoryArray<int>(10, -1);
             });
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() =>
+            Assert.Catch<ArgumentOutOfRangeException>(() =>
             {
                 new MemoryArray<int>(10, 3);
             });
@@ -59,7 +58,7 @@ namespace Reminiscence.Tests.Arrays
         /// <summary>
         /// A comparison test for the huge array to a regular array.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CompareToArrayTest()
         {
             var stringArrayRef = new string[1000];
@@ -89,7 +88,7 @@ namespace Reminiscence.Tests.Arrays
         /// <summary>
         /// A test resizing a huge array 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ResizeTest()
         {
             var stringArrayRef = new string[1000];
@@ -141,6 +140,36 @@ namespace Reminiscence.Tests.Arrays
 
             Assert.AreEqual(stringArrayRef.Length, stringArray.Length);
             for (int idx = 0; idx < stringArrayRef.Length; idx++)
+            {
+                Assert.AreEqual(stringArrayRef[idx], stringArray[idx]);
+            }
+        }
+
+        /// <summary>
+        /// A comparison test for the memory array to a regular array with a tiny block size.
+        /// </summary>
+        [Test]
+        public void CompareToArrayTestWithTinyBlockSize()
+        {
+            var stringArrayRef = new string[1000];
+            var stringArray = new MemoryArray<string>(1000, 8);
+
+            var randomGenerator = new System.Random(66707770); // make this deterministic 
+            for (var idx = 0; idx < 1000; idx++)
+            {
+                if (randomGenerator.Next(4) >= 2)
+                { // add data.
+                    stringArrayRef[idx] = idx.ToString();
+                    stringArray[idx] = idx.ToString();
+                }
+                else
+                {
+                    stringArrayRef[idx] = null;
+                    stringArray[idx] = null;
+                }
+            }
+
+            for (var idx = 0; idx < 1000; idx++)
             {
                 Assert.AreEqual(stringArrayRef[idx], stringArray[idx]);
             }

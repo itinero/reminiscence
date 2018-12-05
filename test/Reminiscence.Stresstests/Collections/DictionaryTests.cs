@@ -25,6 +25,7 @@ using Reminiscence.Collections;
 using Reminiscence.IO;
 using System;
 using System.IO;
+using System.Linq;
 
 namespace Reminiscense.Stresstests.Collections
 {
@@ -63,6 +64,70 @@ namespace Reminiscense.Stresstests.Collections
                     perf.Stop();
                 }
             }
+        }
+        
+        /// <summary>
+        /// Tests adding random string.
+        /// </summary>
+        public static void TestRandomString()
+        {
+            using (var mapStream = new FileInfo(Global.FileName).Open(
+                FileMode.Create, FileAccess.ReadWrite))
+            {
+                using (var map = new MemoryMapStream(mapStream))
+                {
+                    var dictionary = new Dictionary<string, long>(map);
+
+                    var count = 65536 * 2;
+                    var perf = new PerformanceInfoConsumer(
+                        string.Format("Write Dictionary Random Strings"), 10000);
+                    perf.Start();
+                    for (var i = 0; i < count; i++)
+                    {
+                        var r = RandomString(5);
+                        dictionary[r] = (long)(r.GetHashCode());
+
+                        if (Global.Verbose && i % (count / 100) == 0)
+                        {
+                            perf.Report("Writing... {0}%", i, count - 1);
+                        }
+                    }
+                    perf.Stop();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Tests adding random string.
+        /// </summary>
+        public static void TestRandomStringInMemory()
+        {
+            var dictionary = new Dictionary<string, long>();
+
+            var count = 65536 * 16;
+            var perf = new PerformanceInfoConsumer(
+                string.Format("Write Dictionary Random Strings in memory"), 10000);
+            perf.Start();
+            for (var i = 0; i < count; i++)
+            {
+                var r = RandomString(5);
+                dictionary[r] = (long) (r.GetHashCode());
+
+                if (Global.Verbose && i % (count / 100) == 0)
+                {
+                    perf.Report("Writing... {0}%", i, count - 1);
+                }
+            }
+
+            perf.Stop();
+        }
+
+        private static Random random = new Random(1220);
+        private static string RandomString(int length)
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            return new string(Enumerable.Repeat(chars, length)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
         }
     }
 }

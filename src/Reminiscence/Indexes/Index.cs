@@ -23,6 +23,8 @@
 using Reminiscence.IO;
 using Reminiscence.IO.Streams;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Reminiscence.Indexes
@@ -30,14 +32,14 @@ namespace Reminiscence.Indexes
     /// <summary>
     /// An index mapping variable-sized elements to id's. The id's represent the position as if a continuous byte stream.
     /// </summary>
-    public class Index<T> : IDisposable, ISerializableToStream
+    public partial class Index<T> : IDisposable, ISerializableToStream, IEnumerable<KeyValuePair<long, T>>
     {
-        private readonly MemoryMap.CreateAccessorFunc<T> _createAccessor;
+        private MemoryMap.CreateAccessorFunc<T> _createAccessor;
         private readonly System.Collections.Generic.List<MappedAccessor<T>> _accessors;
         private readonly System.Collections.Generic.List<long> _accessorBytesLost;
-        private readonly long _accessorSize;
-        private readonly long _accessorSizeElements;
-        private readonly MemoryMap _map;
+        private long _accessorSize;
+        private long _accessorSizeElements;
+        private MemoryMap _map;
 
         /// <summary>
         /// Creates a new index based on one fixed-size accessor.
@@ -115,11 +117,48 @@ namespace Reminiscence.Indexes
         }
 
         /// <summary>
+        /// Make this index writable again by injecting a new memory map.
+        /// </summary>
+        public void MakeWritable(MemoryMap map)
+        {
+            if (!this.IsReadonly)
+            {
+                throw new InvalidOperationException("Index is already writable, check IsReadonly.");
+            }
+
+            var accessor = _accessors[0];
+            _map = map;
+            _createAccessor = MemoryMap.GetCreateAccessorFuncFor<T>();
+            _accessorSize = accessor.Capacity; // the only way to handle this now.
+            _nextPositionInBytes = _accessorSize;
+            if (_accessorSize == 0)
+            { // this was empty, start over.
+                _accessors.Clear();
+                _accessorSize = 1024;
+            }
+            if(!accessor.ElementSizeFixed)
+            { // use the size in bytes.
+                _accessorSizeElements = _accessorSize;
+            }
+            else
+            { // use the size in elements.
+                _accessorSizeElements = accessor.CapacityElements;
+            }
+            if (_accessors.Count == 0)
+            { // was empty, create at least one.
+                _accessors.Add(_createAccessor(_map, _accessorSizeElements));
+            }
+        }
+
+        /// <summary>
         /// Adds a new element.
         /// </summary>
         public long Add(T element)
         {
-            if (this.IsReadonly) { throw new InvalidOperationException("Cannot add new element, index is readonly."); }
+            if (this.IsReadonly) 
+            { // make writable using a memory stream.
+                this.MakeWritable(new MemoryMapStream());
+            }
 
             var accessor = _accessors[_accessors.Count - 1]; // always write to the last accessor.
             var size = accessor.WriteTo(_nextPositionInBytes - ((_accessors.Count - 1) * _accessorSize), ref element);
@@ -286,6 +325,20 @@ namespace Reminiscence.Indexes
                 var accessor = MemoryMap.GetCreateAccessorFuncFor<T>()(map, size);
                 return new Index<T>(accessor);
             }
+        }
+
+        /// <summary>
+        /// Gets the enumerator for this index.
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerator<KeyValuePair<long, T>> GetEnumerator()
+        {
+            return new Enumerator(this);
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return this.GetEnumerator();
         }
     }
 }

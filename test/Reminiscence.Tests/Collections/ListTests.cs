@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Reminiscence.Collections;
 using Reminiscence.IO;
 using System;
@@ -31,13 +31,12 @@ namespace Reminiscence.Tests.Collections
     /// <summary>
     /// Contains tests for the list.
     /// </summary>
-    [TestClass]
     public class ListTests
     {
         /// <summary>
         /// Tests creating new list(s).
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestCreateNew()
         {
             using(var map = new MemoryMapStream())
@@ -55,7 +54,7 @@ namespace Reminiscence.Tests.Collections
         /// <summary>
         /// Tests adding new items.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestAdd()
         {
             using (var map = new MemoryMapStream())
@@ -87,7 +86,7 @@ namespace Reminiscence.Tests.Collections
         /// <summary>
         /// Tests clearing all items.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestClear()
         {
             using (var map = new MemoryMapStream())
@@ -118,7 +117,7 @@ namespace Reminiscence.Tests.Collections
         /// <summary>
         /// Tests index of.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestIndexOf()
         {
             using (var map = new MemoryMapStream())
@@ -140,7 +139,7 @@ namespace Reminiscence.Tests.Collections
         /// <summary>
         /// Tests contains.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestContains()
         {
             using (var map = new MemoryMapStream())
@@ -162,7 +161,7 @@ namespace Reminiscence.Tests.Collections
         /// <summary>
         /// Tests copy to.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestCopyTo()
         {
             using (var map = new MemoryMapStream())
@@ -193,7 +192,7 @@ namespace Reminiscence.Tests.Collections
         /// <summary>
         /// Tests insert at.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestInsert()
         {
             using (var map = new MemoryMapStream())
@@ -215,7 +214,7 @@ namespace Reminiscence.Tests.Collections
         /// <summary>
         /// Tests set item.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSetItem()
         {
             using (var map = new MemoryMapStream())
@@ -233,19 +232,19 @@ namespace Reminiscence.Tests.Collections
                 {
                     Assert.AreEqual(i, list[i]);
                 }
-                Assert.ThrowsException<ArgumentOutOfRangeException>(() =>
+                Assert.Catch<ArgumentOutOfRangeException>(() =>
                 {
                     list[11] = 0;
                 });
-                Assert.ThrowsException<ArgumentOutOfRangeException>(() =>
+                Assert.Catch<ArgumentOutOfRangeException>(() =>
                 {
                     list[-1] = 0;
                 });
-                Assert.ThrowsException<ArgumentOutOfRangeException>(() =>
+                Assert.Catch<ArgumentOutOfRangeException>(() =>
                 {
                     var t = list[11];
                 });
-                Assert.ThrowsException<ArgumentOutOfRangeException>(() =>
+                Assert.Catch<ArgumentOutOfRangeException>(() =>
                 {
                     var t = list[-1];
                 });
@@ -255,7 +254,7 @@ namespace Reminiscence.Tests.Collections
         /// <summary>
         /// Tests is readonly.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestIsReadonly()
         {
             using (var map = new MemoryMapStream())
@@ -268,7 +267,7 @@ namespace Reminiscence.Tests.Collections
         /// <summary>
         /// Tests removing an item.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestRemove()
         {
             using (var map = new MemoryMapStream())
@@ -303,7 +302,7 @@ namespace Reminiscence.Tests.Collections
         /// <summary>
         /// Tests removing an item.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestRemoveAt()
         {
             using (var map = new MemoryMapStream())
@@ -333,7 +332,7 @@ namespace Reminiscence.Tests.Collections
         /// <summary>
         /// Tests enumerator.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestEnumerator()
         {
             using (var map = new MemoryMapStream())

@@ -24,6 +24,7 @@ using Reminiscence.Arrays;
 using Reminiscence.IO;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Reminiscence.Collections
@@ -176,7 +177,7 @@ namespace Reminiscence.Collections
                 _keyValueList.Add((uint)_keys.Add(key));
                 _keyValueList.Add(this.CalculateFullHash(key));
                 _keyValueList.Add((uint)_values.Add(value));
-                _keyValueList.AddDontCare((_minimumKeyCount - 1) * 3);
+                _keyValueList.AddDontCare((_minimumKeyCount - 1) * ENTRY_SIZE);
             }
             else
             { // ok, add at the end of the linked-list.
@@ -215,7 +216,8 @@ namespace Reminiscence.Collections
                     {
                         for (var p = pointer + 1; p < pointer + (count * ENTRY_SIZE) + 1; p += ENTRY_SIZE)
                         {
-                            if (_keyValueList[p + 1] == keyHash)
+                            if (_keyValueList.Count > p + 1  &&
+                                _keyValueList[p + 1] == keyHash)
                             { // only check if the key full hashes match.
                                 var existingKey = _keys.Get(_keyValueList[p + 0]);
                                 if (_keysEqual(existingKey, key))
@@ -385,31 +387,40 @@ namespace Reminiscence.Collections
                     _keyValueList.Add((uint)_keys.Add(key));
                     _keyValueList.Add(this.CalculateFullHash(key));
                     _keyValueList.Add((uint)_values.Add(value));
-                    _keyValueList.AddDontCare((_minimumKeyCount - 1) * 3);
+                    _keyValueList.AddDontCare((_minimumKeyCount - 1) * ENTRY_SIZE);
                 }
                 else
                 { // ok, add at the end of the linked-list.
                     var keyHash = this.CalculateFullHash(key);
                     var count = _keyValueList[(int)pointer];
                     if (count > (_minimumKeyCount / 2) &&
-                      (count & (count - 1)) == 0)
-                    { // a power of two, copy to the end and check duplicate keys.
-                        _hashedPointers[hash] = (uint)_keyValueList.Count;
-                        _keyValueList.Add(count + 1);
-                        for (var p = pointer + 1; p < pointer + (count * ENTRY_SIZE) + 1; p += ENTRY_SIZE)
+                        (count & (count - 1)) == 0)
+                    {
+                        // a power of two, copy to the end and check duplicate keys.
+
+                        // first check existing keys
+                        if (_verifyUniqueKeys)
                         {
-                            if (_verifyUniqueKeys)
+                            for (var p = pointer + 1; p < pointer + (count * ENTRY_SIZE) + 1; p += ENTRY_SIZE)
                             {
                                 if (_keyValueList[p + 1] == keyHash)
-                                { // only check if the key full hashes match.
+                                {
+                                    // only check if the key full hashes match.
                                     var existingKey = _keys.Get(_keyValueList[p + 0]);
                                     if (_keysEqual(existingKey, key))
                                     {
-                                        _keyValueList[p + 2] = (uint)_values.Add(value);
+                                        _keyValueList[p + 2] = (uint) _values.Add(value);
                                         return;
                                     }
                                 }
                             }
+                        }
+                        
+                        // we are sure we need to copy here.
+                        _hashedPointers[hash] = (uint)_keyValueList.Count;
+                        _keyValueList.Add(count + 1);
+                        for (var p = pointer + 1; p < pointer + (count * ENTRY_SIZE) + 1; p += ENTRY_SIZE)
+                        {
                             _keyValueList.Add(_keyValueList[p]);
                             _keyValueList.Add(_keyValueList[p + 1]);
                             _keyValueList.Add(_keyValueList[p + 2]);
@@ -417,7 +428,7 @@ namespace Reminiscence.Collections
                         _keyValueList.Add((uint)_keys.Add(key));
                         _keyValueList.Add(this.CalculateFullHash(key));
                         _keyValueList.Add((uint)_values.Add(value));
-                        _keyValueList.AddDontCare((int)(count - 1) * 3);
+                        _keyValueList.AddDontCare((int)(count - 1) * ENTRY_SIZE);
                     }
                     else
                     {

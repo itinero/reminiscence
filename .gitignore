@@ -36,3 +36,7 @@ TestResult.xml
 
 packages/*
 !packages/repositories.config
+
+
+.idea
+.idea/*

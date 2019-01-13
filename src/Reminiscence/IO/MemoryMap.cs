@@ -343,7 +343,6 @@ namespace Reminiscence.IO
         /// Creates a new memory mapped file based on the given stream and the given size in bytes.
         /// </summary>
         protected abstract MappedAccessor<byte> DoCreateNewByte(long position, long sizeInByte);
-        
 
         /// <summary>
         /// A delegate to facilitate reading a variable-sized object.
@@ -448,6 +447,8 @@ namespace Reminiscence.IO
                 {
                     _accessorDelegates = new Dictionary<Type, object>();
                 }
+                _accessorDelegates.Add(typeof(byte), new CreateAccessorFunc<byte>(
+                    (map, size) => map.CreateByte(size)));
                 _accessorDelegates.Add(typeof(short), new CreateAccessorFunc<short>(
                     (map, size) => map.CreateInt16(size)));
                 _accessorDelegates.Add(typeof(ushort), new CreateAccessorFunc<ushort>(
@@ -508,11 +509,11 @@ namespace Reminiscence.IO
                 { // register accessors.
                     MemoryMap.RegisterCreateAccessorFuncs();
                 }
-                object value;
-                if (!_accessorDelegates.TryGetValue(type, out value))
+
+                if (!_accessorDelegates.TryGetValue(type, out var value))
                 {
-                    throw new NotSupportedException(string.Format("Type {0} not supported, try explicity registering an accessor creating function.",
-                        type));
+                    throw new NotSupportedException(
+                        $"Type {type} not supported, try explicitly registering an accessor creating function.");
                 }
                 return (CreateAccessorFunc<T>)value;
             }

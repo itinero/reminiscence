@@ -31,7 +31,7 @@ namespace Reminiscence.Arrays
     {
         private T[][] blocks;
         private readonly int _blockSize = (int)System.Math.Pow(2, 20); // Holds the maximum array size, always needs to be a power of 2.
-        private int _arrayPow = 20;
+        private readonly int _arrayPow = 20;
         private long _size; // the total size of this array.
 
         /// <summary>

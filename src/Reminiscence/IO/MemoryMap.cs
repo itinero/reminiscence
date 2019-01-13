@@ -306,6 +306,44 @@ namespace Reminiscence.IO
         /// Creates a new memory mapped file based on the given stream and the given size in bytes.
         /// </summary>
         protected abstract MappedAccessor<ushort> DoCreateNewUInt16(long position, long sizeInByte);
+        
+        /// <summary>
+        /// Creates a new memory mapped accessor for a given part of this file with given size in bytes and the start position.
+        /// </summary>
+        public MappedAccessor<byte> CreateByte(long position, long sizeInElements)
+        {
+            var sizeInBytes = sizeInElements;
+            var accessor = this.DoCreateNewByte(position, sizeInBytes);
+            _accessors.Add(accessor);
+
+            var nextPosition = position + sizeInBytes;
+            if (nextPosition > _nextPosition)
+            {
+                _nextPosition = nextPosition;
+            }
+
+            return accessor;
+        }
+
+        /// <summary>
+        /// Creates a new empty memory mapped accessor with given size in bytes.
+        /// </summary>
+        public MappedAccessor<byte> CreateByte(long sizeInElements)
+        {
+            var sizeInBytes = sizeInElements;
+            var accessor = this.DoCreateNewByte(_nextPosition, sizeInBytes);
+            _accessors.Add(accessor);
+
+            _nextPosition = _nextPosition + sizeInBytes;
+
+            return accessor;
+        }
+
+        /// <summary>
+        /// Creates a new memory mapped file based on the given stream and the given size in bytes.
+        /// </summary>
+        protected abstract MappedAccessor<byte> DoCreateNewByte(long position, long sizeInByte);
+        
 
         /// <summary>
         /// A delegate to facilitate reading a variable-sized object.

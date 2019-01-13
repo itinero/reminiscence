@@ -30,7 +30,7 @@ namespace Reminiscence.IO
     /// </summary>
     public class MemoryMapStream : MemoryMap
     {
-        private Stream _stream; // Holds the stream.
+        private readonly Stream _stream; // Holds the stream.
 
         /// <summary>
         /// Creates a new mapped stream using a memory stream.
@@ -92,6 +92,17 @@ namespace Reminiscence.IO
         protected override MappedAccessor<short> DoCreateNewInt16(long position, long sizeInBytes)
         {
             return new Accessors.MappedAccessorInt16(this, new CappedStream(_stream, position, sizeInBytes));
+        }
+
+        /// <summary>
+        /// Creates a new memory mapped file based on the given stream and the given size in bytes.
+        /// </summary>
+        /// <param name="position">The position to start at.</param>
+        /// <param name="sizeInBytes">The size.</param>
+        /// <returns></returns>
+        protected override MappedAccessor<byte> DoCreateNewByte(long position, long sizeInBytes)
+        {
+            return new Accessors.MappedAccessorByte(this, new CappedStream(_stream, position, sizeInBytes));
         }
 
         /// <summary>

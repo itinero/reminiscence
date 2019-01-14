@@ -59,7 +59,7 @@ namespace Reminiscence
         public static long CopyToWithSize(this ISerializableToStream serializable, Stream stream)
         {
             var position = stream.Position;
-            stream.Seek(position + 8, SeekOrigin.Begin);
+            stream.Write(new byte[8], 0, 8);
 
             // copy the actual data.
             var size = serializable.CopyTo(stream);

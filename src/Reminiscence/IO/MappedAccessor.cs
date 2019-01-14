@@ -211,7 +211,7 @@ namespace Reminiscence.IO
         }
 
         /// <summary>
-        /// Diposes of all native resources associated with this object.
+        /// Disposes of all native resources associated with this object.
         /// </summary>
         public virtual void Dispose()
         {

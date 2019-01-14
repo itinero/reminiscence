@@ -70,6 +70,8 @@ namespace Reminiscence.IO
         public static MemoryMap.WriteToDelegate<string> WriteToString = new MemoryMap.WriteToDelegate<string>(
             (Stream stream, long position, ref string value) =>
             {
+                // TODO: remove this and adjust this to a format that can represent null and empty.
+                if (value == null) value = string.Empty; 
                 stream.Seek(position, System.IO.SeekOrigin.Begin);
                 var bytes = System.Text.Encoding.Unicode.GetBytes(value);
                 var length = bytes.Length;
@@ -80,11 +82,7 @@ namespace Reminiscence.IO
                     {
                         size = 255;
                     }
-
-                    if (stream.Length <= stream.Position + size + 1)
-                    { // past end of stream.
-                        return -1;
-                    }
+                    
                     stream.WriteByte((byte) size);
                     stream.Write(bytes, idx, size);
                     length++;

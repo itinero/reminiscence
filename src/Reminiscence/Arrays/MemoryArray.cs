@@ -21,6 +21,8 @@
 // THE SOFTWARE.
 
 using System;
+using System.IO;
+using Reminiscence.IO;
 
 namespace Reminiscence.Arrays
 {
@@ -29,9 +31,9 @@ namespace Reminiscence.Arrays
     /// </summary>
     public class MemoryArray<T> : ArrayBase<T>
     {
-        private T[][] blocks;
-        private readonly int _blockSize = (int)System.Math.Pow(2, 20); // Holds the maximum array size, always needs to be a power of 2.
-        private readonly int _arrayPow = 20;
+        private T[][] _blocks;
+        private readonly int _blockSize; // Holds the maximum array size, always needs to be a power of 2.
+        private readonly int _arrayPow;
         private long _size; // the total size of this array.
 
         /// <summary>
@@ -57,14 +59,14 @@ namespace Reminiscence.Arrays
             _arrayPow = ExpOf2(blockSize);
 
             var blockCount = (long)System.Math.Ceiling((double)size / _blockSize);
-            blocks = new T[blockCount][];
+            _blocks = new T[blockCount][];
             for (var i = 0; i < blockCount - 1; i++)
             {
-                blocks[i] = new T[_blockSize];
+                _blocks[i] = new T[_blockSize];
             }
             if (blockCount > 0)
             {
-                blocks[blockCount - 1] = new T[size - ((blockCount - 1) * _blockSize)];
+                _blocks[blockCount - 1] = new T[size - ((blockCount - 1) * _blockSize)];
             }
         }
 
@@ -89,23 +91,20 @@ namespace Reminiscence.Arrays
             {
                 var block = idx >> _arrayPow;
                 var localIdx = idx - (block << _arrayPow);
-                return blocks[block][localIdx];
+                return _blocks[block][localIdx];
             }
             set
             {
-                long block = (long)System.Math.Floor((double)idx / _blockSize);
-                long localIdx = idx % _blockSize;
-                blocks[block][localIdx] = value;
+                var block = (long)System.Math.Floor((double)idx / _blockSize);
+                var localIdx = idx % _blockSize;
+                _blocks[block][localIdx] = value;
             }
         }
 
         /// <summary>
         /// Returns true if this array can be resized.
         /// </summary>
-        public override bool CanResize
-        {
-            get { return true; }
-        }
+        public override bool CanResize => true;
 
         /// <summary>
         /// Resizes this array.
@@ -118,35 +117,35 @@ namespace Reminiscence.Arrays
             _size = size;
 
             var blockCount = (long)System.Math.Ceiling((double)size / _blockSize);
-            if (blockCount != blocks.Length)
+            if (blockCount != _blocks.Length)
             {
-                Array.Resize<T[]>(ref blocks, (int)blockCount);
+                Array.Resize<T[]>(ref _blocks, (int)blockCount);
             }
-            for (int i = 0; i < blockCount - 1; i++)
+            for (var i = 0; i < blockCount - 1; i++)
             {
-                if (blocks[i] == null)
+                if (_blocks[i] == null)
                 { // there is no array, create it.
-                    blocks[i] = new T[_blockSize];
+                    _blocks[i] = new T[_blockSize];
                 }
-                if (blocks[i].Length != _blockSize)
+                if (_blocks[i].Length != _blockSize)
                 { // the size is the same, keep it as it.
-                    var localArray = blocks[i];
+                    var localArray = _blocks[i];
                     Array.Resize<T>(ref localArray, (int)_blockSize);
-                    blocks[i] = localArray;
+                    _blocks[i] = localArray;
                 }
             }
             if (blockCount > 0)
             {
                 var lastBlockSize = size - ((blockCount - 1) * _blockSize);
-                if (blocks[blockCount - 1] == null)
+                if (_blocks[blockCount - 1] == null)
                 { // there is no array, create it.
-                    blocks[blockCount - 1] = new T[lastBlockSize];
+                    _blocks[blockCount - 1] = new T[lastBlockSize];
                 }
-                if (blocks[blockCount - 1].Length != lastBlockSize)
+                if (_blocks[blockCount - 1].Length != lastBlockSize)
                 { // the size is the same, keep it as it.
-                    var localArray = blocks[blockCount - 1];
+                    var localArray = _blocks[blockCount - 1];
                     Array.Resize<T>(ref localArray, (int)lastBlockSize);
-                    blocks[blockCount - 1] = localArray;
+                    _blocks[blockCount - 1] = localArray;
                 }
             }
         }
@@ -154,16 +153,40 @@ namespace Reminiscence.Arrays
         /// <summary>
         /// Returns the length of this array.
         /// </summary>
-        public override long Length
+        public override long Length => _size;
+
+        /// <summary>
+        /// Creates a new memory array reading the size and copying from stream.
+        /// </summary>
+        /// <param name="stream">The stream.</param>
+        /// <returns>A memory array.</returns>
+        public static MemoryArray<T> CopyFromWithSize(Stream stream)
         {
-            get
+            using (var accessor = MemoryMap.GetCreateAccessorFuncFor<T>()(new MemoryMapStream(), 0))
             {
-                return _size;
-            }
+                var buffer = new byte[8];
+                stream.Read(buffer, 0, 8);
+                var size = BitConverter.ToInt64(buffer, 0);
+
+                long length;
+                if (!accessor.ElementSizeFixed) 
+                { // if the element size is not fixed, it should have been written here if copy to with size was used.
+                    stream.Read(buffer, 0, 8);
+                    length = BitConverter.ToInt64(buffer, 0);
+                }
+                else
+                { // the length of the array can be calculate from the size of the data.
+                    length = size / accessor.ElementSize;
+                }
+             
+                var memoryArray = new MemoryArray<T>(length);
+                memoryArray.CopyFrom(accessor, stream);
+                return memoryArray;
+            }    
         }
 
         /// <summary>
-        /// Diposes of all associated native resources held by this object.
+        /// Disposes of all associated native resources held by this object.
         /// </summary>
         public override void Dispose()
         {

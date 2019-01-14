@@ -22,6 +22,7 @@
 
 using System;
 using System.IO;
+using Reminiscence.IO.Streams;
 
 namespace Reminiscence.IO
 {
@@ -81,6 +82,12 @@ namespace Reminiscence.IO
                     if (size > 255)
                     {
                         size = 255;
+                    }
+                    
+                    if(stream is CappedStream && 
+                       stream.Length <= stream.Position + size + 1)
+                    { // past end of stream.
+                        return -1;
                     }
                     
                     stream.WriteByte((byte) size);

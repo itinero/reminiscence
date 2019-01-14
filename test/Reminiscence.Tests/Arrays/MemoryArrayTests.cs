@@ -23,6 +23,7 @@
 using NUnit.Framework;
 using Reminiscence.Arrays;
 using System;
+using System.IO;
 
 namespace Reminiscence.Tests.Arrays
 {
@@ -172,6 +173,31 @@ namespace Reminiscence.Tests.Arrays
             for (var idx = 0; idx < 1000; idx++)
             {
                 Assert.AreEqual(stringArrayRef[idx], stringArray[idx]);
+            }
+        }
+
+        /// <summary>
+        /// Tests copy with size and read from.
+        /// </summary>
+        [Test]
+        public void TestWriteToAndReadFromVariable()
+        {
+            using (var memoryStream = new MemoryStream())
+            {
+                var array = new MemoryArray<string>(1000);
+                for (var i = 0; i < array.Length; i++)
+                {
+                    array[i] = (i + 100).ToString(); 
+                }
+
+                array.CopyToWithSize(memoryStream);
+                memoryStream.Seek(0, SeekOrigin.Begin);
+
+                var array1 = MemoryArray<string>.CopyFromWithSize(memoryStream);
+                for (var i = 0; i < array.Length; i++)
+                {
+                    Assert.AreEqual(array[i], array1[i]);
+                }
             }
         }
     }

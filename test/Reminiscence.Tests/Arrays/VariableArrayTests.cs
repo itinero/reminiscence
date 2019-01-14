@@ -24,6 +24,7 @@ using NUnit.Framework;
 using Reminiscence.Arrays;
 using Reminiscence.IO;
 using System;
+using System.IO;
 
 namespace Reminiscence.Tests.Arrays
 {
@@ -196,62 +197,5 @@ namespace Reminiscence.Tests.Arrays
                 }
             }
         }
-
-        ///// <summary>
-        ///// Tests write to stream.
-        ///// </summary>
-        //[Test]
-        //public void TestWriteToAndReadFrom()
-        //{
-        //    using (var map = new MappedStream())
-        //    {
-        //        using (var memoryStream = new MemoryStream())
-        //        {
-        //            using (var array = new Array<int>(map.CreateInt32, 4, 10))
-        //            {
-        //                for (var i = 0; i < array.Length; i++)
-        //                {
-        //                    array[i] = i + 100;
-        //                }
-
-        //                array.WriteTo(memoryStream);
-        //                memoryStream.Seek(0, SeekOrigin.Begin);
-
-        //                using (var array1 = Array<int>.ReadFrom(memoryStream, map.CreateInt32, 4))
-        //                {
-        //                    for (var i = 0; i < array.Length; i++)
-        //                    {
-        //                        Assert.AreEqual(array[i], array1[i]);
-        //                    }
-        //                }
-        //            }
-        //        }
-        //    }
-
-        //    using (var map = new MappedStream())
-        //    {
-        //        using (var memoryStream = new MemoryStream())
-        //        {
-        //            using (var array = new Array<int>(map.CreateInt32, 4, 10000, 32, 32, 2))
-        //            {
-        //                for (var i = 0; i < array.Length; i++)
-        //                {
-        //                    array[i] = i + 100;
-        //                }
-
-        //                array.WriteTo(memoryStream);
-        //                memoryStream.Seek(0, SeekOrigin.Begin);
-
-        //                using (var array1 = Array<int>.ReadFrom(memoryStream, map.CreateInt32, 4))
-        //                {
-        //                    for (var i = 0; i < array.Length; i++)
-        //                    {
-        //                        Assert.AreEqual(array[i], array1[i]);
-        //                    }
-        //                }
-        //            }
-        //        }
-        //    }
-        //}
     }
 }

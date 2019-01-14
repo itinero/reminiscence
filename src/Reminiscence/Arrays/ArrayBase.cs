@@ -93,22 +93,36 @@ namespace Reminiscence.Arrays
         }
 
         /// <summary>
-        /// Copies an array to the given stream.
+        /// Copies an array from the given stream.
         /// </summary>
         public virtual void CopyFrom(Stream stream)
         {
-            var position = stream.Position;
-            long i = 0;
             using (var accessor = MemoryMap.GetCreateAccessorFuncFor<T>()(new MemoryMapStream(), 0))
             {
-                var element = default(T);
-                while (i < this.Length)
-                {
-                    accessor.ReadFrom(stream, stream.Position, ref element);
-                    this[i] = element;
-                    i++;
-                }
+                this.CopyFrom(accessor, stream);
             }
+        }
+
+        /// <summary>
+        /// Copies an array from the given stream using the given accessor.
+        /// </summary>
+        /// <param name="accessor">The accessor to use.</param>
+        /// <param name="stream">The stream to copy from.</param>
+        internal virtual void CopyFrom(MappedAccessor<T> accessor, Stream stream)
+        {
+            long i = 0;
+            var element = default(T);
+            while (i < this.Length)
+            {
+                accessor.ReadFrom(stream, stream.Position, ref element);
+                this[i] = element;
+                i++;
+            }
+        }
+
+        long ISerializableToStream.CopyTo(Stream stream)
+        {
+            return this.CopyTo(stream, true);
         }
 
         /// <summary>
@@ -116,14 +130,26 @@ namespace Reminiscence.Arrays
         /// </summary>
         public virtual long CopyTo(Stream stream)
         {
+            return this.CopyTo(stream, false);
+        }
+
+        /// <summary>
+        /// Copies an array to the given stream.
+        /// </summary>
+        public virtual long CopyTo(Stream stream, bool writeLengthIfNeeded)
+        {
             var position = stream.Position;
             long i = 0;
             using (var accessor = MemoryMap.GetCreateAccessorFuncFor<T>()(new MemoryMapStream(), 0))
             {
-                var element = default(T);
+                if (writeLengthIfNeeded && !accessor.ElementSizeFixed)
+                { // also write the element count here, it cannot be reconstructed from length of data.
+                    stream.Write(BitConverter.GetBytes(this.Length), 0, 8);
+                }
+
                 while (i < this.Length)
                 {
-                    element = this[i];
+                    var element = this[i];
                     accessor.WriteTo(stream, stream.Position, ref element);
                     i++;
                 }

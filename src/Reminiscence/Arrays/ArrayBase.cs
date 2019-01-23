@@ -22,7 +22,6 @@
 
 using Reminiscence.IO;
 using System;
-using System.Collections.Generic;
 using System.IO;
 
 namespace Reminiscence.Arrays
@@ -62,7 +61,7 @@ namespace Reminiscence.Arrays
         /// Copies all the data over from the given array to this array.
         /// </summary>
         /// <param name="array">The array to copy to.</param>
-        public virtual void CopyFrom(ArrayBase<T> array)
+        public void CopyFrom(ArrayBase<T> array)
         {
             this.CopyFrom(array, 0, 0, array.Length);
         }
@@ -72,7 +71,7 @@ namespace Reminiscence.Arrays
         /// </summary>
         /// <param name="array">The array to copy to.</param>
         /// <param name="count">The number of elements to copy.</param>
-        public virtual void CopyFrom(ArrayBase<T> array, long count)
+        public void CopyFrom(ArrayBase<T> array, long count)
         {
             this.CopyFrom(array, 0, 0, count);
         }

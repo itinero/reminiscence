@@ -24,7 +24,6 @@ using NUnit.Framework;
 using Reminiscence.Arrays;
 using System;
 using System.IO;
-using System.IO.MemoryMappedFiles;
 using System.Runtime.InteropServices;
 
 namespace Reminiscence.Tests.Arrays
@@ -171,57 +170,6 @@ namespace Reminiscence.Tests.Arrays
                 {
                     arr2.CopyTo(ms);
                     outputBytes = ms.ToArray();
-                }
-            }
-
-            Assert.True(outputBytes.SequenceEqual(inputBytes));
-        }
-
-        [Test]
-        public void MemoryMappedFileTest()
-        {
-            var inputBytes = new byte[1024 * 1024];
-            var inputBytesAsInt32 = MemoryMarshal.Cast<byte, int>(inputBytes);
-            var randomGenerator = new System.Random(8675309); // make this deterministic
-            for (int i = 0; i < inputBytesAsInt32.Length; i++)
-            {
-                inputBytesAsInt32[i] = randomGenerator.Next();
-            }
-
-            Span<byte> outputBytes;
-
-            using (var inputFile = new FileStream(Path.GetRandomFileName(), FileMode.CreateNew, FileAccess.ReadWrite, FileShare.ReadWrite, 4096, FileOptions.DeleteOnClose))
-            using (var outputFile = new FileStream(Path.GetRandomFileName(), FileMode.CreateNew, FileAccess.ReadWrite, FileShare.ReadWrite, 4096, FileOptions.DeleteOnClose))
-            {
-                inputFile.Write(inputBytes, 0, inputBytes.Length);
-                outputFile.SetLength(inputBytes.Length);
-                using (var inputMMF = MemoryMappedFile.CreateFromFile(inputFile, "TestMap1", 0, MemoryMappedFileAccess.ReadWrite, HandleInheritability.None, true))
-                using (var outputMMF = MemoryMappedFile.CreateFromFile(outputFile, "TestMap2", 0, MemoryMappedFileAccess.ReadWrite, HandleInheritability.None, true))
-                using (var inputAccessor = inputMMF.CreateViewAccessor())
-                using (var outputAccessor = outputMMF.CreateViewAccessor())
-                {
-                    var inputAllocator = new SafeBufferMemoryAllocator(inputAccessor.SafeMemoryMappedViewHandle);
-                    var outputAllocator = new SafeBufferMemoryAllocator(outputAccessor.SafeMemoryMappedViewHandle);
-
-                    using (var arr1 = new NativeMemoryArray<int>(inputAllocator, inputBytesAsInt32.Length))
-                    using (var arr2 = new NativeMemoryArray<int>(outputAllocator, inputBytesAsInt32.Length))
-                    {
-                        // load the data in from a stream
-                        using (var ms = new MemoryStream(inputBytes, false))
-                        {
-                            arr1.CopyFrom(ms);
-                        }
-
-                        // copy the data to another array
-                        arr2.CopyFrom(arr1);
-
-                        // save the data out to another stream
-                        using (var ms = new MemoryStream(inputBytes.Length))
-                        {
-                            arr2.CopyTo(ms);
-                            outputBytes = ms.ToArray();
-                        }
-                    }
                 }
             }
 

@@ -20,6 +20,8 @@ namespace Reminiscence.Arrays
 
         private long length;
 
+        private bool disposed;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="NativeMemoryArray{T}"/> class.
         /// </summary>
@@ -73,6 +75,7 @@ namespace Reminiscence.Arrays
         public override void Dispose()
         {
             this.Resize(0);
+            this.disposed = true;
             GC.SuppressFinalize(this);
         }
 
@@ -82,6 +85,11 @@ namespace Reminiscence.Arrays
             if (size < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(size), size, "Must be non-negative.");
+            }
+
+            if (size != 0 && this.disposed)
+            {
+                throw new ObjectDisposedException(this.GetType().Name);
             }
 
             // this is the only line anywhere that ought to have any business calling Reallocate.

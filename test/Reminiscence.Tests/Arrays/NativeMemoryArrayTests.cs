@@ -45,6 +45,20 @@ namespace Reminiscence.Tests.Arrays
             });
         }
 
+        [Test]
+        public void ThrowIfDisposedTest()
+        {
+            var array = new NativeMemoryArray<int>(DefaultUnmanagedMemoryAllocator.Instance, 1);
+            array.Dispose();
+
+            // should be able to dispose twice and do a "resize" to current size
+            Assert.DoesNotThrow(() => array.Dispose());
+            Assert.DoesNotThrow(() => array.Resize(0));
+
+            // but should not be able to resurrect
+            Assert.Throws<ObjectDisposedException>(() => array.Resize(1));
+        }
+
         /// <summary>
         /// A comparison test for the huge array to a regular array.
         /// </summary>

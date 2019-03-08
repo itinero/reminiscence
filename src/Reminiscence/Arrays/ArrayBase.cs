@@ -22,7 +22,6 @@
 
 using Reminiscence.IO;
 using System;
-using System.Collections.Generic;
 using System.IO;
 
 namespace Reminiscence.Arrays

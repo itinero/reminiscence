@@ -6,45 +6,24 @@ using System.Runtime.CompilerServices;
 namespace Reminiscence.Arrays
 {
     /// <summary>
-    /// An array that holds instances of PDS types contiguously in virtual memory.
+    /// Base class for arrays that hold instances of PDS types contiguously in virtual memory,
+    /// irrespective of what "kind" of virtual memory that is ("regular" memory, memory-mapped file,
+    /// other??).
     /// </summary>
     /// <typeparam name="T">
     /// The type of value to be stored in the array.
     /// </typeparam>
-    public sealed unsafe class NativeMemoryArray<T> : ArrayBase<T>
+    public abstract unsafe class NativeMemoryArrayBase<T> : ArrayBase<T>
         where T : unmanaged
     {
-        private readonly IUnmanagedMemoryAllocator allocator;
-
+        // use backing fields for these two, to help make the MSIL for GetPointer as simple as it
+        // possibly can be, in case that helps the JIT in any way (either now or in the future).
         private T* head;
 
         private long length;
 
-        private bool disposed;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="NativeMemoryArray{T}"/> class.
-        /// </summary>
-        /// <param name="allocator">
-        /// The <see cref="IUnmanagedMemoryAllocator"/> to use to allocate, reallocate, and free
-        /// contiguous blocks of virtual memory.
-        /// </param>
-        /// <param name="size">
-        /// The number of elements that the array should be able to store.
-        /// </param>
-        public NativeMemoryArray(IUnmanagedMemoryAllocator allocator, long size)
-        {
-            this.allocator = allocator ?? throw new ArgumentNullException(nameof(allocator));
-            this.Resize(size);
-        }
-
-        /// <summary>
-        /// Finalizes an instance of the <see cref="NativeMemoryArray{T}"/> class.
-        /// </summary>
-        ~NativeMemoryArray() => this.Resize(0);
-
         /// <inheritdoc />
-        public override T this[long idx]
+        public sealed override T this[long idx]
         {
             get => Unsafe.ReadUnaligned<T>(GetPointer(idx));
             set => Unsafe.WriteUnaligned(GetPointer(idx), value);
@@ -66,52 +45,50 @@ namespace Reminiscence.Arrays
         private static void ThrowArgumentOutOfRangeExceptionForIndex() => throw new ArgumentOutOfRangeException("idx", "Must be non-negative and less than the size of the array.");
 
         /// <inheritdoc />
-        public override long Length => this.length;
+        public sealed override long Length => this.length;
 
         /// <inheritdoc />
-        public override bool CanResize => true;
+        public override bool CanResize => false;
 
         /// <inheritdoc />
-        public override void Dispose()
+        public override void Resize(long size) => throw new NotSupportedException("This array does not support resizing.  Please check CanResize before calling this method.");
+
+        /// <summary>
+        /// Gets or sets the unmanaged pointer to the first element in the array.  If the array is
+        /// empty (i.e., <see cref="LengthCore"/> is 0), then this value may be undefined.
+        /// </summary>
+        protected T* HeadPointer
         {
-            this.Resize(0);
-            this.disposed = true;
-            GC.SuppressFinalize(this);
+            get => this.head;
+            set => this.head = value;
+        }
+
+        /// <summary>
+        /// Gets or sets the number of elements in the array starting at <see cref="HeadPointer"/>.
+        /// Make sure you set this correctly!  Setting an incorrect value here is an invitation for
+        /// access violations, which .NET developers typically do not deal with.
+        /// </summary>
+        /// <remarks>
+        /// When this value is 0, the base class will not attempt to use <see cref="HeadPointer"/>
+        /// in any meaningful way, so it is recommended that the <see cref="ArrayBase{T}.Dispose"/>
+        /// implementation ultimately does so.
+        /// </remarks>
+        protected long LengthCore
+        {
+            get => this.length;
+            set => this.length = value;
         }
 
         /// <inheritdoc />
-        public override void Resize(long size)
+        public sealed override unsafe void CopyFrom(ArrayBase<T> array, long index, long start, long count)
         {
-            if (size < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(size), size, "Must be non-negative.");
-            }
-
-            if (size != 0 && this.disposed)
-            {
-                throw new ObjectDisposedException(this.GetType().Name);
-            }
-
-            // this is the only line anywhere that ought to have any business calling Reallocate.
-#pragma warning disable 618
-            this.head = (T*)this.allocator.Reallocate(oldPointer: (byte*)this.head,
-                                                      oldByteCount: this.length * Unsafe.SizeOf<T>(),
-                                                      newByteCount: size * Unsafe.SizeOf<T>(),
-                                                      zeroFill: true);
-#pragma warning restore 618
-            this.length = size;
-        }
-
-        /// <inheritdoc />
-        public override unsafe void CopyFrom(ArrayBase<T> array, long index, long start, long count)
-        {
-            if (!(array is NativeMemoryArray<T> nativeArray))
+            if (!(array is NativeMemoryArrayBase<T> nativeArray))
             {
                 base.CopyFrom(array, index, start, count);
                 return;
             }
 
-            if (start + count > nativeArray.length)
+            if (start + count > nativeArray.LengthCore)
             {
                 throw new ArgumentException("tried to copy more items than the source has available");
             }
@@ -127,16 +104,16 @@ namespace Reminiscence.Arrays
         }
 
         /// <inheritdoc />
-        public override unsafe void CopyFrom(Stream stream)
+        public sealed override unsafe void CopyFrom(Stream stream)
         {
             long len = this.length * Unsafe.SizeOf<T>();
             NativeMemoryArrayHelper.CopyFromStream(stream: stream ?? throw new ArgumentNullException(nameof(stream)),
-                                                   dst:(byte*)this.head,
+                                                   dst: (byte*)this.head,
                                                    length: len);
         }
 
         /// <inheritdoc />
-        public override unsafe long CopyTo(Stream stream)
+        public sealed override unsafe long CopyTo(Stream stream)
         {
             long len = this.length * Unsafe.SizeOf<T>();
             NativeMemoryArrayHelper.CopyToStream(src: (byte*)this.head,

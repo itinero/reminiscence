@@ -169,6 +169,70 @@ namespace Reminiscence.Tests.Arrays
             Assert.True(outputBytes.SequenceEqual(inputBytes));
         }
 
+        [Test]
+        public void CappedFileTest()
+        {
+            var randomGenerator = new System.Random(8675309); // make this deterministic
+
+            var headValues = GenerateRandomValues(123);
+            var middleValues = GenerateRandomValues(456);
+            var tailValues = GenerateRandomValues(789);
+            ReadOnlySpan<int> GenerateRandomValues(int length)
+            {
+                int[] values = new int[length];
+                for (int i = 0; i < values.Length; i++)
+                {
+                    values[i] = randomGenerator.Next();
+                }
+
+                return values;
+            }
+
+            long headByteOffset, middleByteOffset, tailByteOffset;
+            string path = Path.GetRandomFileName();
+            using (var file = File.Create(path))
+            {
+                this.createdPaths.Add(path);
+
+                // write variable-length garbage before and after each important section.
+                file.Write(new byte[15]);
+
+                headByteOffset = file.Position;
+                file.Write(MemoryMarshal.AsBytes(headValues));
+
+                file.Write(new byte[29]);
+
+                middleByteOffset = file.Position;
+                file.Write(MemoryMarshal.AsBytes(middleValues));
+
+                file.Write(new byte[365]);
+
+                tailByteOffset = file.Position;
+                file.Write(MemoryMarshal.AsBytes(tailValues));
+
+                file.Write(new byte[99]);
+            }
+
+            // make sure to test that we can have multiple arrays alive at the same time that all
+            // look at different non-overlapping sections of the same file
+            using (var headArr = new NativeMemoryMappedArray<int>(path, headByteOffset, headValues.Length))
+            using (var middleArr = new NativeMemoryMappedArray<int>(path, middleByteOffset, middleValues.Length))
+            using (var tailArr = new NativeMemoryMappedArray<int>(path, tailByteOffset, tailValues.Length))
+            {
+                AssertEqual(headValues, headArr);
+                AssertEqual(middleValues, middleArr);
+                AssertEqual(tailValues, tailArr);
+                void AssertEqual(ReadOnlySpan<int> expected, NativeMemoryMappedArray<int> actual)
+                {
+                    Assert.AreEqual(expected.Length, actual.Length);
+                    for (int i = 0; i < expected.Length; i++)
+                    {
+                        Assert.AreEqual(expected[i], actual[i]);
+                    }
+                }
+            }
+        }
+
         private string CreateFile(int length)
         {
             string path = Path.GetRandomFileName();

@@ -18,6 +18,8 @@ namespace Reminiscence.Arrays
     {
         private readonly FileStream fileStream;
 
+        private readonly long? byteOffset;
+
         private MemoryMappedFile memoryMappedFile;
 
         private MemoryMappedViewAccessor memoryMappedViewAccessor;
@@ -35,12 +37,54 @@ namespace Reminiscence.Arrays
         /// </param>
         public NativeMemoryMappedArray(string fileName)
         {
-            // to be considered: if we accept an existing FileStream, an offset, and a byte count,
-            // then we can map just a section of the file so that multiple maps could be active at
-            // once for the same file (though the arrays would become not-resizable).
-            this.fileStream = new FileStream(fileName, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read);
+            this.fileStream = new FileStream(fileName, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
             try
             {
+                this.Initialize();
+            }
+            catch
+            {
+                this.fileStream.Dispose();
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="NativeMemoryMappedArray{T}"/> class using
+        /// only part of the given file.
+        /// </summary>
+        /// <param name="fileName">
+        /// The path to the file to memory-map.  If the file does not exist, then an exception will
+        /// be thrown.
+        /// </param>
+        /// <param name="byteOffset">
+        /// The offset, <strong>in bytes</strong>, at which the data in the file starts.
+        /// </param>
+        /// <param name="length">
+        /// The number of elements in the array.
+        /// </param>
+        public NativeMemoryMappedArray(string fileName, long byteOffset, long length)
+        {
+            this.fileStream = new FileStream(fileName, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
+            try
+            {
+                if (byteOffset < 0)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(byteOffset), byteOffset, "Must be non-negative.");
+                }
+
+                if (length < 0)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(length), length, "Must be non-negative.");
+                }
+
+                if (byteOffset + (length * Unsafe.SizeOf<T>()) > this.fileStream.Length)
+                {
+                    throw new ArgumentException("The given offset and length point to a section that extends beyond the end of the file.");
+                }
+
+                this.byteOffset = byteOffset;
+                this.LengthCore = length;
                 this.Initialize();
             }
             catch
@@ -63,7 +107,7 @@ namespace Reminiscence.Arrays
         }
 
         /// <inheritdoc />
-        public override bool CanResize => true;
+        public override bool CanResize => !this.byteOffset.HasValue;
 
         /// <inheritdoc />
         public override void Resize(long size)
@@ -81,6 +125,11 @@ namespace Reminiscence.Arrays
             if (size == this.LengthCore)
             {
                 return;
+            }
+
+            if (!this.CanResize)
+            {
+                throw new InvalidOperationException("Capped memory-mapped arrays cannot be resized.  Please check CanResize before calling this method.");
             }
 
             long oldLength = this.LengthCore;
@@ -119,11 +168,24 @@ namespace Reminiscence.Arrays
 
         private void Initialize()
         {
+            long finalByteOffset, finalByteLength, finalLength;
+            if (this.byteOffset.HasValue)
+            {
+                finalByteOffset = this.byteOffset.Value;
+                finalLength = this.LengthCore;
+                finalByteLength = finalLength * Unsafe.SizeOf<T>();
+            }
+            else
+            {
+                finalByteOffset = 0;
+                finalByteLength = this.fileStream.Length;
+                finalLength = finalByteLength / Unsafe.SizeOf<T>();
+            }
+
             this.ReleaseAllButFileStream();
 
             try
             {
-                long finalLength = this.fileStream.Length / Unsafe.SizeOf<T>();
                 if (finalLength == 0)
                 {
                     return;
@@ -134,10 +196,13 @@ namespace Reminiscence.Arrays
 #else
                 this.memoryMappedFile = MemoryMappedFile.CreateFromFile(this.fileStream, null, 0, MemoryMappedFileAccess.ReadWrite, HandleInheritability.None, leaveOpen: true);
 #endif
-                this.memoryMappedViewAccessor = this.memoryMappedFile.CreateViewAccessor();
+                this.memoryMappedViewAccessor = this.memoryMappedFile.CreateViewAccessor(finalByteOffset, finalByteLength);
 
                 this.memoryMappedViewAccessor.SafeMemoryMappedViewHandle.AcquirePointer(ref this.acquiredPointer);
-                this.HeadPointer = (T*)this.acquiredPointer;
+
+                // warning: this ignores the offset / length that we used to create the accessor, so
+                // it's our responsibility to translate the offset and do bounds-checking.
+                this.HeadPointer = (T*)(this.acquiredPointer + finalByteOffset);
                 this.LengthCore = finalLength;
             }
             catch

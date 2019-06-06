@@ -26,6 +26,7 @@
                 <dependency id="System.Runtime.CompilerServices.Unsafe" version="4.5.2" />
                 <dependency id="System.Buffers" version="4.5.0" />
                 <dependency id="System.Memory" version="4.5.1" />
+                <dependency id="System.IO.MemoryMappedFiles" version="4.3.0" />
             </group>
 
             <group targetFramework=".NETStandard2.0">

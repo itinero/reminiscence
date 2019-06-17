@@ -368,7 +368,7 @@ namespace Reminiscence.Arrays
         #endregion
 
         /// <summary>
-        /// Diposes of all native resource associated with this array.
+        /// Disposes of all native resource associated with this array.
         /// </summary>
         public sealed override void Dispose()
         {

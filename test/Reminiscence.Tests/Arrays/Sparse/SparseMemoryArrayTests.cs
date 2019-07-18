@@ -29,6 +29,7 @@ namespace Reminiscence.Tests.Arrays.Sparse
                 Assert.AreEqual(a, b);
             }
         }
+        
         [Test]
         public void SparseMemoryArray_ShouldStoreLikeArrayByte()
         {
@@ -48,6 +49,31 @@ namespace Reminiscence.Tests.Arrays.Sparse
             {
                 var a = array[j];
                 var b = arrayRef[j];
+                
+                Assert.AreEqual(a, b);
+            }
+        }
+        
+        [Test]
+        public void SparseMemoryArray_CopyShouldCopyExactly()
+        {
+            var array = new SparseMemoryArray<int>(100000, 512);
+
+            var i = 1;
+            while (i < array.Length)
+            {
+                array[i] = i;
+                
+                i *= 2;
+            }
+            
+            var arrayCopy = new SparseMemoryArray<int>(100000, 512);
+            arrayCopy.CopyFrom(array);
+
+            for (var j = 0; j < array.Length; j++)
+            {
+                var a = array[j];
+                var b = arrayCopy[j];
                 
                 Assert.AreEqual(a, b);
             }

@@ -79,7 +79,34 @@ namespace Reminiscence.Arrays.Sparse
                 _blocks[blockId][localIdx] = value;
             }
         }
-        
+
+        /// <inheritdoc/>
+        public override void CopyFrom(ArrayBase<T> array)
+        {
+            if (array is SparseMemoryArray<T> otherSparse)
+            {
+                if (this._default.Equals(otherSparse._default) &&
+                    this._blockSize == otherSparse._blockSize &&
+                    this._size == otherSparse._size)
+                {
+                    for (var i = 0; i < _blocks.Length; i++)
+                    {
+                        var block = otherSparse._blocks[i];
+                        if (block == null)
+                        {
+                            _blocks[i] = null;
+                        }
+                        else
+                        {
+                            _blocks[i] = otherSparse._blocks[i].Clone() as T[];
+                        }
+                    }
+                    return;
+                }
+            }
+            base.CopyFrom(array);
+        }
+
         /// <inhertdoc/>
         public override bool CanResize => true;
         

@@ -28,5 +28,5 @@ using System.Reflection;
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
-[assembly: AssemblyInformationalVersion("1.4.0-pre001")] // semantic versioning Major.Minor.Patch.Build (9999 will be updated by CI server)
+[assembly: AssemblyInformationalVersion("1.4.0-pre002")] // semantic versioning Major.Minor.Patch.Build (9999 will be updated by CI server)
 [assembly: AssemblyVersion("1.4.0")] // do not change this; build server update this automatically (.9999 will be updated by CI server with -{buildnumber})

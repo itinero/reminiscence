@@ -53,7 +53,7 @@ namespace Reminiscence.Arrays.Sparse
             {
                 var blockId = idx >> _arrayPow;
                 var block = _blocks[blockId];
-                if (block == null) return default(T);
+                if (block == null) return _default;
                 
                 var localIdx = idx - (blockId << _arrayPow);
                 return block[localIdx];
@@ -81,29 +81,34 @@ namespace Reminiscence.Arrays.Sparse
         }
 
         /// <inheritdoc/>
-        public override void CopyFrom(ArrayBase<T> array)
+        public override void CopyFrom(ArrayBase<T> array, long length)
         {
-            if (array is SparseMemoryArray<T> otherSparse)
+            if (length == array.Length)
             {
-                if (this._default.Equals(otherSparse._default) &&
-                    this._blockSize == otherSparse._blockSize &&
-                    this._size == otherSparse._size)
+                if (array is SparseMemoryArray<T> otherSparse)
                 {
-                    for (var i = 0; i < _blocks.Length; i++)
+                    if (this._default.Equals(otherSparse._default) &&
+                        this._blockSize == otherSparse._blockSize &&
+                        this._size == otherSparse._size)
                     {
-                        var block = otherSparse._blocks[i];
-                        if (block == null)
+                        for (var i = 0; i < _blocks.Length; i++)
                         {
-                            _blocks[i] = null;
+                            var block = otherSparse._blocks[i];
+                            if (block == null)
+                            {
+                                _blocks[i] = null;
+                            }
+                            else
+                            {
+                                _blocks[i] = otherSparse._blocks[i].Clone() as T[];
+                            }
                         }
-                        else
-                        {
-                            _blocks[i] = otherSparse._blocks[i].Clone() as T[];
-                        }
+
+                        return;
                     }
-                    return;
                 }
             }
+
             base.CopyFrom(array);
         }
 

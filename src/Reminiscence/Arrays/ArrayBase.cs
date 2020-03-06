@@ -22,6 +22,8 @@
 
 using Reminiscence.IO;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Reminiscence.Arrays
@@ -29,7 +31,7 @@ namespace Reminiscence.Arrays
     /// <summary>
     /// Abstract representation of an array.
     /// </summary>
-    public abstract class ArrayBase<T> : IDisposable, ISerializableToStream
+    public abstract class ArrayBase<T> : IDisposable, ISerializableToStream, System.Collections.Generic.IEnumerable<T>
     {
         /// <summary>
         /// Returns the length of this array.
@@ -186,6 +188,27 @@ namespace Reminiscence.Arrays
                 }
             }
             return new VariableArray<T>(map, size);
+        }
+
+        /// <summary>
+        /// Implements the enumerator for <see cref="IEnumerable{T}"/>
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerator<T> GetEnumerator()
+        {
+            for (long i = 0; i < Length; ++i)
+            {
+                yield return this[i];
+            }
+        }
+
+        /// <summary>
+        /// <see cref="GetEnumerator"/>
+        /// </summary>
+        /// <returns></returns>
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }

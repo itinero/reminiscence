@@ -41,6 +41,8 @@ namespace Reminiscense.Stresstests.Arrays
             ArrayTests.TestWrite(ArrayProfile.NoCache);
             ArrayTests.TestRead(ArrayProfile.NoCache);
             ArrayTests.TestReadRandom(ArrayProfile.NoCache);
+            ArrayTests.TestHugeArray();
+            ArrayTests.TestEnumerableArray();
         }
 
         /// <summary>
@@ -186,6 +188,17 @@ namespace Reminiscense.Stresstests.Arrays
                 Assert.Equal(j, i * 4 + i / 3);
             }
 
+        }
+
+        /// <summary>
+        /// Tests reading through the enumerator
+        /// </summary>
+        public static void TestEnumerableArray()
+        {
+            var len = 100;
+            var array = new MemoryArray<long>(len);
+            for (var i = 0L; i < len; i++) array[i] = i;
+            foreach (var i in array) Assert.Equal(i, array[i]);
         }
     }
 }

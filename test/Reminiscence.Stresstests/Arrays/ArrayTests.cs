@@ -24,6 +24,7 @@ using Reminiscence.Arrays;
 using Reminiscence.IO;
 using System;
 using System.IO;
+using System.Linq;
 using Xunit;
 
 namespace Reminiscense.Stresstests.Arrays

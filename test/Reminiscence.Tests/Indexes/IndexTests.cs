@@ -486,6 +486,34 @@ namespace Reminiscence.Tests.Indexes
         }
 
         /// <summary>
+        /// Tests <see cref="Index.Get(long)"/> in parallel
+        /// </summary>
+        [Test]
+        public void TestGetParallel()
+        {
+            var index = new Index<string>(new MemoryMapStream(), 32);
+
+            List<KeyValuePair<long, string>> ids = new List<KeyValuePair<long, string>>();
+
+            ids.Add(new KeyValuePair<long, string>(index.Add("this"), "this"));
+            ids.Add(new KeyValuePair<long, string>(index.Add("is"), "is"));
+            ids.Add(new KeyValuePair<long, string>(index.Add("another"), "another"));
+            ids.Add(new KeyValuePair<long, string>(index.Add("test"), "test"));
+            ids.Add(new KeyValuePair<long, string>(index.Add("sentence"), "sentence"));
+
+            //Adding this allows the test to pass??
+            //foreach(var kvp in ids)
+            //{
+            //    Assert.AreEqual(index.Get(kvp.Key), kvp.Value);
+            //}
+
+            ParallelEnumerable.ForAll(ids.AsParallel(), kvp =>
+            {
+                Assert.AreEqual(index.Get(kvp.Key), kvp.Value);
+            });
+        }
+
+        /// <summary>
         /// Tests enumeration.
         /// </summary>
         [Test]

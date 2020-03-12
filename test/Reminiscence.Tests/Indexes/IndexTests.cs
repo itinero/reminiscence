@@ -501,15 +501,10 @@ namespace Reminiscence.Tests.Indexes
             ids.Add(new KeyValuePair<long, string>(index.Add("test"), "test"));
             ids.Add(new KeyValuePair<long, string>(index.Add("sentence"), "sentence"));
 
-            //Adding this allows the test to pass??
-            //foreach(var kvp in ids)
-            //{
-            //    Assert.AreEqual(index.Get(kvp.Key), kvp.Value);
-            //}
-
             ParallelEnumerable.ForAll(ids.AsParallel(), kvp =>
             {
-                Assert.AreEqual(index.Get(kvp.Key), kvp.Value);
+                string found = index.Get(kvp.Key);
+                Assert.AreEqual(found, kvp.Value);
             });
         }
 

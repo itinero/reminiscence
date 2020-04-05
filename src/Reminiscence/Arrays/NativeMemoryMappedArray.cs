@@ -202,7 +202,15 @@ namespace Reminiscence.Arrays
 
                 // warning: this ignores the offset / length that we used to create the accessor, so
                 // it's our responsibility to translate the offset and do bounds-checking.
-                this.HeadPointer = (T*)(this.acquiredPointer + finalByteOffset);
+#if NET45
+                // PointerOffset was added in .NET Framework 4.5.1.
+                // https://stackoverflow.com/a/42170762/1083771
+                NativeMemoryArrayHelper.GetSystemInfo(out var systemInfo);
+                long pointerOffset = finalByteOffset % systemInfo.dwAllocationGranularity;
+#else
+                long pointerOffset = memoryMappedViewAccessor.PointerOffset;
+#endif
+                this.HeadPointer = (T*)(this.acquiredPointer + pointerOffset);
                 this.LengthCore = finalLength;
             }
             catch

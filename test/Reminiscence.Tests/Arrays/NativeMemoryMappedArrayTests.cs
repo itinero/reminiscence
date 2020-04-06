@@ -195,7 +195,7 @@ namespace Reminiscence.Tests.Arrays
                 this.createdPaths.Add(path);
 
                 // write variable-length garbage before and after each important section.
-                file.Write(new byte[15]);
+                file.Write(new byte[70000]);
 
                 headByteOffset = file.Position;
                 file.Write(MemoryMarshal.AsBytes(headValues));

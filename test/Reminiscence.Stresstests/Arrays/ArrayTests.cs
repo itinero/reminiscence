@@ -24,6 +24,7 @@ using Reminiscence.Arrays;
 using Reminiscence.IO;
 using System;
 using System.IO;
+using System.Linq;
 using Xunit;
 
 namespace Reminiscense.Stresstests.Arrays
@@ -41,6 +42,7 @@ namespace Reminiscense.Stresstests.Arrays
             ArrayTests.TestWrite(ArrayProfile.NoCache);
             ArrayTests.TestRead(ArrayProfile.NoCache);
             ArrayTests.TestReadRandom(ArrayProfile.NoCache);
+            ArrayTests.TestParallelAccess();
             ArrayTests.TestHugeArray();
             ArrayTests.TestEnumerableArray();
         }
@@ -199,6 +201,21 @@ namespace Reminiscense.Stresstests.Arrays
             var array = new MemoryArray<long>(len);
             for (var i = 0L; i < len; i++) array[i] = i;
             foreach (var i in array) Assert.Equal(i, array[i]);
+        }
+
+        /// <summary>
+        /// Tests using an array with Parallel Access
+        /// </summary>
+        public static void TestParallelAccess()
+        {
+            var len = 1024;
+            var array = new MemoryArray<long>(len);
+            for (var i = 0L; i < len; i++) array[i] = i;
+            //Test accessing elements in parallel
+            System.Linq.ParallelEnumerable.ForAll(array.AsParallel(), i =>
+            {
+                Assert.Equal(i, array[i]);
+            });
         }
     }
 }

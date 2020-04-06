@@ -192,30 +192,33 @@ namespace Reminiscence.Indexes
         /// </summary>
         public T Get(long id)
         {
-            // calculate accessor id.
-            var a = 0;
-            var accessorBytesLostPrevious = 0L;
-            var accessorBytesLost = _accessorBytesLost[a];
-            var accessorBytesOffset = _accessorSize - accessorBytesLost;
-            while(accessorBytesOffset <= id)
-            { // keep looping until the accessor is found where the data is located.
-                a++;
-                if (a >= _accessors.Count)
-                {
-                    throw new System.Exception("Cannot read elements with an id outside of the accessor range.");
-                }
-                accessorBytesLostPrevious = accessorBytesLost;
-                accessorBytesLost += _accessorBytesLost[a]; 
-                accessorBytesOffset = (_accessorSize * (a + 1)) - accessorBytesLost;
-            }
-            var accessor = _accessors[a];
-            var accessorOffset = id + accessorBytesLostPrevious - (_accessorSize * a);
-            var result = default(T);
-            if (accessor.ReadFrom(accessorOffset, ref result) < 0)
+            lock (this)
             {
-                throw new System.Exception("Failed to read element, perhaps an invalid id was given.");
+                // calculate accessor id.
+                var a = 0;
+                var accessorBytesLostPrevious = 0L;
+                var accessorBytesLost = _accessorBytesLost[a];
+                var accessorBytesOffset = _accessorSize - accessorBytesLost;
+                while (accessorBytesOffset <= id)
+                { // keep looping until the accessor is found where the data is located.
+                    a++;
+                    if (a >= _accessors.Count)
+                    {
+                        throw new System.Exception("Cannot read elements with an id outside of the accessor range.");
+                    }
+                    accessorBytesLostPrevious = accessorBytesLost;
+                    accessorBytesLost += _accessorBytesLost[a];
+                    accessorBytesOffset = (_accessorSize * (a + 1)) - accessorBytesLost;
+                }
+                var accessor = _accessors[a];
+                var accessorOffset = id + accessorBytesLostPrevious - (_accessorSize * a);
+                var result = default(T);
+                if (accessor.ReadFrom(accessorOffset, ref result) < 0)
+                {
+                    throw new System.Exception("Failed to read element, perhaps an invalid id was given.");
+                }
+                return result;
             }
-            return result;
         }
 
         /// <summary>

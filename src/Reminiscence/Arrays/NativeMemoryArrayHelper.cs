@@ -1,5 +1,4 @@
-﻿#if SUPPORTS_NATIVE_MEMORY_ARRAY
-using System;
+﻿using System;
 using System.Buffers;
 using System.IO;
 
@@ -123,28 +122,5 @@ namespace Reminiscence.Arrays
                 head += toZero;
             }
         }
-
-#if NET45
-        // https://www.pinvoke.net/default.aspx/kernel32.getsysteminfo
-        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
-        internal struct SYSTEM_INFO
-        {
-            internal ushort wProcessorArchitecture;
-            internal ushort wReserved;
-            internal uint dwPageSize;
-            internal IntPtr lpMinimumApplicationAddress;
-            internal IntPtr lpMaximumApplicationAddress;
-            internal IntPtr dwActiveProcessorMask;
-            internal uint dwNumberOfProcessors;
-            internal uint dwProcessorType;
-            internal uint dwAllocationGranularity;
-            internal ushort wProcessorLevel;
-            internal ushort wProcessorRevision;
-        }
-
-        [System.Runtime.InteropServices.DllImport("kernel32", SetLastError = true)]
-        internal static extern void GetSystemInfo(out SYSTEM_INFO lpSystemInfo);
-#endif
     }
 }
-#endif

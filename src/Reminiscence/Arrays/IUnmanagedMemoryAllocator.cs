@@ -1,5 +1,4 @@
-﻿#if SUPPORTS_NATIVE_MEMORY_ARRAY
-using System;
+﻿using System;
 
 namespace Reminiscence.Arrays
 {
@@ -35,4 +34,3 @@ namespace Reminiscence.Arrays
         unsafe byte* Reallocate(byte* oldPointer, long oldByteCount, long newByteCount, bool zeroFill);
     }
 }
-#endif

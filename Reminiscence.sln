@@ -22,7 +22,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuspec", "nuspec", "{0FD9E667-4D52-4A77-987D-204C41B42C0D}"
 	ProjectSection(SolutionItems) = preProject
 		nuspec\icon.png = nuspec\icon.png
-		nuspec\Reminiscence.nuspec = nuspec\Reminiscence.nuspec
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Reminiscence.Stresstests", "test\Reminiscence.Stresstests\Reminiscence.Stresstests.csproj", "{D367BB44-4CFC-465F-93AD-2B8DF934EAD0}"

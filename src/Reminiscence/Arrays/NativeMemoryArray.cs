@@ -1,5 +1,4 @@
-﻿#if SUPPORTS_NATIVE_MEMORY_ARRAY
-using System;
+﻿using System;
 using System.Runtime.CompilerServices;
 
 namespace Reminiscence.Arrays
@@ -74,4 +73,3 @@ namespace Reminiscence.Arrays
         }
     }
 }
-#endif

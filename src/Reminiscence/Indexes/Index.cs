@@ -192,33 +192,34 @@ namespace Reminiscence.Indexes
         /// </summary>
         public T Get(long id)
         {
-            lock (this)
+            // calculate accessor id.
+            var a = 0;
+            var accessorBytesLostPrevious = 0L;
+            var accessorBytesLost = _accessorBytesLost[a];
+            var accessorBytesOffset = _accessorSize - accessorBytesLost;
+            while (accessorBytesOffset <= id)
             {
-                // calculate accessor id.
-                var a = 0;
-                var accessorBytesLostPrevious = 0L;
-                var accessorBytesLost = _accessorBytesLost[a];
-                var accessorBytesOffset = _accessorSize - accessorBytesLost;
-                while (accessorBytesOffset <= id)
-                { // keep looping until the accessor is found where the data is located.
-                    a++;
-                    if (a >= _accessors.Count)
-                    {
-                        throw new System.Exception("Cannot read elements with an id outside of the accessor range.");
-                    }
-                    accessorBytesLostPrevious = accessorBytesLost;
-                    accessorBytesLost += _accessorBytesLost[a];
-                    accessorBytesOffset = (_accessorSize * (a + 1)) - accessorBytesLost;
-                }
-                var accessor = _accessors[a];
-                var accessorOffset = id + accessorBytesLostPrevious - (_accessorSize * a);
-                var result = default(T);
-                if (accessor.ReadFrom(accessorOffset, ref result) < 0)
+                // keep looping until the accessor is found where the data is located.
+                a++;
+                if (a >= _accessors.Count)
                 {
-                    throw new System.Exception("Failed to read element, perhaps an invalid id was given.");
+                    throw new System.Exception("Cannot read elements with an id outside of the accessor range.");
                 }
-                return result;
+
+                accessorBytesLostPrevious = accessorBytesLost;
+                accessorBytesLost += _accessorBytesLost[a];
+                accessorBytesOffset = (_accessorSize * (a + 1)) - accessorBytesLost;
             }
+
+            var accessor = _accessors[a];
+            var accessorOffset = id + accessorBytesLostPrevious - (_accessorSize * a);
+            var result = default(T);
+            if (accessor.ReadFrom(accessorOffset, ref result) < 0)
+            {
+                throw new System.Exception("Failed to read element, perhaps an invalid id was given.");
+            }
+
+            return result;
         }
 
         /// <summary>
@@ -324,7 +325,7 @@ namespace Reminiscence.Indexes
                 var data = new byte[size];
                 var position = stream.Position;
                 stream.Read(data, 0, (int)size);
-                var map = new MemoryMapStream(new CappedStream(new MemoryStream(data), 0, size));
+                var map = new MemoryMapByteArray(data);
                 var accessor = MemoryMap.GetCreateAccessorFuncFor<T>()(map, size);
                 return new Index<T>(accessor);
             }

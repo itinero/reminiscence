@@ -31,6 +31,15 @@ namespace Reminiscence.IO.Accessors
     public sealed class MappedAccessorSingle : MappedAccessor<float>
     {
         private readonly byte[] _buffer;
+        
+        /// <summary>
+        /// Creates a new memory mapped acessor.
+        /// </summary>
+        public MappedAccessorSingle(MemoryMap file, byte[] data)
+            : base(file, data, 4)
+        {
+            _buffer = new byte[_elementSize];
+        }
 
         /// <summary>
         /// Creates a new memory mapped acessor.

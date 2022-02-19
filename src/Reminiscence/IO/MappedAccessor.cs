@@ -34,7 +34,9 @@ namespace Reminiscence.IO
         /// <summary>
         /// Holds the stream.
         /// </summary>
-        protected Stream _stream;
+        protected readonly Stream _stream;
+
+        private readonly byte[] _data;
         /// <summary>
         /// The size of a single element if constant.
         /// </summary>
@@ -56,12 +58,27 @@ namespace Reminiscence.IO
         }
 
         /// <summary>
+        /// Creates a new mapped accessor.
+        /// </summary>
+        public MappedAccessor(MemoryMap file, byte[] data, int elementSize)
+        {
+            if (file == null) { throw new ArgumentNullException("file"); }
+            if (elementSize == 0 || elementSize < -1) { throw new ArgumentOutOfRangeException("elementSize need to be -1 or in the range of ]0-n]."); }
+
+            _file = file;
+            _data = data;
+            _elementSize = elementSize;
+        }
+
+        /// <summary>
         /// Determines whether the accessory is writable.
         /// </summary>
         public virtual bool CanWrite
         {
             get
             {
+                if (_stream == null) return true;
+                
                 return _stream.CanWrite;
             }
         }
@@ -73,6 +90,8 @@ namespace Reminiscence.IO
         {
             get
             {
+                if (_stream == null) return _data.Length;
+                
                 return _stream.Length;
             }
         }
@@ -84,7 +103,7 @@ namespace Reminiscence.IO
         {
             get
             {
-                return _stream.Length / this.ElementSize;
+                return this.Capacity / this.ElementSize;
             }
         }
 
@@ -117,9 +136,14 @@ namespace Reminiscence.IO
         /// </summary>
         public virtual long ReadFrom(long position, ref T structure)
         {
-            if (position < 0 || position > _stream.Length)
+            if (position < 0 || position > this.Capacity)
             {
                 return -1;
+            }
+
+            if (_stream == null)
+            {
+                return this.ReadFrom(new MemoryStream(_data), position, ref structure);
             }
             return this.ReadFrom(_stream, position, ref structure);
         }
@@ -134,9 +158,13 @@ namespace Reminiscence.IO
         /// </summary>
         public virtual long WriteTo(long position, ref T structure)
         {
-            if (position < 0 || position >= _stream.Length)
+            if (position < 0 || position >= this.Capacity)
             {
                 return -1;
+            }
+            if (_stream == null)
+            {
+                return this.WriteTo(new MemoryStream(_data), position, ref structure);
             }
             return this.WriteTo(_stream, position, ref structure);
         }
@@ -146,17 +174,24 @@ namespace Reminiscence.IO
         /// </summary>
         public virtual int ReadArray(long position, T[] array, int offset, int count)
         {
-            if(_stream.Length <= position)
+            if(this.Capacity <= position)
             { // cannot seek to this location, past the end of the stream.
                 return -1;
             }
 
             // try and read everything.
-            var elementsRead = System.Math.Min((int)((_stream.Length - position) / _elementSize), count);
+            var elementsRead = System.Math.Min((int)((this.Capacity - position) / _elementSize), count);
             var structure = default(T);
             for (int i = 0; i < elementsRead; i++)
             {
-                this.ReadFrom(_stream, position + i * _elementSize, ref structure);
+                if (_stream == null)
+                {
+                    this.ReadFrom(new MemoryStream(_data), position + i * _elementSize, ref structure);
+                }
+                else
+                {
+                    this.ReadFrom(_stream, position + i * _elementSize, ref structure);
+                }
                 array[i + offset] = structure;
             }
             return elementsRead;
@@ -168,11 +203,23 @@ namespace Reminiscence.IO
         public virtual long WriteArray(long position, T[] array, int offset, int count)
         {
             long size = 0;
-            _stream.Seek(position, SeekOrigin.Begin);
-            for (int i = 0; i < count; i++)
+            if (_stream != null) _stream.Seek(position, SeekOrigin.Begin);
+            if (_stream == null)
             {
-                size = size + this.WriteTo(_stream, _stream.Position, 
-                    ref array[i + offset]);
+                var stream = new MemoryStream(_data);
+                for (int i = 0; i < count; i++)
+                {
+                    size = size + this.WriteTo(stream, stream.Position, 
+                        ref array[i + offset]);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    size = size + this.WriteTo(_stream, _stream.Position, 
+                        ref array[i + offset]);
+                }
             }
             return size;
         }
@@ -182,7 +229,7 @@ namespace Reminiscence.IO
         /// </summary>
         public void CopyTo(Stream stream)
         {
-            this.CopyTo(stream, 0, (int)_stream.Length);
+            this.CopyTo(stream, 0, (int)this.Capacity);
         }
 
         /// <summary>
@@ -198,15 +245,21 @@ namespace Reminiscence.IO
         /// </summary>
         public void CopyTo(Stream stream, long position, int length, byte[] buffer)
         {
-            _stream.Seek(position, SeekOrigin.Begin);
+            var thisStream = _stream;
+            if (thisStream == null)
+            {
+                thisStream = new MemoryStream(_data);
+            }
+            
+            thisStream.Seek(position, SeekOrigin.Begin);
             while (length > buffer.Length)
             {
-                _stream.Read(buffer, 0, buffer.Length);
+                thisStream.Read(buffer, 0, buffer.Length);
                 stream.Write(buffer, 0, buffer.Length);
 
                 length = length - buffer.Length;
             }
-            _stream.Read(buffer, 0, length);
+            thisStream.Read(buffer, 0, length);
             stream.Write(buffer, 0, length);
         }
 

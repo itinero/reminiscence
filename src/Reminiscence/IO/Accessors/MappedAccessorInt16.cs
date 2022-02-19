@@ -35,6 +35,15 @@ namespace Reminiscence.IO.Accessors
         /// <summary>
         /// Creates a new memory mapped file.
         /// </summary>
+        public MappedAccessorInt16(MemoryMap file, byte[] data)
+            : base(file, data, 2)
+        {
+            _buffer = new byte[_elementSize];
+        }
+
+        /// <summary>
+        /// Creates a new memory mapped file.
+        /// </summary>
         public MappedAccessorInt16(MemoryMap file, Stream stream)
             : base(file, stream, 2)
         {

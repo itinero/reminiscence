@@ -35,6 +35,15 @@ namespace Reminiscence.IO.Accessors
         /// <summary>
         /// Creates a new memory mapped acessor.
         /// </summary>
+        public MappedAccessorDouble(MemoryMap file, byte[] data)
+            : base(file, data, 8)
+        {
+            _buffer = new byte[_elementSize];
+        }
+
+        /// <summary>
+        /// Creates a new memory mapped acessor.
+        /// </summary>
         public MappedAccessorDouble(MemoryMap file, Stream stream)
             : base(file, stream, 8)
         {

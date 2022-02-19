@@ -8,7 +8,7 @@
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <LangVersion>latest</LangVersion>
-        <PackageVersion>1.4.0-pre004</PackageVersion>
+        <PackageVersion>1.4.0-pre005</PackageVersion>
         <NeutralLanguage>en</NeutralLanguage>
         <Description>Simple cross-platform memory mapping for .NET/Mono.</Description>
         <Copyright>Ben Abelshausen</Copyright>

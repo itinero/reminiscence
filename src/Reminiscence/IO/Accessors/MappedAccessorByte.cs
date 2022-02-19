@@ -11,6 +11,15 @@ namespace Reminiscence.IO.Accessors
         /// <summary>
         /// Creates a new memory mapped file.
         /// </summary>
+        public MappedAccessorByte(MemoryMap file, byte[] data)
+            : base(file, data, 1)
+        {
+            
+        }
+        
+        /// <summary>
+        /// Creates a new memory mapped file.
+        /// </summary>
         public MappedAccessorByte(MemoryMap file, Stream stream)
             : base(file, stream, 1)
         {

@@ -11,8 +11,8 @@ namespace Reminiscence.IO.Accessors
         /// <summary>
         /// Creates a new memory mapped file.
         /// </summary>
-        public MappedAccessorByte(MemoryMap file, byte[] data)
-            : base(file, data, 1)
+        public MappedAccessorByte(MemoryMap file, byte[] data, long position, long sizeInBytes)
+            : base(file, data, position, sizeInBytes, 1)
         {
             
         }
@@ -51,21 +51,23 @@ namespace Reminiscence.IO.Accessors
         /// </summary>
         public override int ReadArray(long position, byte[] array, int offset, int count)
         {
-            if (_stream.Length <= position)
+            var stream = this.GetStream();
+            
+            if (stream.Length <= position)
             { // cannot seek to this location, past the end of the stream.
                 return -1;
             }
 
             // try and read everything.
-            var elementsRead = Math.Min((int)((_stream.Length - position) / _elementSize), count);
+            var elementsRead = Math.Min((int)((stream.Length - position) / _elementSize), count);
             if (elementsRead > 0)
             { // ok, read.
                 var bufferSize = array.Length * _elementSize;
-                if (_stream.Position != position)
+                if (stream.Position != position)
                 {
-                    _stream.Seek(position, SeekOrigin.Begin);
+                    stream.Seek(position, SeekOrigin.Begin);
                 }
-                _stream.Read(array, 0, array.Length);
+                stream.Read(array, 0, array.Length);
             }
             return elementsRead;
         }
@@ -88,11 +90,13 @@ namespace Reminiscence.IO.Accessors
         /// </summary>
         public override long WriteArray(long position, byte[] array, int offset, int count)
         {
+            var stream = this.GetStream();
+            
             var size = 0L;
-            _stream.Seek(position, SeekOrigin.Begin);
+            stream.Seek(position, SeekOrigin.Begin);
             for (var i = 0; i < count; i++)
             {
-                _stream.WriteByte(array[i]);
+                stream.WriteByte(array[i]);
                 size++;
             }
             return size;

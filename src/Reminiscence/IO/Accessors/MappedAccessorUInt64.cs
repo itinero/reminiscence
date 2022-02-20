@@ -35,8 +35,8 @@ namespace Reminiscence.IO.Accessors
         /// <summary>
         /// Creates a new memory mapped acessor.
         /// </summary>
-        public MappedAccessorUInt64(MemoryMap file, byte[] data)
-            : base(file, data, 8)
+        public MappedAccessorUInt64(MemoryMap file, byte[] data, long position, long sizeInBytes)
+            : base(file, data, position, sizeInBytes, 8)
         {
             _buffer = new byte[_elementSize];
         }

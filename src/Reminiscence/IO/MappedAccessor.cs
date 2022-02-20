@@ -30,13 +30,14 @@ namespace Reminiscence.IO
     /// </summary>
     public abstract class MappedAccessor<T> : IDisposable
     {
-        private MemoryMap _file; // Holds the file that created this accessor.
-        /// <summary>
-        /// Holds the stream.
-        /// </summary>
-        protected readonly Stream _stream;
-
+        private MemoryMap _file;
+        
+        // a stream or byte array is used.
+        private readonly Stream _stream;
         private readonly byte[] _data;
+        private readonly long _position;
+        private readonly long _sizeInBytes;
+        
         /// <summary>
         /// The size of a single element if constant.
         /// </summary>
@@ -60,14 +61,30 @@ namespace Reminiscence.IO
         /// <summary>
         /// Creates a new mapped accessor.
         /// </summary>
-        public MappedAccessor(MemoryMap file, byte[] data, int elementSize)
+        public MappedAccessor(MemoryMap file, byte[] data, long position, long sizeInBytes, int elementSize)
         {
             if (file == null) { throw new ArgumentNullException("file"); }
             if (elementSize == 0 || elementSize < -1) { throw new ArgumentOutOfRangeException("elementSize need to be -1 or in the range of ]0-n]."); }
 
             _file = file;
             _data = data;
+            _position = position;
+            _sizeInBytes = sizeInBytes;
             _elementSize = elementSize;
+        }
+
+        /// <summary>
+        /// Gets the backing stream.
+        /// </summary>
+        /// <returns></returns>
+        protected Stream GetStream()
+        {
+            if (_data != null)
+            {
+                return new MemoryStream(_data, (int)_position, (int)_sizeInBytes);
+            }
+
+            return _stream;
         }
 
         /// <summary>
@@ -90,7 +107,7 @@ namespace Reminiscence.IO
         {
             get
             {
-                if (_stream == null) return _data.Length;
+                if (_stream == null) return _sizeInBytes;
                 
                 return _stream.Length;
             }
@@ -141,11 +158,7 @@ namespace Reminiscence.IO
                 return -1;
             }
 
-            if (_stream == null)
-            {
-                return this.ReadFrom(new MemoryStream(_data), position, ref structure);
-            }
-            return this.ReadFrom(_stream, position, ref structure);
+            return this.ReadFrom(this.GetStream(), position, ref structure);
         }
 
         /// <summary>
@@ -162,11 +175,7 @@ namespace Reminiscence.IO
             {
                 return -1;
             }
-            if (_stream == null)
-            {
-                return this.WriteTo(new MemoryStream(_data), position, ref structure);
-            }
-            return this.WriteTo(_stream, position, ref structure);
+            return this.WriteTo(this.GetStream(), position, ref structure);
         }
 
         /// <summary>
@@ -182,18 +191,13 @@ namespace Reminiscence.IO
             // try and read everything.
             var elementsRead = System.Math.Min((int)((this.Capacity - position) / _elementSize), count);
             var structure = default(T);
+            var stream = this.GetStream();
             for (int i = 0; i < elementsRead; i++)
             {
-                if (_stream == null)
-                {
-                    this.ReadFrom(new MemoryStream(_data), position + i * _elementSize, ref structure);
-                }
-                else
-                {
-                    this.ReadFrom(_stream, position + i * _elementSize, ref structure);
-                }
+                this.ReadFrom(stream, position + i * _elementSize, ref structure);
                 array[i + offset] = structure;
             }
+
             return elementsRead;
         }
 
@@ -203,24 +207,14 @@ namespace Reminiscence.IO
         public virtual long WriteArray(long position, T[] array, int offset, int count)
         {
             long size = 0;
-            if (_stream != null) _stream.Seek(position, SeekOrigin.Begin);
-            if (_stream == null)
+            var stream = this.GetStream();
+            stream.Seek(position, SeekOrigin.Begin);
+            for (int i = 0; i < count; i++)
             {
-                var stream = new MemoryStream(_data);
-                for (int i = 0; i < count; i++)
-                {
-                    size = size + this.WriteTo(stream, stream.Position, 
-                        ref array[i + offset]);
-                }
+                size = size + this.WriteTo(stream, stream.Position,
+                    ref array[i + offset]);
             }
-            else
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    size = size + this.WriteTo(_stream, _stream.Position, 
-                        ref array[i + offset]);
-                }
-            }
+
             return size;
         }
 
@@ -245,11 +239,7 @@ namespace Reminiscence.IO
         /// </summary>
         public void CopyTo(Stream stream, long position, int length, byte[] buffer)
         {
-            var thisStream = _stream;
-            if (thisStream == null)
-            {
-                thisStream = new MemoryStream(_data);
-            }
+            var thisStream = this.GetStream();
             
             thisStream.Seek(position, SeekOrigin.Begin);
             while (length > buffer.Length)

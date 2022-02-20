@@ -35,8 +35,8 @@ namespace Reminiscence.IO.Accessors
         /// <summary>
         /// Creates a new memory mapped file.
         /// </summary>
-        public MappedAccessorInt16(MemoryMap file, byte[] data)
-            : base(file, data, 2)
+        public MappedAccessorInt16(MemoryMap file, byte[] data, long position, long sizeInBytes)
+            : base(file, data, position, sizeInBytes, 2)
         {
             _buffer = new byte[_elementSize];
         }
@@ -73,13 +73,15 @@ namespace Reminiscence.IO.Accessors
         /// </summary>
         public override int ReadArray(long position, short[] array, int offset, int count)
         {
-            if (_stream.Length <= position)
+            var stream = this.GetStream();
+            
+            if (stream.Length <= position)
             { // cannot seek to this location, past the end of the stream.
                 return -1;
             }
 
             // try and read everything.
-            var elementsRead = System.Math.Min((int)((_stream.Length - position) / _elementSize), count);
+            var elementsRead = System.Math.Min((int)((stream.Length - position) / _elementSize), count);
             if (elementsRead > 0)
             { // ok, read.
                 var bufferSize = array.Length * _elementSize;
@@ -87,11 +89,11 @@ namespace Reminiscence.IO.Accessors
                 {
                     Array.Resize(ref _buffer, bufferSize);
                 }
-                if (_stream.Position != position)
+                if (stream.Position != position)
                 {
-                    _stream.Seek(position, SeekOrigin.Begin);
+                    stream.Seek(position, SeekOrigin.Begin);
                 }
-                _stream.Read(_buffer, 0, _buffer.Length);
+                stream.Read(_buffer, 0, _buffer.Length);
                 for (int i = 0; i < elementsRead; i++)
                 {
                     array[i + offset] = BitConverter.ToInt16(_buffer, i * _elementSize);
@@ -118,9 +120,11 @@ namespace Reminiscence.IO.Accessors
         /// </summary>
         public override long WriteArray(long position, short[] array, int offset, int count)
         {
+            var stream = this.GetStream();
+            
             long size = 0;
-            _stream.Seek(position, SeekOrigin.Begin);
-            using (var binaryWriter = new BinaryWriter(_stream))
+            stream.Seek(position, SeekOrigin.Begin);
+            using (var binaryWriter = new BinaryWriter(stream))
             {
                 for (int i = 0; i < count; i++)
                 {

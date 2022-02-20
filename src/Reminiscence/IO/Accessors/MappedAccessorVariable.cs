@@ -36,9 +36,9 @@ namespace Reminiscence.IO.Accessors
         /// <summary>
         /// Creates a new memory mapped file.
         /// </summary>
-        public MappedAccessorVariable(MemoryMap file, byte[] data, 
+        public MappedAccessorVariable(MemoryMap file, byte[] data, long position, long sizeInBytes, 
             MemoryMap.ReadFromDelegate<T> readFrom, MemoryMap.WriteToDelegate<T> writeTo)
-            : base(file, data, -1)
+            : base(file, data, position, sizeInBytes, -1)
         {
             _readFrom = readFrom;
             _writeTo = writeTo;
